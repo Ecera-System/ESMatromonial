@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import Login from './components/User/UserLogin'
-import Chat from '../pages/User/Chat'
+import Chat from './pages/User/Chat'
 
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
