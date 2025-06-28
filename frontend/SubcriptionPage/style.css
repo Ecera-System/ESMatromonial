@@ -1,0 +1,126 @@
+body {
+  margin: 0;
+  font-family: sans-serif;
+  background-color: #fff1f2;
+  color: #333;
+}
+
+/* Header */
+.header {
+  background-color: #ffffff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  padding: 1rem 0;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.logo {
+  color: #db2777;
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+.nav a {
+  margin-left: 1rem;
+  color: #db2777;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.nav a:hover {
+  text-decoration: underline;
+}
+
+/* Intro */
+.intro {
+  text-align: center;
+  margin: 3rem 1rem;
+}
+
+.intro-title {
+  font-size: 2rem;
+  color: #be185d;
+  font-weight: bold;
+}
+
+.intro-subtitle {
+  margin-top: 0.5rem;
+  color: #6b7280;
+}
+
+/* Plans Section */
+.plans {
+  max-width: 1000px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+  padding: 0 1rem;
+}
+
+.plan-card {
+  background-color: #ffffff;
+  border: 1px solid #fbcfe8;
+  border-radius: 1rem;
+  padding: 1.5rem;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+  text-align: center;
+}
+
+.plan-card h3 {
+  color: #db2777;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.price {
+  font-size: 1.75rem;
+  font-weight: bold;
+  margin-top: 0.5rem;
+  color: #111827;
+}
+
+.plan-card ul {
+  margin-top: 1rem;
+  list-style: none;
+  padding: 0;
+  color: #4b5563;
+}
+
+.plan-card ul li {
+  margin: 0.5rem 0;
+}
+
+.plan-card button {
+  margin-top: 1.5rem;
+  width: 100%;
+  background-color: #fbcfe8;
+  color: #db2777;
+  border: none;
+  padding: 0.75rem;
+  font-weight: 600;
+  border-radius: 0.75rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.plan-card button:hover {
+  background-color: #f9a8d4;
+}
+
+/* Footer */
+.footer {
+  margin-top: 3rem;
+  padding: 1.5rem 0;
+  text-align: center;
+  color: #6b7280;
+  font-size: 0.875rem;
+  border-top: 1px solid #e5e7eb;
+}
