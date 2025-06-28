@@ -16,6 +16,7 @@ function App() {
       {/* Public Routes (No Sidebar) */}
       <Route path="/" element={<Login />} />
       <Route path="/chat" element={<Chat />} />
+      <Route path="/verify" element={<verification_suite />} />
       
       </Routes>
       </Router>
