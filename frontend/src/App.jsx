@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import Login from './components/User/UserLogin'
-import verification_suite from './components/User/verification_suite'
+import verificationSuite from './components/User/verification_suite'
 import Chat from './pages/User/Chat'
 
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
@@ -16,7 +16,7 @@ function App() {
       {/* Public Routes (No Sidebar) */}
       <Route path="/" element={<Login />} />
       <Route path="/chat" element={<Chat />} />
-      <Route path="/verify" element={<verification_suite />} />
+      <Route path="/verify" element={<verificationSuite />} />
       
       </Routes>
       </Router>
