@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import Login from './components/User/UserLogin'
+import verification_suite from './components/User/verification_suite'
 import Chat from './pages/User/Chat'
 
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
