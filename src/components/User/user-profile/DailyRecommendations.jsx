@@ -1,26 +1,20 @@
 import React from 'react';
 import userProfile from '../../../assets/userprofile/emma.png';
 
-
 function DailyRecommendations() {
   return (
     <section className="bg-white rounded-2xl p-8 shadow-lg w-full border border-gray-100">
-      <h2 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-3">
-        <span className="text-2xl">✨</span>
-        Daily Recommendations
-      </h2>
-
       <div className="flex items-center justify-between gap-8 py-6 w-full lg:flex-row md:flex-col md:items-start md:gap-6">
-        
-      {/* Profile Info */}
+
+        {/* Profile Info */}
         <div className="flex items-center gap-6 flex-1">
-          
-       {/* Avatar */}
+
+          {/* Avatar */}
           <div className="w-32 h-32 rounded-3xl bg-gradient-to-br from-blue-100 to-indigo-200 overflow-hidden cursor-pointer transition-all duration-300 hover:scale-105 shadow-lg">
             <img src={userProfile} alt="User" className="w-full h-full object-cover" />
           </div>
-          
-      {/* Profile Details */}
+
+          {/* Profile Details */}
           <div className="flex flex-col gap-2">
             <h3 className="text-2xl font-bold text-gray-800 m-0">Emma Johnson</h3>
             <p className="text-lg text-gray-600 m-0 font-medium">25 • Teacher</p>
@@ -31,7 +25,7 @@ function DailyRecommendations() {
           </div>
         </div>
 
-      {/* Match Info */}
+        {/* Match Info */}
         <div className="flex flex-col items-center justify-center min-w-[140px] gap-4">
           <div className="text-center">
             <div className="text-4xl font-bold text-green-600 mb-2">92%</div>

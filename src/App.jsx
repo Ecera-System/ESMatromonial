@@ -2,7 +2,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-d
 import { useState } from 'react';
 
 import Login from './components/User/UserLogin';
-import Chat from './pages/User/Chat';
+import Chat from './components/User/Chat';
 import Header from './components/User/user-profile/Header';
 import Sidebar from './components/User/user-profile/Sidebar';
 import MainContent from './components/User/user-profile/MainContent';

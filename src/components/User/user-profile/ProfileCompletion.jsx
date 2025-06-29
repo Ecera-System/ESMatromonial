@@ -1,4 +1,4 @@
-import React from 'react';
+iimport React from 'react';
 
 function ProfileCompletion() {
   const completionItems = [
@@ -23,7 +23,7 @@ function ProfileCompletion() {
           <div className="absolute right-0 top-0 h-full w-2 bg-white opacity-30 animate-pulse"></div>
         </div>
       </div>
-      
+
       <div className="text-center mb-6">
         <span className="text-2xl font-bold text-gray-800">60%</span>
         <span className="text-gray-500 ml-2">Complete</span>
@@ -34,7 +34,7 @@ function ProfileCompletion() {
         {completionItems.map((item, index) => (
           <div
             key={index}
-            className="flex items-center gap-4 p-4 bg-gray-50 rounded-xl cursor-pointer hover:bg-gray-100 transition-all duration-300 hover:scale-102 hover:shadow-md"
+            className="flex items-center gap-4 p-4 bg-gray-50 rounded-xl cursor-pointer hover:bg-gray-100 transition-all duration-300 hover:scale-[1.02] hover:shadow-md"
           >
             <span className={`text-2xl w-8 text-center ${item.color}`}>{item.icon}</span>
             <span className="text-base text-gray-700 font-medium flex-1">{item.text}</span>

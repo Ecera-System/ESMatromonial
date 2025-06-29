@@ -15,7 +15,7 @@ function Header() {
           </div>
 
           {/* Search Bar (hidden on small screens) */}
-          <div className="flex max-md:hidden items-center bg-gray-50 rounded-full px-5 py-3 gap-3 min-w-[300px] border border-gray-200 focus-within:border-blue-300 focus-within:bg-white transition-all">
+          <div className="hidden md:flex items-center bg-gray-50 rounded-full px-5 py-3 gap-3 min-w-[300px] border border-gray-200 focus-within:border-blue-300 focus-within:bg-white transition-all">
             <span className="text-gray-400 text-lg">🔍</span>
             <input
               type="text"
@@ -37,7 +37,7 @@ function Header() {
 
         {/* Right Side */}
         <div className="flex items-center gap-4">
-          <button className="bg-transparent border-none text-xl cursor-pointer p-2 hover:bg-gray-100 rounded-full transition-colors relative">
+          <button className="relative bg-transparent border-none text-xl cursor-pointer p-2 hover:bg-gray-100 rounded-full transition-colors">
             🔔
             <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full"></span>
           </button>
