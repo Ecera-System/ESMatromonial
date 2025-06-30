@@ -1,0 +1,1312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MatchMate - Find Your Perfect Match</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            background-size: 400% 400%;
+            animation: gentleGradient 8s ease infinite;
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        @keyframes gentleGradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .floating-elements {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -2;
+        }
+
+        .floating-circle {
+            position: absolute;
+            border-radius: 50%;
+            animation: floatGently 12s ease-in-out infinite;
+            opacity: 0.1;
+        }
+
+        .circle-1 {
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(45deg, #ff6b9d, #c44569);
+            top: 10%;
+            left: 5%;
+            animation-delay: 0s;
+        }
+
+        .circle-2 {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(45deg, #4834d4, #686de0);
+            top: 60%;
+            right: 10%;
+            animation-delay: 4s;
+        }
+
+        .circle-3 {
+            width: 120px;
+            height: 120px;
+            background: linear-gradient(45deg, #ff9ff3, #f368e0);
+            bottom: 20%;
+            left: 15%;
+            animation-delay: 8s;
+        }
+
+        @keyframes floatGently {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-30px) rotate(180deg); }
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(15px);
+            padding: 1.5rem 2rem;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            box-shadow: 0 8px 32px rgba(102, 126, 234, 0.2);
+            animation: slideDown 1s ease-out;
+        }
+
+        @keyframes slideDown {
+            from {
+                transform: translateY(-100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .logo {
+            font-size: 2.5rem;
+            font-weight: 900;
+            background: linear-gradient(45deg, #ff6b9d, #4834d4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: logoGlow 3s ease-in-out infinite;
+        }
+
+        @keyframes logoGlow {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: #333;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            position: relative;
+            padding: 0.8rem 1.5rem;
+            border-radius: 25px;
+        }
+
+        .nav-links a:hover {
+            background: linear-gradient(45deg, #ff6b9d, #4834d4);
+            color: white;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(255, 107, 157, 0.3);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 120px 2rem 2rem;
+        }
+
+        .feed-header {
+            text-align: center;
+            margin-bottom: 4rem;
+            animation: fadeInUp 1.2s ease-out;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .feed-title {
+            font-size: 3.5rem;
+            font-weight: 900;
+            background: linear-gradient(45deg, #e41118, #d1f90a);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 1rem;
+            animation: titleFloat 4s ease-in-out infinite;
+        }
+
+        @keyframes titleFloat {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .feed-subtitle {
+            font-size: 1.3rem;
+            color: white;
+            margin-bottom: 3rem;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+            font-weight: 500;
+        }
+
+        .filters {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            margin-bottom: 4rem;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 30px;
+            background: linear-gradient(45deg, #ff6b9d, #4834d4);
+            color: white;
+            cursor: pointer;
+            transition: all 0.4s ease;
+            font-weight: 600;
+            font-size: 1rem;
+            animation: filterFloat 3s ease-in-out infinite;
+        }
+
+        .filter-btn:nth-child(1) { animation-delay: 0s; }
+        .filter-btn:nth-child(2) { animation-delay: 1s; }
+        .filter-btn:nth-child(3) { animation-delay: 2s; }
+
+        @keyframes filterFloat {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+
+        .filter-btn:hover, .filter-btn.active {
+            transform: translateY(-8px) scale(1.05);
+            box-shadow: 0 15px 35px rgba(255, 107, 157, 0.4);
+        }
+
+        .profiles-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+            gap: 2.5rem;
+            animation: gridFadeIn 1.5s ease-out;
+        }
+
+        @keyframes gridFadeIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .profile-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 25px;
+            overflow: hidden;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
+            transition: all 0.5s ease;
+            position: relative;
+            animation: cardSlideIn 0.8s ease-out;
+            animation-fill-mode: both;
+        }
+
+        .profile-card:nth-child(1) { animation-delay: 0.1s; }
+        .profile-card:nth-child(2) { animation-delay: 0.2s; }
+        .profile-card:nth-child(3) { animation-delay: 0.3s; }
+        .profile-card:nth-child(4) { animation-delay: 0.4s; }
+        .profile-card:nth-child(5) { animation-delay: 0.5s; }
+        .profile-card:nth-child(6) { animation-delay: 0.6s; }
+
+        @keyframes cardSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .profile-card:hover {
+            transform: translateY(-15px) scale(1.02);
+            box-shadow: 0 30px 60px rgba(102, 126, 234, 0.2);
+        }
+
+        .profile-image {
+            position: relative;
+            height: 280px;
+            overflow: hidden;
+        }
+
+        .profile-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+
+        .profile-card:hover .profile-image img {
+            transform: scale(1.1);
+        }
+
+        .profile-info {
+            padding: 2rem;
+        }
+
+        .profile-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1.5rem;
+        }
+
+        .profile-name {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: #333;
+            margin-bottom: 0.3rem;
+        }
+
+        .profile-age-location {
+            color: #666;
+            font-size: 1rem;
+            font-weight: 500;
+        }
+
+        .verified-badge {
+            background: linear-gradient(45deg, #4834d4, #686de0);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            animation: badgePulse 2s ease-in-out infinite;
+        }
+
+        @keyframes badgePulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .profile-quote {
+            background: linear-gradient(45deg, rgba(255, 107, 157, 0.1), rgba(72, 52, 212, 0.1));
+            padding: 1rem;
+            border-radius: 15px;
+            margin-bottom: 1.5rem;
+            border-left: 4px solid #ff6b9d;
+            font-style: italic;
+            color: #555;
+            font-size: 0.95rem;
+        }
+
+        .profile-details {
+            margin-bottom: 2rem;
+        }
+
+        .detail-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.8rem;
+            padding: 0.8rem;
+            background: rgba(102, 126, 234, 0.05);
+            border-radius: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .detail-item:hover {
+            background: rgba(102, 126, 234, 0.1);
+            transform: translateX(5px);
+        }
+
+        .detail-icon {
+            width: 30px;
+            height: 30px;
+            margin-right: 1rem;
+            background: linear-gradient(45deg, #ff6b9d, #4834d4);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 0.9rem;
+            animation: iconSpin 8s linear infinite;
+        }
+
+        @keyframes iconSpin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .detail-text {
+            color: #555;
+            font-weight: 500;
+            flex: 1;
+        }
+
+        .detail-value {
+            color: #333;
+            font-weight: 600;
+        }
+
+        .interests {
+            margin-bottom: 2rem;
+        }
+
+        .interests-title {
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+        }
+
+        .interest-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.8rem;
+        }
+
+        .interest-tag {
+            background: linear-gradient(45deg, rgba(255, 107, 157, 0.2), rgba(72, 52, 212, 0.2));
+            color: #333;
+            padding: 0.6rem 1.2rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            animation: tagFloat 4s ease-in-out infinite;
+        }
+
+        .interest-tag:nth-child(odd) { animation-delay: 0s; }
+        .interest-tag:nth-child(even) { animation-delay: 2s; }
+
+        @keyframes tagFloat {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-3px); }
+        }
+
+        .interest-tag:hover {
+            transform: scale(1.1);
+            background: linear-gradient(45deg, rgba(255, 107, 157, 0.3), rgba(72, 52, 212, 0.3));
+        }
+
+        .profile-actions {
+            display: flex;
+            gap: 1.5rem;
+            justify-content: center;
+        }
+
+        .action-btn {
+            flex: 1;
+            padding: 1.2rem;
+            border: none;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .like-btn {
+            background: linear-gradient(45deg, #ff6b9d, #f368e0);
+            color: white;
+        }
+
+        .message-btn {
+            background: linear-gradient(45deg, #4834d4, #686de0);
+            color: white;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+        }
+
+        .floating-hearts {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .heart {
+            position: absolute;
+            font-size: 2rem;
+            animation: heartFloat 8s infinite linear;
+            opacity: 0.3;
+        }
+
+        .heart:nth-child(1) { color: #ff6b9d; left: 10%; animation-delay: 0s; }
+        .heart:nth-child(2) { color: #4834d4; left: 30%; animation-delay: 2s; }
+        .heart:nth-child(3) { color: #f093fb; left: 50%; animation-delay: 4s; }
+        .heart:nth-child(4) { color: #686de0; left: 70%; animation-delay: 6s; }
+
+        @keyframes heartFloat {
+            0% {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 0.3;
+            }
+            10% {
+                opacity: 0.6;
+            }
+            90% {
+                opacity: 0.6;
+            }
+            100% {
+                transform: translateY(-100px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        .loading-spinner {
+            display: none;
+            text-align: center;
+            margin: 3rem 0;
+        }
+
+        .spinner {
+            width: 60px;
+            height: 60px;
+            border: 5px solid rgba(255, 255, 255, 0.3);
+            border-top: 5px solid #ff6b9d;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+            
+            .feed-title {
+                font-size: 2.5rem;
+            }
+            
+            .profiles-grid {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+            }
+            
+            .container {
+                padding: 100px 1rem 1rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .profile-actions {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            .logo {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="floating-elements">
+        <div class="floating-circle circle-1"></div>
+        <div class="floating-circle circle-2"></div>
+        <div class="floating-circle circle-3"></div>
+    </div>
+
+    <div class="floating-hearts">
+        <div class="heart">💕</div>
+        <div class="heart">💖</div>
+        <div class="heart">💗</div>
+        <div class="heart">💝</div>
+        <div class="heart">💙</div>
+        <div class="heart">🖤</div>
+        <div class="heart">🧡</div>
+        <div class="heart">💙</div>
+    </div>
+    
+    <header class="header">
+        <nav class="nav">
+            <div class="logo"> MatchMate</div>
+            <ul class="nav-links">
+                <li><a href="#home">Home</a></li>
+                <li><a href="#matches">Matches</a></li>
+                <li><a href="#messages">Messages</a></li>
+                <li><a href="#profile">Profile</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <div class="container">
+        <div class="feed-header">
+            <h1 class="feed-title">Discover Your Perfect Match</h1>
+            <p class="feed-subtitle">Connect with amazing people who share your interests and values</p>
+            
+            <div class="filters">
+                <button class="filter-btn active" data-filter="all">All Profiles</button>
+                <button class="filter-btn" data-filter="nearby">Nearby</button>
+                <button class="filter-btn" data-filter="verified">Verified</button>
+            </div>
+        </div>
+
+        <div class="profiles-grid" id="profilesGrid">
+            <!-- Profile Card 1 -->
+            <div class="profile-card" data-category="verified">
+                <div class="profile-image">
+                    <img src="/placeholder.svg?height=280&width=380" alt="Sarah Johnson">
+                </div>
+                <div class="profile-info">
+                    <div class="profile-header">
+                        <div>
+                            <h3 class="profile-name">Sarah Johnson</h3>
+                            <p class="profile-age-location">28 • San Francisco, CA</p>
+                        </div>
+                        <span class="verified-badge">✓ Verified</span>
+                    </div>
+                    
+                    <div class="profile-quote">
+                        "Life is an adventure, and I'm looking for someone to explore it with. Love hiking trails and deep conversations under the stars."
+                    </div>
+                    
+                    <div class="profile-details">
+                        <div class="detail-item">
+                            <div class="detail-icon">💼</div>
+                            <div class="detail-text">
+                                <div class="detail-value">Software Engineer at Google</div>
+                            </div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-icon">🎓</div>
+                            <div class="detail-text">
+                                <div class="detail-value">Master's in Computer Science</div>
+                            </div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-icon">📏</div>
+                            <div class="detail-text">
+                                <div class="detail-value">5'6" • Non Vegetarian</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="interests">
+                        <h4 class="interests-title">🎯 Interests</h4>
+                        <div class="interest-tags">
+                            <span class="interest-tag">Hiking</span>
+                            <span class="interest-tag">Photography</span>
+                            <span class="interest-tag">Cooking</span>
+                            <span class="interest-tag">Travel</span>
+                            <span class="interest-tag">Yoga</span>
+                            <span class="interest-tag">Wine Tasting</span>
+                        </div>
+                    </div>
+                    
+                    <div class="profile-actions">
+                        <button class="action-btn like-btn">💖 Like</button>
+                        <button class="action-btn message-btn">💬 Message</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Profile Card 2 -->
+            <div class="profile-card" data-category="nearby">
+                <div class="profile-image">
+                    <img src="/placeholder.svg?height=280&width=380" alt="Michael Chen">
+                </div>
+                <div class="profile-info">
+                    <div class="profile-header">
+                        <div>
+                            <h3 class="profile-name">Michael Chen</h3>
+                            <p class="profile-age-location">32 • Oakland, CA</p>
+                        </div>
+                    </div>
+                    
+                    <div class="profile-quote">
+                        "Passionate about music and fitness. Looking for someone who values both adventure and quiet moments together."
+                    </div>
+                    
+                    <div class="profile-details">
+                        <div class="detail-item">
+                            <div class="detail-icon">💼</div>
+                            <div class="detail-text">
+                                <div class="detail-value">Marketing Director at Spotify</div>
+                            </div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-icon">🎓</div>
+                            <div class="detail-text">
+                                <div class="detail-value">MBA from Stanford</div>
+                            </div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-icon">📏</div>
+                            <div class="detail-text">
+                                <div class="detail-value">5'10" • Vegetarian</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="interests">
+                        <h4 class="interests-title">🎯 Interests</h4>
+                        <div class="interest-tags">
+                            <span class="interest-tag">Music</span>
+                            <span class="interest-tag">Fitness</span>
+                            <span class="interest-tag">Wine Tasting</span>
+                            <span class="interest-tag">Skiing</span>
+                            <span class="interest-tag">Concerts</span>
+                            <span class="interest-tag">Basketball</span>
+                        </div>
+                    </div>
+                    
+                    <div class="profile-actions">
+                        <button class="action-btn like-btn">💖 Like</button>
+                        <button class="action-btn message-btn">💬 Message</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Profile Card 3 -->
+            <div class="profile-card" data-category="verified">
+                <div class="profile-image">
+                    <img src="/placeholder.svg?height=280&width=380" alt="Emma Rodriguez">
+                </div>
+                <div class="profile-info">
+                    <div class="profile-header">
+                        <div>
+                            <h3 class="profile-name">Emma Rodriguez</h3>
+                            <p class="profile-age-location">26 • San Jose, CA</p>
+                        </div>
+                        <span class="verified-badge">✓ Verified</span>
+                    </div>
+                    
+                    <div class="profile-quote">
+                        "Dedicated to helping others and making a difference. Love dancing and volunteering. Seeking someone with a kind heart."
+                    </div>
+                    
+                    <div class="profile-details">
+                        <div class="detail-item">
+                            <div class="detail-icon">💼</div>
+                            <div class="detail-text">
+                                <div class="detail-value">Pediatric Nurse at UCSF</div>
+                            </div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-icon">🎓</div>
+                            <div class="detail-text">
+                                <div class="detail-value">BSN from UC Davis</div>
+                            </div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-icon">📏</div>
+                            <div class="detail-text">
+                                <div class="detail-value">5'4" • Non Vegetarian</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="interests">
+                        <h4 class="interests-title">🎯 Interests</h4>
+                        <div class="interest-tags">
+                            <span class="interest-tag">Dancing</span>
+                            <span class="interest-tag">Reading</span>
+                            <span class="interest-tag">Volunteering</span>
+                            <span class="interest-tag">Yoga</span>
+                            <span class="interest-tag">Family Time</span>
+                            <span class="interest-tag">Gardening</span>
+                        </div>
+                    </div>
+                    
+                    <div class="profile-actions">
+                        <button class="action-btn like-btn">💖 Like</button>
+                        <button class="action-btn message-btn">💬 Message</button>
+                    </div>
+                </div>
+            </div>
+<div class="profile-card" data-category="verified">
+    <div class="profile-image">
+        <img src="/placeholder.svg?height=280&width=380" alt="Olivia Martinez">
+    </div>
+    <div class="profile-info">
+        <div class="profile-header">
+            <div>
+                <h3 class="profile-name">Olivia Martinez</h3>
+                <p class="profile-age-location">30 • Austin, TX</p>
+            </div>
+            <span class="verified-badge">✓ Verified</span>
+        </div>
+        
+        <div class="profile-quote">
+            "Tech-savvy and full of passion for coding and art. Searching for someone who appreciates creativity and ambition."
+        </div>
+        
+        <div class="profile-details">
+            <div class="detail-item"><div class="detail-icon">💼</div><div class="detail-text"><div class="detail-value">UI/UX Designer at Google</div></div></div>
+            <div class="detail-item"><div class="detail-icon">🎓</div><div class="detail-text"><div class="detail-value">MFA from RISD</div></div></div>
+            <div class="detail-item"><div class="detail-icon">📏</div><div class="detail-text"><div class="detail-value">5'7" • Vegetarian</div></div></div>
+        </div>
+        
+        <div class="interests">
+            <h4 class="interests-title">🎯 Interests</h4>
+            <div class="interest-tags">
+                <span class="interest-tag">Sketching</span>
+                <span class="interest-tag">Travel</span>
+                <span class="interest-tag">Live Music</span>
+                <span class="interest-tag">Tech Conferences</span>
+                <span class="interest-tag">Coffee Shops</span>
+                <span class="interest-tag">Cycling</span>
+            </div>
+        </div>
+        
+        <div class="profile-actions">
+            <button class="action-btn like-btn">💖 Like</button>
+            <button class="action-btn message-btn">💬 Message</button>
+        </div>
+    </div>
+</div>
+
+            <!-- Profile Card 4 -->
+            <div class="profile-card" data-category="nearby">
+                <div class="profile-image">
+                    <img src="/placeholder.svg?height=280&width=380" alt="David Kim">
+                </div>
+                <div class="profile-info">
+                    <div class="profile-header">
+                        <div>
+                            <h3 class="profile-name">David Kim</h3>
+                            <p class="profile-age-location">30 • Berkeley, CA</p>
+                        </div>
+                    </div>
+                    
+                    <div class="profile-quote">
+                        "Architecture is my passion, coffee is my fuel. Looking for someone who appreciates creativity and deep conversations."
+                    </div>
+                    
+                    <div class="profile-details">
+                        <div class="detail-item">
+                            <div class="detail-icon">💼</div>
+                            <div class="detail-text">
+                                <div class="detail-value">Architect at Gensler</div>
+                            </div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-icon">🎓</div>
+                            <div class="detail-text">
+                                <div class="detail-value">M.Arch from UC Berkeley</div>
+                            </div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-icon">📏</div>
+                            <div class="detail-text">
+                                <div class="detail-value">5'9" • Vegetarian</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="interests">
+                        <h4 class="interests-title">🎯 Interests</h4>
+                        <div class="interest-tags">
+                            <span class="interest-tag">Architecture</span>
+                            <span class="interest-tag">Art</span>
+                            <span class="interest-tag">Coffee</span>
+                            <span class="interest-tag">Cycling</span>
+                            <span class="interest-tag">Photography</span>
+                            <span class="interest-tag">Museums</span>
+                        </div>
+                    </div>
+                    
+                    <div class="profile-actions">
+                        <button class="action-btn like-btn">💖 Like</button>
+                        <button class="action-btn message-btn">💬 Message</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Profile Card 5 -->
+            <div class="profile-card" data-category="verified">
+                <div class="profile-image">
+                    <img src="/placeholder.svg?height=280&width=380" alt="Lisa Thompson">
+                </div>
+                <div class="profile-info">
+                    <div class="profile-header">
+                        <div>
+                            <h3 class="profile-name">Lisa Thompson</h3>
+                            <p class="profile-age-location">29 • Palo Alto, CA</p>
+                        </div>
+                        <span class="verified-badge">✓ Verified</span>
+                    </div>
+                    
+                    <div class="profile-quote">
+                        "Finance professional who loves tennis and theater. Looking for someone ambitious and family-oriented."
+                    </div>
+                    
+                    <div class="profile-details">
+                        <div class="detail-item">
+                            <div class="detail-icon">💼</div>
+                            <div class="detail-text">
+                                <div class="detail-value">Financial Analyst at Wells Fargo</div>
+                            </div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-icon">🎓</div>
+                            <div class="detail-text">
+                                <div class="detail-value">MBA from Wharton</div>
+                            </div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-icon">📏</div>
+                            <div class="detail-text">
+                                <div class="detail-value">5'7" • Vegetarian</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="interests">
+                        <h4 class="interests-title">🎯 Interests</h4>
+                        <div class="interest-tags">
+                            <span class="interest-tag">Tennis</span>
+                            <span class="interest-tag">Investing</span>
+                            <span class="interest-tag">Theater</span>
+                            <span class="interest-tag">Pilates</span>
+                            <span class="interest-tag">Fine Dining</span>
+                            <span class="interest-tag">Travel</span>
+                        </div>
+                    </div>
+                    
+                    <div class="profile-actions">
+                        <button class="action-btn like-btn">💖 Like</button>
+                        <button class="action-btn message-btn">💬 Message</button>
+                    </div>
+                </div>
+            </div>
+<div class="profile-card" data-category="verified">
+    <div class="profile-image">
+        <img src="/placeholder.svg?height=280&width=380" alt="Aisha Khan">
+    </div>
+    <div class="profile-info">
+        <div class="profile-header">
+            <div>
+                <h3 class="profile-name">Aisha Khan</h3>
+                <p class="profile-age-location">28 • Chicago, IL</p>
+            </div>
+            <span class="verified-badge">✓ Verified</span>
+        </div>
+        
+        <div class="profile-quote">
+            "Empathetic soul who loves deep conversations and sunsets. Let's build something meaningful together."
+        </div>
+        
+        <div class="profile-details">
+            <div class="detail-item"><div class="detail-icon">💼</div><div class="detail-text"><div class="detail-value">Psychologist</div></div></div>
+            <div class="detail-item"><div class="detail-icon">🎓</div><div class="detail-text"><div class="detail-value">MA in Psychology from Northwestern</div></div></div>
+            <div class="detail-item"><div class="detail-icon">📏</div><div class="detail-text"><div class="detail-value">5'5" • Non Vegetarian</div></div></div>
+        </div>
+        
+        <div class="interests">
+            <h4 class="interests-title">🎯 Interests</h4>
+            <div class="interest-tags">
+                <span class="interest-tag">Meditation</span>
+                <span class="interest-tag">Poetry</span>
+                <span class="interest-tag">Jazz Music</span>
+                <span class="interest-tag">Volunteering</span>
+                <span class="interest-tag">Nature Walks</span>
+                <span class="interest-tag">Board Games</span>
+            </div>
+        </div>
+        
+        <div class="profile-actions">
+            <button class="action-btn like-btn">💖 Like</button>
+            <button class="action-btn message-btn">💬 Message</button>
+        </div>
+    </div>
+</div>
+<div class="profile-card" data-category="verified">
+    <div class="profile-image">
+        <img src="/placeholder.svg?height=280&width=380" alt="Sofia Nguyen">
+    </div>
+    <div class="profile-info">
+        <div class="profile-header">
+            <div>
+                <h3 class="profile-name">Sofia Nguyen</h3>
+                <p class="profile-age-location">25 • Seattle, WA</p>
+            </div>
+            <span class="verified-badge">✓ Verified</span>
+        </div>
+        
+        <div class="profile-quote">
+            "Adventurer at heart. I find joy in the little things. Looking for someone to grow with through life’s ups and downs."
+        </div>
+        
+        <div class="profile-details">
+            <div class="detail-item"><div class="detail-icon">💼</div><div class="detail-text"><div class="detail-value">Software Engineer at Amazon</div></div></div>
+            <div class="detail-item"><div class="detail-icon">🎓</div><div class="detail-text"><div class="detail-value">CS Degree from UW</div></div></div>
+            <div class="detail-item"><div class="detail-icon">📏</div><div class="detail-text"><div class="detail-value">5'6" • Vegetarian</div></div></div>
+        </div>
+        
+        <div class="interests">
+            <h4 class="interests-title">🎯 Interests</h4>
+            <div class="interest-tags">
+                <span class="interest-tag">Hiking</span>
+                <span class="interest-tag">Photography</span>
+                <span class="interest-tag">Rock Climbing</span>
+                <span class="interest-tag">Tech Talks</span>
+                <span class="interest-tag">Gaming</span>
+                <span class="interest-tag">Coffee Brewing</span>
+            </div>
+        </div>
+        
+        <div class="profile-actions">
+            <button class="action-btn like-btn">💖 Like</button>
+            <button class="action-btn message-btn">💬 Message</button>
+        </div>
+    </div>
+</div>
+<div class="profile-card" data-category="verified">
+    <div class="profile-image">
+        <img src="/placeholder.svg?height=280&width=380" alt="Isabella Ruiz">
+    </div>
+    <div class="profile-info">
+        <div class="profile-header">
+            <div>
+                <h3 class="profile-name">Isabella Ruiz</h3>
+                <p class="profile-age-location">32 • Miami, FL</p>
+            </div>
+            <span class="verified-badge">✓ Verified</span>
+        </div>
+        
+        <div class="profile-quote">
+            "Latina fire with a love for family and food. Let’s cook, laugh, and dance through life together."
+        </div>
+        
+        <div class="profile-details">
+            <div class="detail-item"><div class="detail-icon">💼</div><div class="detail-text"><div class="detail-value">Entrepreneur - Food Truck Owner</div></div></div>
+            <div class="detail-item"><div class="detail-icon">🎓</div><div class="detail-text"><div class="detail-value">Diploma in Culinary Arts</div></div></div>
+            <div class="detail-item"><div class="detail-icon">📏</div><div class="detail-text"><div class="detail-value">5'3" • Non Vegetarian</div></div></div>
+        </div>
+        
+        <div class="interests">
+            <h4 class="interests-title">🎯 Interests</h4>
+            <div class="interest-tags">
+                <span class="interest-tag">Salsa Dancing</span>
+                <span class="interest-tag">Cooking</span>
+                <span class="interest-tag">Beach Walks</span>
+                <span class="interest-tag">Family Gatherings</span>
+                <span class="interest-tag">Road Trips</span>
+                <span class="interest-tag">Crafts</span>
+            </div>
+        </div>
+        
+        <div class="profile-actions">
+            <button class="action-btn like-btn">💖 Like</button>
+            <button class="action-btn message-btn">💬 Message</button>
+        </div>
+    </div>
+</div>
+<div class="profile-card" data-category="verified">
+    <div class="profile-image">
+        <img src="/placeholder.svg?height=280&width=380" alt="Priya Mehta">
+    </div>
+    <div class="profile-info">
+        <div class="profile-header">
+            <div>
+                <h3 class="profile-name">Priya Mehta</h3>
+                <p class="profile-age-location">27 • New York, NY</p>
+            </div>
+            <span class="verified-badge">✓ Verified</span>
+        </div>
+        
+        <div class="profile-quote">
+            "Driven by curiosity and fueled by creativity. Let’s explore new places and share meaningful experiences."
+        </div>
+        
+        <div class="profile-details">
+            <div class="detail-item"><div class="detail-icon">💼</div><div class="detail-text"><div class="detail-value">Marketing Strategist at Spotify</div></div></div>
+            <div class="detail-item"><div class="detail-icon">🎓</div><div class="detail-text"><div class="detail-value">MBA from NYU Stern</div></div></div>
+            <div class="detail-item"><div class="detail-icon">📏</div><div class="detail-text"><div class="detail-value">5'6" • Non Vegetarian</div></div></div>
+        </div>
+        
+        <div class="interests">
+            <h4 class="interests-title">🎯 Interests</h4>
+            <div class="interest-tags">
+                <span class="interest-tag">Marketing Trends</span>
+                <span class="interest-tag">Theatre</span>
+                <span class="interest-tag">Writing</span>
+                <span class="interest-tag">Podcasts</span>
+                <span class="interest-tag">Spirituality</span>
+                <span class="interest-tag">Photography</span>
+            </div>
+        </div>
+        
+        <div class="profile-actions">
+            <button class="action-btn like-btn">💖 Like</button>
+            <button class="action-btn message-btn">💬 Message</button>
+        </div>
+    </div>
+</div>
+<div class="profile-card" data-category="verified">
+    <div class="profile-image">
+        <img src="/placeholder.svg?height=280&width=380" alt="Hana Yamada">
+    </div>
+    <div class="profile-info">
+        <div class="profile-header">
+            <div>
+                <h3 class="profile-name">Hana Yamada</h3>
+                <p class="profile-age-location">29 • San Francisco, CA</p>
+            </div>
+            <span class="verified-badge">✓ Verified</span>
+        </div>
+        
+        <div class="profile-quote">
+            "Introverted but curious. I love deep conversations, rainy cafés, and indie films. Looking for a calm soul to share life with."
+        </div>
+        
+        <div class="profile-details">
+            <div class="detail-item"><div class="detail-icon">💼</div><div class="detail-text"><div class="detail-value">Data Analyst at Airbnb</div></div></div>
+            <div class="detail-item"><div class="detail-icon">🎓</div><div class="detail-text"><div class="detail-value">MS in Data Science from Stanford</div></div></div>
+            <div class="detail-item"><div class="detail-icon">📏</div><div class="detail-text"><div class="detail-value">5'2" • Vegetarian</div></div></div>
+        </div>
+        
+        <div class="interests">
+            <h4 class="interests-title">🎯 Interests</h4>
+            <div class="interest-tags">
+                <span class="interest-tag">Indie Films</span>
+                <span class="interest-tag">Poetry</span>
+                <span class="interest-tag">Tea Brewing</span>
+                <span class="interest-tag">Astronomy</span>
+                <span class="interest-tag">Puzzles</span>
+                <span class="interest-tag">Rainy Walks</span>
+            </div>
+        </div>
+        
+        <div class="profile-actions">
+            <button class="action-btn like-btn">💖 Like</button>
+            <button class="action-btn message-btn">💬 Message</button>
+        </div>
+    </div>
+</div>
+
+            <!-- Profile Card 6 -->
+            <div class="profile-card" data-category="nearby">
+                <div class="profile-image">
+                    <img src="/placeholder.svg?height=280&width=380" alt="James Wilson">
+                </div>
+                <div class="profile-info">
+                    <div class="profile-header">
+                        <div>
+                            <h3 class="profile-name">James Wilson</h3>
+                            <p class="profile-age-location">34 • Napa Valley, CA</p>
+                        </div>
+                    </div>
+                    
+                    <div class="profile-quote">
+                        "Chef and restaurant owner who loves creating memorable experiences. Looking for someone to share life's flavors with."
+                    </div>
+                    
+                    <div class="profile-details">
+                        <div class="detail-item">
+                            <div class="detail-icon">💼</div>
+                            <div class="detail-text">
+                                <div class="detail-value">Chef & Restaurant Owner</div>
+                            </div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-icon">🎓</div>
+                            <div class="detail-text">
+                                <div class="detail-value">Culinary Institute of America</div>
+                            </div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-icon">📏</div>
+                            <div class="detail-text">
+                                <div class="detail-value">6'1" • Non Vegetarian</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="interests">
+                        <h4 class="interests-title">🎯 Interests</h4>
+                        <div class="interest-tags">
+                            <span class="interest-tag">Cooking</span>
+                            <span class="interest-tag">Wine</span>
+                            <span class="interest-tag">Gardening</span>
+                            <span class="interest-tag">Surfing</span>
+                            <span class="interest-tag">Food Travel</span>
+                            <span class="interest-tag">Hiking</span>
+                        </div>
+                    </div>
+                    
+                    <div class="profile-actions">
+                        <button class="action-btn like-btn">💖 Like</button>
+                        <button class="action-btn message-btn">💬 Message</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    <script>
+        // Filter functionality
+        const filterBtns = document.querySelectorAll('.filter-btn');
+        const profileCards = document.querySelectorAll('.profile-card');
+
+        filterBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                filterBtns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+
+                const filter = btn.getAttribute('data-filter');
+
+                profileCards.forEach(card => {
+                    if (filter === 'all') {
+                        card.style.display = 'block';
+                        card.style.animation = 'cardSlideIn 0.6s ease-out';
+                    } else {
+                        const categories = card.getAttribute('data-category');
+                        if (categories && categories.includes(filter)) {
+                            card.style.display = 'block';
+                            card.style.animation = 'cardSlideIn 0.6s ease-out';
+                        } else {
+                            card.style.display = 'none';
+                        }
+                    }
+                });
+            });
+        });
+
+        // Like button animation
+        document.querySelectorAll('.like-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                this.style.transform = 'scale(0.9)';
+                this.innerHTML = '💖 Liked!';
+                this.style.background = 'linear-gradient(45deg, #f368e0, #ff6b9d)';
+                
+                setTimeout(() => {
+                    this.style.transform = 'scale(1.1)';
+                }, 150);
+
+                setTimeout(() => {
+                    this.style.transform = 'scale(1)';
+                }, 300);
+
+                // Create floating hearts
+                for(let i = 0; i < 3; i++) {
+                    setTimeout(() => createFloatingHeart(this), i * 200);
+                }
+            });
+        });
+
+        // Message button animation
+        document.querySelectorAll('.message-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                this.style.transform = 'scale(0.9)';
+                this.innerHTML = '✓ Message Sent';
+                this.style.background = 'linear-gradient(45deg, #686de0, #4834d4)';
+                
+                setTimeout(() => {
+                    this.style.transform = 'scale(1.1)';
+                }, 150);
+
+                setTimeout(() => {
+                    this.style.transform = 'scale(1)';
+                    this.innerHTML = '💬 Message';
+                }, 2000);
+            });
+        });
+
+        // Create floating hearts
+        function createFloatingHeart(button) {
+            const hearts = ['💖', '💕', '💗'];
+            const heart = document.createElement('div');
+            heart.innerHTML = hearts[Math.floor(Math.random() * hearts.length)];
+            heart.style.position = 'absolute';
+            heart.style.fontSize = '1.5rem';
+            heart.style.pointerEvents = 'none';
+            heart.style.zIndex = '1000';
+            heart.style.color = '#ff6b9d';
+            
+            const rect = button.getBoundingClientRect();
+            heart.style.left = rect.left + rect.width / 2 + (Math.random() - 0.5) * 50 + 'px';
+            heart.style.top = rect.top + 'px';
+            
+            document.body.appendChild(heart);
+            
+            heart.animate([
+                { transform: 'translateY(0) scale(0)', opacity: 1 },
+                { transform: 'translateY(-80px) scale(1.5)', opacity: 0 }
+            ], {
+                duration: 1500,
+                easing: 'ease-out'
+            }).onfinish = () => heart.remove();
+        }
+
+        // Loading animation
+        let isLoading = false;
+        window.addEventListener('scroll', () => {
+            if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 1000 && !isLoading) {
+                isLoading = true;
+                document.getElementById('loadingSpinner').style.display = 'block';
+                
+                setTimeout(() => {
+                    document.getElementById('loadingSpinner').style.display = 'none';
+                    isLoading = false;
+                }, 2000);
+            }
+        });
+
+        // Smooth navigation
+        document.querySelectorAll('.nav-links a').forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            });
+        });
+    </script>
+</body>
+</html>
