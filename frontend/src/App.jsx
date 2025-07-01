@@ -7,6 +7,7 @@ import Sidebar from './components/User/User_Dashboard/Sidebar';
 import MainContent from './components/User/User_Dashboard/MainContent';
 import CreateProfile from './components/User/User_Profile/CreateProfile';
 import ViewProfile from './components/User/User_Profile/ViewProfile';
+import Plans from "./components/User/User-Plan/Plans";
 import VerificationSuite from './components/User/verification_suite';
 function DashboardLayout() {
   return (
@@ -34,6 +35,7 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/chat" element={<Chat />} />
         <Route path="/dashboard" element={<DashboardLayout />} />
+        <Route path="/plans" element={<Plans />} />
         <Route
           path="/profile/create"
           element={
