@@ -10,6 +10,10 @@ import ViewProfile from './components/User/User_Profile/ViewProfile';
 import MatrimonyFeed from "./components/User/User-Feed/Feed";
 import Plans from "./components/User/User-Plan/Plans";
 import VerificationSuite from './components/User/verification_suite';
+import AdminSignIn from "./components/Admin/AdminSignIn";
+import AdminSignUp from "./components/Admin/AdminSignUp";
+
+
 function DashboardLayout() {
   return (
     <div className="flex flex-col h-screen bg-gray-50">
@@ -35,6 +39,8 @@ function App() {
         <Route path="/" element={<Navigate to="/login" replace />} />
         <Route path="/login" element={<Login />} />
         <Route path="/chat" element={<Chat />} />
+        <Route path="/admin/signin" element={<AdminSignIn />} />
+        <Route path="/admin/signup" element={<AdminSignUp />} />
         <Route path="/dashboard" element={<DashboardLayout />} />
         <Route path="/plans" element={<Plans />} />
          <Route path="/feed" element={<MatrimonyFeed />} />
