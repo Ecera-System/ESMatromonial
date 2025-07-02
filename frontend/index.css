@@ -1,0 +1,253 @@
+import React from 'react';
+import PropTypes from 'prop-types';
+import cn from 'classnames';
+
+import styles from './index.module.scss';
+
+function Ecera(props) {
+  return (
+    <div className={cn(styles.root, props.className, 'ecera')}>
+      /*🚩85 Unstructured items require structuring to ensure responsiveness, as
+      code with absolute positioning lacks adaptability.❗*/
+      <div className={styles.color} />
+      <div className={styles.info}>Home</div>
+      <div className={styles.info1}>Services</div>
+      <div className={styles.info11}>About</div>
+      <div className={styles.info12}>Contact</div>
+      <img
+        className={styles.image}
+        src={'/assets/Ecera/save_the_date_card.png'}
+        alt="alt text"
+      />
+      <div className={styles.color1} />
+      <div className={styles.color11} />
+      <div className={styles.info2}>Login</div>
+      <div className={styles.info21}>Signup</div>
+      <img
+        className={styles.image1}
+        src={'/assets/Ecera/87a2197ff62dbde390a5c7601340e371.svg'}
+        alt="alt text"
+      />
+      <img
+        className={styles.decorator}
+        src={'/assets/Ecera/pine_forest.png'}
+        alt="alt text"
+      />
+      <img
+        className={styles.image2}
+        src={'/assets/Ecera/couple_piggyback.png'}
+        alt="alt text"
+      />
+      <div className={styles.info3}>Discover a world beyond matrimony</div>
+      <div className={styles.color2} />
+      <div className={styles.info4}>Find Your Match</div>
+      <div className={styles.info5}>Find your forever</div>
+      <img
+        className={styles.image3}
+        src={'/assets/Ecera/red_heart.svg'}
+        alt="alt text"
+      />
+      <img
+        className={styles.image4}
+        src={'/assets/Ecera/5bc953ce74e3816af20acb1b7203dbdb.png'}
+        alt="alt text"
+      />
+      <div className={styles.info6}>80 Lakh Success Stories</div>
+      <div className={styles.color3} />
+      <div className={styles.color31} />
+      <div className={styles.info61}>#1 Matchmaking Service</div>
+      <img
+        className={styles.image5}
+        src={'/assets/Ecera/yellow_star_1.svg'}
+        alt="alt text"
+      />
+      <img
+        className={styles.image6}
+        src={'/assets/Ecera/yellow_star_2.svg'}
+        alt="alt text"
+      />
+      <img
+        className={styles.image7}
+        src={'/assets/Ecera/yellow_star_3.svg'}
+        alt="alt text"
+      />
+      <img
+        className={styles.image8}
+        src={'/assets/Ecera/yellow_star_4.svg'}
+        alt="alt text"
+      />
+      <img
+        className={styles.image9}
+        src={'/assets/Ecera/yellow_star_5.svg'}
+        alt="alt text"
+      />
+      <div className={styles.info62}>
+        Ratings on Playstore by 2.4 lakh users
+      </div>
+      <div className={styles.info7}>The Shaadi Experience</div>
+      <div className={styles.color4} />
+      <div className={styles.color41} />
+      <div className={styles.color42} />
+      <img
+        className={styles.image11}
+        src={'/assets/Ecera/hand_with_coin.svg'}
+        alt="alt text"
+      />
+      <div className={styles.info8}>30 Day Money Back Guarantee</div>
+      <div className={styles.info81}>Blue Tick to find your Green Flag</div>
+      <div className={styles.info82}>Matchmaking Powered by AI</div>
+      <p className={styles.desc}>
+        Get matched with someone special within 30 days, or we’ll refund your
+        money—guaranteed!
+      </p>
+      <p className={styles.desc1}>
+        Did you know our blue-tick profiles get 40% more connection requests
+        than others?
+      </p>
+      <p
+        className={
+          styles.desc2
+        }>{`Cutting-edge technology with two decades of matchmaking expertise to help you find "the one".`}</p>
+      <img
+        className={styles.image12}
+        src={'/assets/Ecera/blue_checkmark.svg'}
+        alt="alt text"
+      />
+      <img
+        className={styles.image10}
+        src={'/assets/Ecera/lightbulb_idea.png'}
+        alt="alt text"
+      />
+      <div className={styles.color6} />
+      <p className={styles.desc11}>
+        Discover how Shaadi has brought together couples through meaningful
+        connections and shared journeys. Your success story could be next!
+      </p>
+      <div className={styles.info9}>Real Stories, True Connections</div>
+      <div className={styles.color7} />
+      <div className={styles.color71} />
+      <div className={styles.info10}>{`Ajinkya & Ashwini`}</div>
+      <div className={styles.info101}>{`Shreyashree & Sukdev`}</div>
+      <img
+        className={styles.image13}
+        src={'/assets/Ecera/couple_embrace.png'}
+        alt="alt text"
+      />
+      <img
+        className={styles.image14}
+        src={'/assets/Ecera/traditional_ceremony.png'}
+        alt="alt text"
+      />
+      <p className={styles.desc21}>
+        Thank You,I have found my soulmate on this site and it is really great
+        that it happened.We started talking and later we involved our parents
+        and everything went well.Both families are happy now and we are engaged
+        on 9th May 2025..
+      </p>
+      <p className={styles.desc22}>
+        Thank You,I have found my soulmate on this site and it is really great
+        that it happened.We started talking and later we involved our parents
+        and everything went well.Both families are happy now and we are engaged
+        on 9th May 2025..
+      </p>
+      <div className={styles.color8} />
+      <img
+        className={styles.image15}
+        src={'/assets/Ecera/58dca8982266a40923bcabb5be9fb630.svg'}
+        alt="alt text"
+      />
+      <div className={styles.color81} />
+      <img
+        className={styles.image16}
+        src={'/assets/Ecera/58dca8982266a40923bcabb5be9fb630.svg'}
+        alt="alt text"
+      />
+      <div className={styles.color9} />
+      <div className={styles.info102}>Get Your Match</div>
+      <div className={styles.color10} />
+      <div className={styles.info111}>Privacy Policy</div>
+      <div className={styles.info112}>Terms of service</div>
+      <div className={styles.info113}>Cookies Policy</div>
+      <div className={styles.color111} />
+      <div className={styles.info121}>Contacts Us for Legal Assistance</div>
+      <div className={styles.info13}>
+        Trusted matchmakers committed to your perfect match
+      </div>
+      <div className={styles.color12} />
+      <div className={styles.info14}>Profession-Based Matching</div>
+      <div className={styles.info15}>Useful Links</div>
+      <div className={styles.info151}>Careers</div>
+      <div className={styles.info152}>Resources</div>
+      <p className={styles.desc3}>
+        About Us
+        <br />
+        Contact US
+        <br />
+        FAQs
+        <br />
+        Terms of Services
+        <br />
+        Privacy Policy
+      </p>
+      <p className={styles.desc31}>
+        Blog
+        <br />
+        Press
+        <br />
+        Partnerships
+        <br />
+        Supports
+        <br />
+        Help center
+      </p>
+      <p className={styles.desc32}>
+        Events
+        <br />
+        Community
+        <br />
+        Social Media
+        <br />
+        Newsletter
+        <br />
+        Subscribe
+      </p>
+      <div className={styles.line} />
+      <div className={styles.line1} />
+      <div className={styles.info16}>RabDiJodi</div>
+      <div className={styles.info17}>Follow Us</div>
+      <img
+        className={styles.image17}
+        src={'/assets/Ecera/facebook_logo.svg'}
+        alt="alt text"
+      />
+      <img
+        className={styles.image18}
+        src={'/assets/Ecera/instagram_logo.svg'}
+        alt="alt text"
+      />
+      <img
+        className={styles.image19}
+        src={'/assets/Ecera/linkedin_logo.svg'}
+        alt="alt text"
+      />
+      <img
+        className={styles.image20}
+        src={'/assets/Ecera/youtube_logo.svg'}
+        alt="alt text"
+      />
+      <div className={styles.info18}>© 2024 RabDiJodi. All right reserved</div>
+      <div className={styles.info161}>RabDiJodi</div>
+      <img
+        className={styles.image21}
+        src={'/assets/Ecera/cd5df299fdb9d63b37158ebdab4572de.png'}
+        alt="alt text"
+      />
+    </div>
+  );
+}
+
+Ecera.propTypes = {
+  className: PropTypes.string
+};
+
+export default Ecera;
