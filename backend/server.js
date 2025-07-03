@@ -1,6 +1,9 @@
 import express from "express";
 import dotenv from "dotenv";
 import connectDB from "./config/db.js";
+import userRouter from "./routes/userRoutes.js";
+import userAuthRouter from "./routes/userAuthRoutes.js";
+import adminAuthRouter from "./routes/adminAuthRoutes.js";
 dotenv.config();
 
 const app = express();
@@ -17,3 +20,7 @@ app.get("/", (req, res) => {
     message: "Welcome to ESMatrimonial API",
   });
 });
+
+app.use(userRouter);
+app.use(userAuthRouter);
+app.use(adminAuthRouter);

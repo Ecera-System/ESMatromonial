@@ -198,7 +198,7 @@ matrimony-backend/
    npm install
    ```
 3. **Configure environment variables**
-   - Copy `.env.example` to `.env` and fill in your credentials (MongoDB URI, JWT secret, Stripe/Razorpay keys, Cloudinary, etc.)
+   - Copy `.env.example` to `.env` and fill in your credentials (MongoDB URI, JWT secret,Razorpay keys, Cloudinary, etc.)
 4. **Run the server**
    ```sh
    npm start
@@ -217,3 +217,21 @@ Feel free to open issues or submit pull requests for improvements and bug fixes.
 ## License
 
 MIT
+
+## Environment Variables (.env)
+
+For security reasons, the `.env` file is not included in the repository. You must create your own `.env` file in the project root with the following variables:
+
+      PORT=5000
+      MONGO_URI=your_mongodb_connection_string
+      JWT_SECRET=your_jwt_secret
+      ADMIN_JWT_SECRET=your_admin_jwt_secret
+      RAZORPAY_KEY=your_razorpay_key
+      RAZORPAY_SECRET=your_razorpay_secret
+      CLOUDINARY_URL=your_cloudinary_url
+
+- Replace `your_mongodb_connection_string` with your MongoDB URI.
+- Replace `your_jwt_secret` and `your_admin_jwt_secret` with strong, random strings.
+- Replace Cloudinary values if you use image uploads.
+
+**Note:** Never commit your `.env` file to version control.
