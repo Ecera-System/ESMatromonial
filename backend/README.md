@@ -164,6 +164,14 @@ matrimony-backend/
 - `PUT /api/admin/plans/:id` — Update subscription plan
 - `DELETE /api/admin/plans/:id` — Delete subscription plan
 
+  ## API Testing
+
+You can use our shared Postman workspace to test all API endpoints:
+
+[Click here to join the Postman team and access the collection](https://app.getpostman.com/join-team?invite_code=3b6a2d4ae72bfa1305a9524cc19ad4240b7c0edfa26c51155cdb734032adf231&target_code=60566b410a8e87cfd6c30380ed787fa4)
+
+- Import the collection and environment to quickly test authentication, user, admin, and other endpoints.
+
 ## Real-time Features (Socket.io Events)
 
 ### Connection Events
