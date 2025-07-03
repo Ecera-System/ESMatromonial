@@ -13,6 +13,7 @@ import Plans from "./components/User/User-Plan/Plans";
 import VerificationSuite from './components/User/verification_suite';
 import AdminSignIn from "./components/Admin/AdminSignIn";
 import AdminSignUp from "./components/Admin/AdminSignUp";
+import Landing from "./components/User/Landing-Page/Landing";
 
 
 function DashboardLayout() {
@@ -37,7 +38,8 @@ function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<Navigate to="/login" replace />} />
+        <Route path="/" element={<Navigate to="/landing" replace />} />
+        <Route path="/landing" element={<Landing />} />
         <Route path="/login" element={<Login />} />
         <Route path="/chat" element={<Chat />} />
         <Route path="/admin/signin" element={<AdminSignIn />} />
