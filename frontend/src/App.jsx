@@ -8,10 +8,12 @@ import MainContent from './components/User/User_Dashboard/MainContent';
 import CreateProfile from './components/User/User_Profile/CreateProfile';
 import ViewProfile from './components/User/User_Profile/ViewProfile';
 import MatrimonyFeed from "./components/User/User-Feed/Feed";
+import Signup from './components/User/Signup';
 import Plans from "./components/User/User-Plan/Plans";
 import VerificationSuite from './components/User/verification_suite';
 import AdminSignIn from "./components/Admin/AdminSignIn";
 import AdminSignUp from "./components/Admin/AdminSignUp";
+import Landing from "./components/User/Landing-Page/Landing";
 
 
 function DashboardLayout() {
@@ -36,7 +38,8 @@ function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<Navigate to="/login" replace />} />
+        <Route path="/" element={<Navigate to="/landing" replace />} />
+        <Route path="/landing" element={<Landing />} />
         <Route path="/login" element={<Login />} />
         <Route path="/chat" element={<Chat />} />
         <Route path="/admin/signin" element={<AdminSignIn />} />
@@ -44,6 +47,7 @@ function App() {
         <Route path="/dashboard" element={<DashboardLayout />} />
         <Route path="/plans" element={<Plans />} />
          <Route path="/feed" element={<MatrimonyFeed />} />
+         <Route path="/signup" element={<Signup />} />
         <Route
           path="/profile/create"
           element={
