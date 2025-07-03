@@ -24,17 +24,17 @@ const Plans = () => {
           {
             name: "Basic",
             price: "₹0",
-            features: [":heavy_check_mark: View 10 profiles/day", ":heavy_check_mark: Limited filters", ":heavy_check_mark: Basic support"],
+            features: [" ✅ View 10 profiles/day", " ✅ Limited filters", " ✅ Basic support"],
           },
           {
             name: "Premium",
             price: "₹499/month",
-            features: [":heavy_check_mark: Unlimited profile views", ":heavy_check_mark: Contact 10 profiles/month", ":heavy_check_mark: Priority support"],
+            features: [" ✅ Unlimited profile views", " ✅ Contact 10 profiles/month", " ✅ Priority support"],
           },
           {
             name: "Elite VIP",
             price: "₹999/month",
-            features: [":heavy_check_mark: Direct chat with members", ":heavy_check_mark: Profile boost & highlights", ":heavy_check_mark: Match priority algorithm"],
+            features: [" ✅ Direct chat with members", " ✅ Profile boost & highlights", " ✅ Match priority algorithm"],
           },
         ].map((plan, idx) => (
           <div key={idx} className="bg-white border border-pink-200 rounded-2xl p-6 shadow-md text-center">
