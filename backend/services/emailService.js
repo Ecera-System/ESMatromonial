@@ -1,1 +1,0 @@
-// Email templates and sending
