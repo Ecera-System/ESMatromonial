@@ -17,6 +17,7 @@ import {
   DollarSign,
   Edit
 } from 'lucide-react';
+import BackButton from '../../BackButton';
 
 const ViewProfile = ({ profileData, onBackToCreate, isDarkMode }) => {
   const navigate = useNavigate();
@@ -55,6 +56,9 @@ const ViewProfile = ({ profileData, onBackToCreate, isDarkMode }) => {
   return (
     <div className="min-h-screen bg-white dark:bg-black py-8 px-4 transition-colors duration-300">
       <div className="max-w-6xl mx-auto">
+        <div className="mb-6">
+          <BackButton />
+        </div>
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <button

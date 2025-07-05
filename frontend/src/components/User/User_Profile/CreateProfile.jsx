@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {useNavigate} from 'react-router-dom';
 import {
   User,
@@ -13,8 +13,16 @@ import {
   X,
   MapPin,
   Shield,
-  Eye
+  Eye,
+  Mail,
+  Phone,
+  Calendar,
+  Users,
+  GraduationCap,
+  Building,
+  DollarSign
 } from 'lucide-react';
+import BackButton from '../../BackButton';
 
 const CreateProfile = ({ onProfileCreated }) => {
   const [currentStep, setCurrentStep] = useState(1);
@@ -739,6 +747,9 @@ const CreateProfile = ({ onProfileCreated }) => {
   return (
     <div className="min-h-screen bg-white dark:bg-black py-8 px-4 transition-colors duration-300">
       <div className="max-w-4xl mx-auto">
+        <div className="mb-6">
+          <BackButton />
+        </div>
         {/* Header with View Profile Button */}
         <div className="flex items-center justify-between mb-8">
           <div className="text-center flex-1">

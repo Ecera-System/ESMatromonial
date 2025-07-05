@@ -1,18 +1,14 @@
 import React from "react";
+import BackButton from "../../BackButton";
+
 const Plans = () => {
   return (
     <div className="bg-pink-50 font-sans min-h-screen">
-      {/* Header */}
-      <header className="bg-white shadow-md py-4">
-        <div className="max-w-6xl mx-auto px-4 flex justify-between items-center">
-          <h1 className="text-pink-600 text-xl font-bold">Matrimony Hub</h1>
-          <nav className="space-x-4">
-            <a href="#" className="text-pink-600 font-medium hover:underline">Home</a>
-            <a href="#" className="text-pink-600 font-medium hover:underline">Login</a>
-            <a href="#" className="text-pink-600 font-medium hover:underline">Register</a>
-          </nav>
+      <div className="max-w-5xl mx-auto px-4 py-8">
+        <div className="mb-6">
+          <BackButton />
         </div>
-      </header>
+      </div>
       {/* Intro */}
       <section className="text-center my-12">
         <h2 className="text-2xl text-pink-800 font-bold">Choose the Plan That Suits You</h2>
