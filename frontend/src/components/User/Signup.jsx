@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { FaHeart } from 'react-icons/fa';
 import { Heart, Mail, Lock, User, Phone, Eye, EyeOff, Sparkles, CheckCircle } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 
 function Signup() {
+  const navigate = useNavigate();
   const [currentVideo, setCurrentVideo] = useState(0);
   const [showPassword, setShowPassword] = useState(false);
   const [hearts, setHearts] = useState([]);
@@ -245,7 +248,7 @@ function Signup() {
       <div className="relative z-20 flex items-center justify-center min-h-screen p-4 py-8">
         <div className="w-full max-w-lg">
           {/* Glassmorphism Signup Card with new colors */}
-          <div className="relative bg-white/12 backdrop-blur-3xl rounded-3xl border border-amber-200/25 p-8 shadow-2xl transform transition-all duration-1000 hover:scale-105 hover:shadow-orange-500/25 hover:shadow-2xl hover:bg-white/18">
+          <div className="relative bg-white/12 backdrop-blur-3xl rounded-3xl border border-amber-200/25 p-8 shadow-2xl transform transition-all duration-1000 hover:scale-85 hover:shadow-orange-500/25 hover:shadow-2xl hover:bg-white/18">
             {/* Enhanced Glass Border Glow with new colors */}
             <div className="absolute inset-0 rounded-3xl bg-gradient-to-r from-coral-500/15 via-amber-500/12 to-teal-500/15 blur-xl -z-10"></div>
             <div className="absolute inset-0 rounded-3xl border border-gradient-to-r from-orange-300/40 via-rose-300/30 to-emerald-300/40 opacity-60"></div>
@@ -454,7 +457,20 @@ function Signup() {
             <div className="text-center mt-8">
               <p className="text-amber-100/95 text-sm">
                 Already have an account?{' '}
-               <button className="text-coral-400 hover:text-coral-300 font-semibold transition-colors duration-300 cursor-pointer">
+                <button 
+                  onClick={() => {
+                    console.log('Login button clicked!');
+                    alert('Login button clicked!');
+                    try {
+                      navigate('/login', { replace: true });
+                    } catch (error) {
+                      console.error('Navigation error:', error);
+                      window.location.href = '/login';
+                    }
+                  }}
+                  className="text-coral-400 hover:text-coral-300 font-medium transition-colors duration-300 cursor-pointer bg-transparent border-none underline z-50 relative"
+                  style={{ pointerEvents: 'auto' }}
+                >
                   Sign in here
                 </button>
               </p>

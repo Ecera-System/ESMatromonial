@@ -1,6 +1,7 @@
 // UserVerificationDashboard.jsx
 import React, { useState } from "react";
-import { CheckCircle } from "lucide-react";
+import { CheckCircle, Upload, X } from "lucide-react";
+import BackButton from "../BackButton";
 
 export default function UserVerificationDashboard() {
   const [toast, setToast] = useState("");
@@ -26,6 +27,9 @@ export default function UserVerificationDashboard() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-orange-50 to-white flex flex-col md:flex-row p-6">
+      <div className="absolute top-4 left-4 z-20">
+        <BackButton />
+      </div>
       <aside className="hidden md:block w-1/4 pr-4 border-r border-gray-200 relative">
         <h2 className="text-xl font-semibold mb-4">Verification Steps</h2>
         <ul className="space-y-4">
