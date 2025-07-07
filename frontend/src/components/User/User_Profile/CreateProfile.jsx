@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import {useNavigate} from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import {
   User,
   Briefcase,
@@ -80,9 +81,35 @@ const CreateProfile = ({ onProfileCreated }) => {
     partnerAbout: '',
     photos: []
   });
-  const navigate = useNavigate();
-  const totalSteps = 6;
 
+  const navigate = useNavigate();
+const totalSteps = 6;
+
+// Add this useEffect hook right here
+const location = useLocation();
+useEffect(() => {
+  const searchParams = new URLSearchParams(location.search);
+  const scrollTo = searchParams.get('scrollTo');
+  
+  if (scrollTo === 'photos') {
+    setCurrentStep(6); // Photos is step 6
+    setTimeout(() => {
+      const photosSection = document.getElementById('photos-section');
+      if (photosSection) {
+        photosSection.scrollIntoView({ behavior: 'smooth' });
+      }
+    }, 300);
+  }
+  else if (scrollTo === 'preferences') {
+    setCurrentStep(5); // Preferences are in step 5
+    setTimeout(() => {
+      const preferencesSection = document.getElementById('preferences-section');
+      if (preferencesSection) {
+        preferencesSection.scrollIntoView({ behavior: 'smooth' });
+      }
+    }, 300);
+  }
+}, [location.search]);
   const steps = [
     { id: 1, title: 'Personal Info', icon: User },
     { id: 2, title: 'Contact & Location', icon: MapPin },
@@ -550,9 +577,8 @@ const CreateProfile = ({ onProfileCreated }) => {
 
       case 5:
         return (
-          <div className="space-y-6">
-            <h3 className="text-2xl font-bold text-black dark:text-white mb-6">Lifestyle & About Me</h3>
-            
+         <div id="preferences-section" className="space-y-6">
+      <h3 className="text-2xl font-bold text-black dark:text-white mb-6">Lifestyle & About Me</h3>
             <div className="grid md:grid-cols-2 gap-6">
               <div>
                 <label className="block text-sm font-medium text-black dark:text-white mb-2">Diet</label>
@@ -684,8 +710,8 @@ const CreateProfile = ({ onProfileCreated }) => {
 
       case 6:
         return (
-          <div className="space-y-6">
-            <h3 className="text-2xl font-bold text-black dark:text-white mb-6">Upload Photos</h3>
+    <div id="photos-section" className="space-y-6">
+      <h3 className="text-2xl font-bold text-black dark:text-white mb-6">Upload Photos</h3>
             
             <div className="bg-gray-100 dark:bg-gray-900 p-6 rounded-xl border border-gray-300 dark:border-gray-600">
               <div className="flex items-center space-x-3 mb-4">

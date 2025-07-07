@@ -1,11 +1,18 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 
 function ProfileCompletion() {
+  const navigate = useNavigate();
   const completionItems = [
-    { icon: '📷', text: 'Upload More Photos', completed: false, color: 'text-orange-500' },
-    { icon: '💙', text: 'Add Partner Preferences', completed: false, color: 'text-blue-500' },
-    { icon: '✅', text: 'Verify Email/Phone', completed: false, color: 'text-green-500' }
+    { icon: '📷', text: 'Upload More Photos', to: '/profile/create?scrollTo=photos',completed: false, color: 'text-orange-500' },
+    { icon: '💙', text: 'Add Partner Preferences',to: '/profile/create?scrollTo=preferences', completed: false, color: 'text-blue-500' },
+    { icon: '✅', text: 'Verify Email/Phone', to:'/verify',completed: false, color: 'text-green-500' }
   ];
+const handleClick = (item) => {
+    if (item.to) {
+      navigate(item.to);
+    }
+  };
 
   return (
     <section className="bg-white rounded-2xl p-4 lg:p-8 shadow-lg w-full h-full border border-gray-100">
@@ -23,7 +30,7 @@ function ProfileCompletion() {
           <div className="absolute right-0 top-0 h-full w-1 lg:w-2 bg-white opacity-30 animate-pulse"></div>
         </div>
       </div>
-      
+
       <div className="text-center mb-4 lg:mb-6">
         <span className="text-xl lg:text-2xl font-bold text-gray-800">60%</span>
         <span className="text-gray-500 ml-2 text-sm lg:text-base">Complete</span>
@@ -34,10 +41,15 @@ function ProfileCompletion() {
         {completionItems.map((item, index) => (
           <div
             key={index}
+            onClick={() => handleClick(item)}
             className="flex items-center gap-3 lg:gap-4 p-3 lg:p-4 bg-gray-50 rounded-xl cursor-pointer hover:bg-gray-100 transition-all duration-300 hover:scale-102 hover:shadow-md"
           >
-            <span className={`text-xl lg:text-2xl w-6 lg:w-8 text-center ${item.color}`}>{item.icon}</span>
-            <span className="text-sm lg:text-base text-gray-700 font-medium flex-1">{item.text}</span>
+            <span className={`text-xl lg:text-2xl w-6 lg:w-8 text-center ${item.color}`}>
+              {item.icon}
+            </span>
+            <span className="text-sm lg:text-base text-gray-700 font-medium flex-1">
+              {item.text}
+            </span>
             <span className="text-gray-400 text-sm lg:text-base">→</span>
           </div>
         ))}
@@ -47,3 +59,4 @@ function ProfileCompletion() {
 }
 
 export default ProfileCompletion;
+

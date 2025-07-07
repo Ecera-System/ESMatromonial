@@ -14,6 +14,7 @@ import ViewProfile from './components/User/User_Profile/ViewProfile';
 import Layout from './components/Layout/Layout';
 import Dashboard from './pages/User/Dashboard';
 import ScrollToTop from './components/ScrollToTop';
+import RequestsSection from './components/User/User_Dashboard/RequestsSection';
 
 function App() {
   const [profileData, setProfileData] = useState(null);
@@ -34,6 +35,7 @@ function App() {
         <Route path="/signup" element={<Signup />} />
         {/* Layout for all dashboard pages */}
         <Route element={<Layout />}>
+         <Route path="/dashboard/requests" element={<RequestsSection />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/feed" element={<MatrimonyFeed />} />
           <Route path="/chat" element={<Chat />} />

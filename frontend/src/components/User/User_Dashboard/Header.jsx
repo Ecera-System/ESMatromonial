@@ -116,9 +116,14 @@ function Header({ onMenuClick }) {
             <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
           </button>
           {/* User Avatar */}
-          <div className="w-8 h-8 lg:w-10 lg:h-10 overflow-hidden rounded-full border-2 border-gray-200 hover:border-blue-300 transition-colors">
-            <img src={userProfile} alt="User" className="w-full h-full object-cover" />
-          </div>
+          {/* User Avatar - Clickable */}
+          <Link
+         to="/profile/view"
+         className="w-8 h-8 lg:w-10 lg:h-10 overflow-hidden rounded-full border-2 border-gray-200 hover:border-blue-300 transition-colors"
+          >
+         <img src={userProfile} alt="User" className="w-full h-full object-cover" />
+          </Link>
+
         </div>
       </div>
     </header>

@@ -1,8 +1,20 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 
 function RequestsSection() {
-  const [activeTab, setActiveTab] = useState('Received');
+  const [searchParams] = useSearchParams();
+  const tabParam = searchParams.get('tab') || 'received';
+  const [activeTab, setActiveTab] = useState(
+    tabParam.charAt(0).toUpperCase() + tabParam.slice(1).toLowerCase()
+  );
+
   const tabs = ['Received', 'Sent', 'Accepted'];
+
+  // Update tab on URL change
+  useEffect(() => {
+    const newTab = searchParams.get('tab') || 'received';
+    setActiveTab(newTab.charAt(0).toUpperCase() + newTab.slice(1).toLowerCase());
+  }, [searchParams]);
 
   return (
     <section className="bg-white rounded-2xl p-4 lg:p-8 shadow-lg w-full h-full border border-gray-100">
@@ -16,7 +28,9 @@ function RequestsSection() {
         {tabs.map((tab) => (
           <button
             key={tab}
-            onClick={() => setActiveTab(tab)}
+            onClick={() =>
+              window.history.pushState({}, '', `?tab=${tab.toLowerCase()}`) || setActiveTab(tab)
+            }
             className={`text-xs lg:text-sm font-semibold py-2 lg:py-3 px-3 lg:px-4 mr-4 lg:mr-6 border-b-2 transition-all duration-300 whitespace-nowrap flex-shrink-0 ${
               activeTab === tab
                 ? 'text-blue-600 border-blue-600 bg-blue-50'

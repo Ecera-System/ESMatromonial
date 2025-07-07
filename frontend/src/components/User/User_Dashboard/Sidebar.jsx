@@ -4,17 +4,18 @@ import { Link } from 'react-router-dom';
 
 function Sidebar({ onClose }) {
   const menuItems = [
-    { icon: '✏️', text: 'Edit Profile', to: '/dashboard/profile', active: false },
-    { icon: '💖', text: 'My Matches', to: '/dashboard/matches', active: false },
-    { icon: '⭐', text: 'Shortlisted', to: '/dashboard/shortlisted', active: false },
-    { icon: '📋', text: 'Received Requests', to: '/dashboard/requests', active: false },
-    { icon: '📤', text: 'Sent Requests', to: '/dashboard/sent', active: false },
-    { icon: '💬', text: 'Messages', to: '/dashboard/messages', active: false },
-    { icon: '⚙️', text: 'Settings', to: '/dashboard/settings', active: false },
+    { icon: '✏️', text: 'Edit Profile', to: '/profile/create' },
+    { icon: '💖', text: 'My Matches', to: '/dashboard/matches' },
+    { icon: '⭐', text: 'Shortlisted', to: '/dashboard/shortlisted' },
+    { icon: '📋', text: 'Received Requests', to: '/dashboard/requests?tab=received' },
+    { icon: '📤', text: 'Sent Requests', to: '/dashboard/requests?tab=sent' },
+    { icon: '💬', text: 'Messages', to: '/chat' },
+    { icon: '⚙️', text: 'Settings', to: '/dashboard/settings' },
   ];
 
   return (
-    <aside className="w-[280px] lg:w-[300px]  bg-white border-r border-gray-200 py-6 lg:py-8 px-4 lg:px-6 shadow-lg h-full overflow-y-auto">
+    <aside className="w-[280px] lg:w-[300px] bg-white border-r border-gray-200 py-6 lg:py-8 px-4 lg:px-6 shadow-lg h-full overflow-y-auto">
+      
       {/* Mobile Close Button */}
       <div className="lg:hidden flex mt-[-25px] justify-end mb-4">
         <button
@@ -61,24 +62,25 @@ function Sidebar({ onClose }) {
           <Link
             key={index}
             to={item.to}
-            className={`flex items-center gap-3 lg:gap-4 px-3 lg:px-4 py-3 lg:py-4 rounded-xl transition-all text-sm font-medium group ${
-              item.active
-                ? 'bg-blue-600 text-white shadow-lg'
-                : 'text-gray-600 hover:bg-gray-50 hover:text-gray-800'
-            }`}
+            className="flex items-center gap-3 lg:gap-4 px-3 lg:px-4 py-3 lg:py-4 rounded-xl transition-all text-sm font-medium group text-gray-600 hover:bg-gray-50 hover:text-gray-800"
             onClick={onClose}
           >
-            <span className="text-base lg:text-lg w-5 lg:w-6 text-center group-hover:scale-110 transition-transform">{item.icon}</span>
+            <span className="text-base lg:text-lg w-5 lg:w-6 text-center group-hover:scale-110 transition-transform">
+              {item.icon}
+            </span>
             <span className="truncate">{item.text}</span>
           </Link>
         ))}
-        {/* Plans and other links for mobile only */}
+
+        {/* Mobile-only Links */}
         <div className="flex flex-col gap-1 mt-4 lg:hidden">
-          <Link to="/plans" className="flex items-center gap-3 px-3 py-3 rounded-xl text-blue-700 font-semibold hover:bg-blue-50 transition-colors">
+          <Link
+            to="/plans"
+            className="flex items-center gap-3 px-3 py-3 rounded-xl text-blue-700 font-semibold hover:bg-blue-50 transition-colors"
+          >
             <span className="text-lg">💳</span>
             <span>Plans</span>
           </Link>
-          {/* Add more mobile-only links here if needed */}
         </div>
       </nav>
     </aside>
