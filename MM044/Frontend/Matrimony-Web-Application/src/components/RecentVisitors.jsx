@@ -1,33 +1,48 @@
-import React from 'react';
-import visitor1 from '../../../assets/userprofile/visiter-1.png';
-import visitor2 from '../../../assets/userprofile/visiter-2.png';
-import visitor3 from '../../../assets/userprofile/visiter-3.png';
-import visitor4 from '../../../assets/userprofile/visiter-4.png';
+import React, { useEffect, useState } from "react";
+import axios from "axios";
 
 function RecentVisitors() {
-  const visitors = [
-    { id: 1, image: visitor1 },
-    { id: 2, image: visitor2 },
-    { id: 3, image: visitor3 },
-    { id: 4, image: visitor4 }
-  ];
+  const [visitors, setVisitors] = useState([]);
+
+  useEffect(() => {
+    axios
+      .get("http://localhost:5000/api/v1/visitors")
+      .then((res) => {
+        const sorted = res.data
+          .sort((a, b) => new Date(b.visitedAt) - new Date(a.visitedAt))
+          .slice(0, 4);//for latest 4 visitors
+        setVisitors(sorted);
+        console.log("Fetched visitors:", sorted);
+      })
+      .catch((err) => console.error("API error:", err));
+  }, []);
 
   return (
-    <section className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl w-full transition-all duration-300 border border-gray-100">
-      <h2 className="text-2xl font-bold mb-6 text-gray-800 flex items-center gap-3">
-        <span className="text-2xl">👀</span>
-        Recent Visitors
-      </h2>
-      
-      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-6 gap-6 justify-items-center">
-        {visitors.map(visitor => (
-          <div
-            key={visitor.id}
-            className="w-24 h-24 bg-gradient-to-br from-purple-100 to-pink-100 rounded-2xl overflow-hidden cursor-pointer transition-all duration-300 hover:scale-110 hover:shadow-lg border-2 border-transparent hover:border-purple-200"
-          >
-            <img src={visitor.image} alt={`Visitor ${visitor.id}`} className="w-full h-full object-cover" />
-          </div>
-        ))}
+    <section className="p-4 bg-white rounded-xl shadow-sm">
+      <h2 className="text-lg font-semibold text-gray-800 mb-3">Recent Visitors</h2>
+
+      <div className="flex gap-4 overflow-x-auto">
+        {visitors.map((visitor) => {
+          const user = visitor.userId;
+          const avatar = user?.avatar;
+          const name = user?.name;
+
+          return (
+            <div
+              key={visitor._id}
+              className="flex flex-col items-center bg-gray-50 rounded-xl p-3 w-[80px] h-[100px] justify-between shadow-sm border"
+            >
+              <img
+                src={avatar || "https://cdn-icons-png.flaticon.com/512/2922/2922510.png"}
+                alt={name || "User"}
+                className="w-12 h-12 rounded-full object-cover border"
+              />
+              <span className="text-[13px] font-medium text-gray-700 text-center truncate w-full">
+                {name || "Unknown"}
+              </span>
+            </div>
+          );
+        })}
       </div>
     </section>
   );
