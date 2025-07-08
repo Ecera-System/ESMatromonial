@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Heart, Mail, Lock, Eye, EyeOff, Sparkles } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 const Login = ({ onLogin }) => {
   const [currentVideo, setCurrentVideo] = useState(0);
@@ -202,7 +202,7 @@ const Login = ({ onLogin }) => {
       <div className="relative z-20 flex items-center justify-center min-h-screen p-4">
         <div className="w-full max-w-md">
           {/* Glassmorphism Login Card */}
-          <div className="relative bg-white/10 backdrop-blur-2xl rounded-3xl border border-white/20 p-8 shadow-2xl transform transition-all duration-1000 hover:scale-105 hover:shadow-pink-500/20 hover:shadow-2xl hover:bg-white/15">
+          <div className="relative bg-white/10 backdrop-blur-2xl rounded-3xl border border-white/20 p-8 shadow-2xl transform transition-all duration-1000 hover:scale-95 hover:shadow-pink-500/20 hover:shadow-2xl hover:bg-white/15">
             {/* Enhanced Glass Border Glow */}
             <div className="absolute inset-0 rounded-3xl bg-gradient-to-r from-pink-500/10 via-purple-500/10 to-blue-500/10 blur-xl -z-10"></div>
             <div className="absolute inset-0 rounded-3xl border border-white/30 opacity-50"></div>
@@ -299,7 +299,7 @@ const Login = ({ onLogin }) => {
                 disabled={isLoading || !formData.email || !formData.password}
                 className="w-full py-4 bg-gradient-to-r from-pink-500 via-purple-600 to-blue-600 text-white font-semibold rounded-2xl hover:from-pink-600 hover:via-purple-700 hover:to-blue-700 focus:outline-none focus:ring-2 focus:ring-pink-400/50 transform transition-all duration-300 hover:scale-105 active:scale-95 shadow-xl hover:shadow-2xl hover:shadow-pink-500/30 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
                 onClick={(e) => {
-                  console.log('Button clicked!'); // Debug log
+                  console.log('Login button clicked!'); // Debug log
                   handleSubmit(e);
                 }}
               >
@@ -352,14 +352,29 @@ const Login = ({ onLogin }) => {
               </button>
             </div>
 
-            {/* Sign Up Link */}
+                        {/* Sign Up Link */}
             <div className="text-center mt-8">
               <p className="text-white/90 text-sm">
                 Don't have an account?{' '}
-                <a href="#" className="text-pink-400 hover:text-pink-300 font-semibold transition-colors duration-300">
-                  Sign up now
-                </a>
+                <button 
+                  onClick={() => {
+                    console.log('Signup button clicked!');
+                    alert('Signup button clicked!');
+                    try {
+                      navigate('/signup', { replace: true });
+                    } catch (error) {
+                      console.error('Navigation error:', error);
+                      window.location.href = '/signup';
+                    }
+                  }}
+                  className="text-pink-400 hover:text-pink-300 font-semibold transition-colors duration-300 cursor-pointer bg-transparent border-none underline z-50 relative"
+                  style={{ pointerEvents: 'auto' }}
+                >
+                  Sign Up Now
+                </button>
               </p>
+              {/* Test Navigation Button */}
+              
             </div>
           </div>
 

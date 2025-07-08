@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom';
+import BackButton from '../../components/BackButton';
 
 const Chat = ({ user, onLogout }) => {
   const [messages, setMessages] = useState([
@@ -69,6 +70,11 @@ const Chat = ({ user, onLogout }) => {
 
   return (
     <div className="flex flex-col h-screen bg-gradient-to-br from-indigo-100 via-purple-50 to-pink-100 relative overflow-hidden">
+      {/* Back Button */}
+      <div className="absolute top-4 left-4 z-20">
+        <BackButton className="bg-white/20 backdrop-blur-sm border border-white/20 text-gray-700 hover:bg-white/30" />
+      </div>
+      
       {/* Animated Background Elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute -top-4 -left-4 w-32 h-32 bg-gradient-to-br from-pink-300/30 to-purple-300/30 rounded-full blur-xl animate-pulse"></div>
