@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import BackButton from "../../BackButton";
 
 const Plans = () => {
   const [plans, setPlans] = useState([]);
@@ -77,6 +78,12 @@ const Plans = () => {
           </nav>
         </div>
       </header>
+
+      <div className="max-w-5xl mx-auto px-4 py-8">
+        <div className="mb-6">
+          <BackButton />
+        </div>
+      </div>
 
       {/* Intro */}
       <section className="text-center my-12">

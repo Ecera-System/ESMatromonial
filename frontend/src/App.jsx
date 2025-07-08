@@ -2,11 +2,6 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-d
 import { useState } from 'react';
 import Login from './components/User/UserLogin';
 import Chat from './pages/User/Chat';
-import Header from './components/User/User_Dashboard/Header';
-import Sidebar from './components/User/User_Dashboard/Sidebar';
-import MainContent from './components/User/User_Dashboard/MainContent';
-import CreateProfile from './components/User/User_Profile/CreateProfile';
-import ViewProfile from './components/User/User_Profile/ViewProfile';
 import MatrimonyFeed from "./components/User/User-Feed/Feed";
 import Signup from './components/User/Signup';
 import Plans from "./components/User/User-Plan/Plans";
@@ -14,21 +9,12 @@ import VerificationSuite from './components/User/verification_suite';
 import AdminSignIn from "./components/Admin/AdminSignIn";
 import AdminSignUp from "./components/Admin/AdminSignUp";
 import Landing from "./components/User/Landing-Page/Landing";
+import CreateProfile from './components/User/User_Profile/CreateProfile';
+import ViewProfile from './components/User/User_Profile/ViewProfile';
+import Layout from './components/Layout/Layout';
+import Dashboard from './pages/User/Dashboard';
+import ScrollToTop from './components/ScrollToTop';
 
-
-function DashboardLayout() {
-  return (
-    <div className="flex flex-col h-screen bg-gray-50">
-      <Header />
-      <div className="flex flex-1 overflow-hidden">
-        <Sidebar />
-        <div className="flex-1 overflow-y-auto p-6 bg-white">
-          <MainContent />
-        </div>
-      </div>
-    </div>
-  );
-}
 function App() {
   const [profileData, setProfileData] = useState(null);
   const [isDarkMode, setIsDarkMode] = useState(false);
@@ -37,41 +23,25 @@ function App() {
   };
   return (
     <Router>
+      <ScrollToTop />
       <Routes>
         <Route path="/" element={<Navigate to="/landing" replace />} />
         <Route path="/landing" element={<Landing />} />
         <Route path="/login" element={<Login />} />
-        <Route path="/chat" element={<Chat />} />
         <Route path="/admin/signin" element={<AdminSignIn />} />
         <Route path="/admin/signup" element={<AdminSignUp />} />
-        <Route path="/dashboard" element={<DashboardLayout />} />
-        <Route path="/plans" element={<Plans />} />
-         <Route path="/feed" element={<MatrimonyFeed />} />
-         <Route path="/signup" element={<Signup />} />
-        <Route
-          path="/profile/create"
-          element={
-            <CreateProfile
-              onProfileCreated={handleProfileCreated}
-              initialData={profileData}
-            />
-          }
-        />
-        <Route
-          path="/profile/view"
-          element={
-            profileData ? (
-              <ViewProfile
-                profileData={profileData}
-                onBackToCreate={() => window.history.back()}
-                isDarkMode={isDarkMode}
-              />
-            ) : (
-              <Navigate to="/profile/create" replace />
-            )
-          }
-        />
         <Route path="/verify" element={<VerificationSuite />} />
+        <Route path="/signup" element={<Signup />} />
+        {/* Layout for all dashboard pages */}
+        <Route element={<Layout />}>
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/feed" element={<MatrimonyFeed />} />
+          <Route path="/chat" element={<Chat />} />
+          <Route path="/plans" element={<Plans />} />
+          <Route path="/profile/create" element={<CreateProfile onProfileCreated={handleProfileCreated} initialData={profileData} />} />
+          <Route path="/profile/view" element={<ViewProfile profileData={profileData} onBackToCreate={() => window.history.back()} isDarkMode={isDarkMode} />} />
+          {/* Add more dashboard pages here as needed */}
+        </Route>
       </Routes>
     </Router>
   );
