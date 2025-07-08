@@ -1,5 +1,3 @@
-// server.js
-
 import express from "express";
 import mongoose from 'mongoose';  
 import dotenv from "dotenv";
@@ -13,7 +11,8 @@ import adminAuthRouter from "./routes/adminAuthRoutes.js";
 import visitorRouter from "./routes/visitorRoutes.js";
 import requestRouter from "./routes/requestRoutes.js";
 
-// Load environment variables
+
+// load environment variables
 dotenv.config();
 
 // App setup
@@ -33,12 +32,11 @@ app.get("/", (req, res) => {
 });
 
 // Routes
-app.use(userRouter);         // /api/v1/users
-app.use(userAuthRouter);     // /api/v1/auth/user
-app.use(adminAuthRouter);    // /api/v1/auth/admin
-app.use(visitorRouter);      // /api/v1/visitors
-app.use('/api/requests', requestRouter);     // /api/v1/requests
-
+app.use("/api/v1/users", userRouter);
+app.use("/api/v1/auth/user", userAuthRouter);
+app.use("/api/v1/auth/admin", adminAuthRouter);
+app.use("/api/v1/visitors", visitorRouter);
+app.use("/api/v1/requests", requestRouter);
 
 // Server
 const PORT = process.env.PORT || 5000;
