@@ -1,0 +1,1 @@
+export const loginAdmin = (req, res) => res.send('Login Admin');
