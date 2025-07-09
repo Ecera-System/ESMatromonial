@@ -1,15 +1,32 @@
 import Visitor from "../models/Visitor.js";
 
-export const getRecentVisitors = async (req, res) => {
+// GET visitors
+export const getVisitors = async (req, res) => {
   try {
     const visitors = await Visitor.find()
-      .sort({ visitedAt: -1 })
-      .limit(4)
-      .populate("userId", "name avatar");
+      .populate("userId", "name avatarUrl")
+      .sort({ _id: -1 });
 
     res.status(200).json(visitors);
-  } catch (error) {
-    console.error("Visitor fetch error:", error.message);
-    res.status(500).json({ error: "Something went wrong" });
+  } catch (err) {
+    console.error("Error fetching visitors:", err);
+    res.status(500).json({ message: err.message });
+  }
+};
+
+// POST a visitor
+export const addVisitor = async (req, res) => {
+  const { name, avatarUrl, userId } = req.body;
+
+  if (!name || !avatarUrl || !userId) {
+    return res.status(400).json({ message: "Name, avatarUrl, and userId are required" });
+  }
+
+  try {
+    const newVisitor = new Visitor({ name, avatarUrl, userId });
+    await newVisitor.save();
+    res.status(201).json(newVisitor);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
   }
 };
