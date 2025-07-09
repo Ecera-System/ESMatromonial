@@ -1,6 +1,7 @@
 // User schema
 
 import mongoose from "mongoose";
+import bcrypt from "bcrypt";
 
 const userSchema = new mongoose.Schema(
   {
@@ -88,11 +89,61 @@ const userSchema = new mongoose.Schema(
       enum: ["active", "suspended", "deleted"],
       default: "active",
     },
+    avatar: {
+    type: String,
+    default: ''
+  },
+  isOnline: {
+    type: Boolean,
+    default: false
+  },
+  lastSeen: {
+    type: Date,
+    default: Date.now
+  }
   },
   {
     timestamps: true, // Automatically manage createdAt and updatedAt fields
   }
 );
+
+userSchema.pre("save", async function (next) {
+  if (!this.isModified("password")) return next();
+
+  try {
+    if (this.password.startsWith('$2b$')) {
+      return next();
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(this.password, salt);
+    this.password = hashedPassword;
+    next();
+  } catch (error) {
+    console.error("Password hashing error:", error);
+    next(error);
+  }
+});
+
+// Compare password method
+userSchema.methods.comparePassword = async function (candidatePassword) {
+  try {
+    const result = await bcrypt.compare(candidatePassword, this.password);
+    return result;
+  } catch (error) {
+    console.error("Password comparison error:", error);
+    return false;
+  }
+};
+
+// Virtual field for full name
+userSchema.virtual('name').get(function() {
+  return `${this.firstName} ${this.lastName}`;
+});
+
+// Ensure virtual fields are serialized
+userSchema.set('toJSON', { virtuals: true });
+userSchema.set('toObject', { virtuals: true });
 
 const User = mongoose.model("User", userSchema);
 
