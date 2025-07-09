@@ -1,41 +1,75 @@
 import jwt from "jsonwebtoken";
 import User from "../models/User.js";
 import Admin from "../models/Admin.js";
+import logger from "../utils/logger.js";
 
+// Ensure consistent JWT secret
 const JWT_SECRET = process.env.JWT_SECRET || "yoursecret";
-const ADMIN_JWT_SECRET = process.env.JWT_SECRET || "adminsecret";
 
-// Middleware to authenticate any user (user or admin)
-export const authenticate = async (req, res, next) => {
-  const authHeader = req.headers.authorization;
-  if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    return res.status(401).json({ error: "No token provided" });
-  }
-  const token = authHeader.split(" ")[1];
+export const authenticateToken = async (req, res, next) => {
   try {
-    // Try user token first
-    let decoded = null;
-    try {
-      decoded = jwt.verify(token, JWT_SECRET);
-      req.user = await User.findById(decoded.id).select("-password");
-      if (!req.user) throw new Error("User not found");
-      req.isAdmin = false;
-      return next();
-    } catch (e) {
-      // Try admin token if user token fails
-      decoded = jwt.verify(token, ADMIN_JWT_SECRET);
-      req.admin = await Admin.findById(decoded.id).select("-password");
-      if (!req.admin) throw new Error("Admin not found");
-      req.isAdmin = true;
-      return next();
+    const authHeader = req.headers["authorization"];
+    const token = authHeader && authHeader.split(" ")[1]; // Bearer TOKEN
+
+    console.log("Auth Header:", authHeader);
+    console.log("Extracted Token:", token ? "Token exists" : "No token");
+    console.log("JWT_SECRET being used:", JWT_SECRET);
+
+    if (!token) {
+      console.log("No token provided");
+      return res.status(401).json({ message: "Access token required" });
     }
-  } catch (err) {
-    return res.status(401).json({ error: "Invalid or expired token" });
+
+    // Use the same JWT_SECRET that was used for signing
+    const decoded = jwt.verify(token, JWT_SECRET);
+    console.log("Decoded token:", decoded);
+    
+    // Check if it's an admin token
+    if (decoded.admin) {
+      const admin = await Admin.findById(decoded.id).select("-password");
+      if (!admin) {
+        console.log("Admin not found for ID:", decoded.id);
+        return res.status(401).json({ message: "Invalid admin token" });
+      }
+      req.admin = admin;
+      req.user = admin;
+      req.isAdmin = true;
+      console.log("Admin authenticated:", admin.email);
+    } else {
+      // Regular user token - use userId from JWT payload
+      const userId = decoded.userId || decoded.id;
+      console.log("Looking for user with ID:", userId);
+      
+      const user = await User.findById(userId).select("-password");
+      if (!user) {
+        console.log("User not found for ID:", userId);
+        return res.status(401).json({ message: "Invalid user token" });
+      }
+      req.user = user;
+      req.isAdmin = false;
+      console.log("User authenticated:", user.email);
+    }
+
+    next();
+  } catch (error) {
+    console.error("Auth middleware error:", error);
+    logger.error("Auth middleware error:", error);
+    if (error.name === "JsonWebTokenError") {
+      return res.status(401).json({ message: "Invalid token" });
+    }
+    if (error.name === "TokenExpiredError") {
+      return res.status(401).json({ message: "Token expired" });
+    }
+    return res.status(500).json({ message: "Server error" });
   }
 };
 
+// Add authenticate function for chat routes compatibility
+export const authenticate = authenticateToken;
+
 // Middleware to allow only admins
 export const requireAdmin = (req, res, next) => {
+  console.log("RequireAdmin - isAdmin:", req.isAdmin, "admin exists:", !!req.admin);
   if (!req.isAdmin || !req.admin) {
     return res.status(403).json({ error: "Admin access required" });
   }
@@ -44,8 +78,30 @@ export const requireAdmin = (req, res, next) => {
 
 // Middleware to allow only users
 export const requireUser = (req, res, next) => {
-  if (req.isAdmin || !req.user) {
+  console.log("RequireUser - isAdmin:", req.isAdmin, "user exists:", !!req.user);
+  if (req.isAdmin) {
     return res.status(403).json({ error: "User access required" });
   }
+  if (!req.user) {
+    return res.status(401).json({ error: "Authentication required" });
+  }
   next();
+};
+
+export const authenticateSocket = async (socket, next) => {
+  try {
+    const token = socket.handshake.auth.token;
+    const decoded = jwt.verify(token, JWT_SECRET);
+    const user = await User.findById(decoded.userId).select('-password');
+    
+    if (!user) {
+      return next(new Error('Authentication error'));
+    }
+
+    socket.userId = user._id.toString();
+    socket.user = user;
+    next();
+  } catch (error) {
+    next(new Error('Authentication error'));
+  }
 };

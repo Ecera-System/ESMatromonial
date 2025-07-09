@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Mail, Lock, Eye, EyeOff, LogIn, Heart, Sparkles, Shield } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../../contexts/AuthContext';
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -11,6 +12,7 @@ const Login = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -51,15 +53,23 @@ const Login = () => {
       console.log('Response data:', data);
 
       if (response.ok) {
-        // Store authentication data
-        localStorage.setItem('token', data.token);
-        localStorage.setItem('user', JSON.stringify(data.user));
+        // Ensure we have both user and token
+        if (!data.user || !data.token) {
+          throw new Error('Invalid response from server');
+        }
+
+        console.log('Using AuthContext login method with:', data.user);
+        
+        // Use AuthContext login method
+        login(data.user, data.token);
         
         console.log('Login successful! Redirecting to dashboard...');
-        alert('Login successful! Welcome back!');
         
-        // Navigate to dashboard
-        navigate('/dashboard');
+        // Small delay to ensure state is updated
+        setTimeout(() => {
+          navigate('/dashboard', { replace: true });
+        }, 100);
+        
       } else {
         console.error('Login failed:', data);
         setError(data.error || 'Login failed. Please try again.');
