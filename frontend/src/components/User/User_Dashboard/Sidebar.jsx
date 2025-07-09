@@ -1,20 +1,44 @@
 import React from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useAuth } from '../../../contexts/AuthContext';
 import userProfile from '../../../assets/userprofile/profile.png';
-import { Link } from 'react-router-dom';
 
 function Sidebar({ onClose }) {
+  const { user, logout } = useAuth();
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      navigate('/login');
+    } catch (error) {
+      console.error('Logout failed:', error);
+    }
+  };
+
   const menuItems = [
-    { icon: '✏️', text: 'Edit Profile', to: '/dashboard/profile', active: false },
-    { icon: '💖', text: 'My Matches', to: '/dashboard/matches', active: false },
-    { icon: '⭐', text: 'Shortlisted', to: '/dashboard/shortlisted', active: false },
-    { icon: '📋', text: 'Received Requests', to: '/dashboard/requests', active: false },
-    { icon: '📤', text: 'Sent Requests', to: '/dashboard/sent', active: false },
-    { icon: '💬', text: 'Messages', to: '/dashboard/messages', active: false },
-    { icon: '⚙️', text: 'Settings', to: '/dashboard/settings', active: false },
+    { icon: '🏠', text: 'Dashboard', to: '/dashboard', active: location.pathname === '/dashboard' },
+    { icon: '💳', text: 'Subscription Plans', to: '/plans', active: location.pathname === '/plans' },
+    { icon: '📰', text: 'Feed Page', to: '/feed', active: location.pathname === '/feed' },
+    { icon: '💬', text: 'Chat Page', to: '/chat', active: location.pathname === '/chat' },
+    { icon: '✏️', text: 'Profile Page', to: '/profile/create', active: location.pathname.includes('/profile') },
+    { icon: '✅', text: 'Verification', to: '/verify', active: location.pathname === '/verify' },
   ];
 
   return (
-    <aside className="w-[280px] lg:w-[300px]  bg-white border-r border-gray-200 py-6 lg:py-8 px-4 lg:px-6 shadow-lg h-full overflow-y-auto">
+    <aside className="w-[280px] lg:w-[300px] bg-white border-r border-gray-200 py-6 lg:py-8 px-4 lg:px-6 shadow-lg h-full overflow-y-auto scrollbar-hide">
+      {/* Custom CSS for hiding scrollbar */}
+      <style jsx>{`
+        .scrollbar-hide {
+          -ms-overflow-style: none;  /* IE and Edge */
+          scrollbar-width: none;  /* Firefox */
+        }
+        .scrollbar-hide::-webkit-scrollbar {
+          display: none;  /* Chrome, Safari and Opera */
+        }
+      `}</style>
+
       {/* Mobile Close Button */}
       <div className="lg:hidden flex mt-[-25px] justify-end mb-4">
         <button
@@ -32,14 +56,18 @@ function Sidebar({ onClose }) {
       <div className="text-center mb-8 lg:mb-10">
         <div className="w-20 h-20 lg:w-24 lg:h-24 mx-auto mb-4 relative">
           <img
-            src={userProfile}
+            src={user?.avatar || userProfile}
             alt="User"
             className="w-full h-full object-cover rounded-full border-4 border-blue-100"
           />
           <div className="absolute -bottom-1 -right-1 w-5 h-5 lg:w-6 lg:h-6 bg-green-500 rounded-full border-2 border-white"></div>
         </div>
-        <h2 className="text-lg lg:text-xl font-bold text-gray-800 mb-1">Jacob Williams</h2>
-        <p className="text-xs lg:text-sm text-blue-600 mb-4 lg:mb-6 font-semibold bg-blue-50 px-2 lg:px-3 py-1 rounded-full inline-block">Free Member</p>
+        <h2 className="text-lg lg:text-xl font-bold text-gray-800 mb-1">
+          {user ? `${user.firstName} ${user.lastName}` : 'User Name'}
+        </h2>
+        <p className="text-xs lg:text-sm text-blue-600 mb-4 lg:mb-6 font-semibold bg-blue-50 px-2 lg:px-3 py-1 rounded-full inline-block">
+          {user?.planType || 'Free Member'}
+        </p>
 
         <div className="grid grid-cols-3 gap-2 lg:gap-4 mb-6">
           {[
@@ -56,7 +84,7 @@ function Sidebar({ onClose }) {
       </div>
 
       {/* Navigation Menu */}
-      <nav className="flex flex-col gap-1 lg:gap-2">
+      <nav className="flex flex-col gap-1 lg:gap-2 mb-6">
         {menuItems.map((item, index) => (
           <Link
             key={index}
@@ -72,15 +100,18 @@ function Sidebar({ onClose }) {
             <span className="truncate">{item.text}</span>
           </Link>
         ))}
-        {/* Plans and other links for mobile only */}
-        <div className="flex flex-col gap-1 mt-4 lg:hidden">
-          <Link to="/plans" className="flex items-center gap-3 px-3 py-3 rounded-xl text-blue-700 font-semibold hover:bg-blue-50 transition-colors">
-            <span className="text-lg">💳</span>
-            <span>Plans</span>
-          </Link>
-          {/* Add more mobile-only links here if needed */}
-        </div>
       </nav>
+
+      {/* Logout Button */}
+      <div className="mt-auto pt-4 border-t border-gray-200">
+        <button
+          onClick={handleLogout}
+          className="w-full flex items-center gap-3 lg:gap-4 px-3 lg:px-4 py-3 lg:py-4 rounded-xl text-sm font-medium text-red-600 hover:bg-red-50 hover:text-red-700 transition-all group"
+        >
+          <span className="text-base lg:text-lg w-5 lg:w-6 text-center group-hover:scale-110 transition-transform">🚪</span>
+          <span className="truncate">Logout</span>
+        </button>
+      </div>
     </aside>
   );
 }
