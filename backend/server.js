@@ -4,7 +4,7 @@ import express from "express";
 import mongoose from "mongoose";
 import { createServer } from 'http';
 import { Server } from 'socket.io';
-import subscriptionRoutes from "./routes/subscriptionRoutes.js";
+// import subscriptionRoutes from "./routes/subscriptionRoutes.js";
 import chatRoutes from './routes/chatRoutes.js';
 import messageRoutes from './routes/messageRoutes.js';
 import uploadRoutes from './routes/uploadRoutes.js';
@@ -32,7 +32,7 @@ app.use(express.json());
 // ✅ Routes
 app.use(userAuthRoutes); // User auth routes
 app.use(adminAuthRoutes); // Admin auth routes
-app.use("/api/subscription", subscriptionRoutes);
+//app.use("/api/subscription", subscriptionRoutes);//
 app.use('/api/chats', chatRoutes);
 app.use('/api/messages', messageRoutes);
 app.use('/api/upload', uploadRoutes);
