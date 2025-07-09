@@ -1,26 +1,37 @@
-import express from "express";
+import cors from "cors"; // ✅ Import CORS
 import dotenv from "dotenv";
-import connectDB from "./config/db.js";
-import userRouter from "./routes/userRoutes.js";
-import userAuthRouter from "./routes/userAuthRoutes.js";
-import adminAuthRouter from "./routes/adminAuthRoutes.js";
+import express from "express";
+import mongoose from "mongoose";
+import subscriptionRoutes from "./routes/subscriptionRoutes.js";
+
 dotenv.config();
 
 const app = express();
-app.use(express.json());
 const PORT = process.env.PORT || 5000;
-connectDB();
-app.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
-});
 
+// ✅ Middleware
+app.use(cors()); // ✅ Enable CORS
+app.use(express.json());
+
+// ✅ Routes
+app.use("/api/subscription", subscriptionRoutes);
+
+// ✅ Root endpoint
 app.get("/", (req, res) => {
-  return res.status(200).json({
-    success: true,
-    message: "Welcome to ESMatrimonial API",
-  });
+  res.send("🧠 Matrimony Backend is running...");
 });
 
-app.use(userRouter);
-app.use(userAuthRouter);
-app.use(adminAuthRouter);
+// ✅ MongoDB connection and server start
+const startServer = async () => {
+  try {
+    await mongoose.connect(process.env.MONGO_URI);
+    console.log("✅ MongoDB connected");
+    app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+  } catch (err) {
+    console.error("❌ MongoDB connection error:", err);
+  }
+};
+
+startServer();
+
+export default app; // For testing (supertest)
