@@ -58,12 +58,14 @@ function RecentVisitors() {
 
   return (
     <section className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl w-full transition-all duration-300 border border-gray-100">
-      <h2 className="text-2xl font-bold mb-6 text-gray-800 flex items-center gap-3">Recent Visitors</h2>
+      <h2 className="text-2xl font-bold mb-6 text-gray-800 flex items-center gap-3">
+        <span className="text-2xl">👀</span>
+        Recent Visitors</h2>
 
       {loading && <p className="text-gray-500 text-sm">Loading...</p>}
       {error && <p className="text-red-500 text-sm">{error}</p>}
 
-      <div className="flex gap-18 overflow-x-auto">
+      <div className="flex gap-14 overflow-x-auto">
         {visitors.map((visitor) => {
           const user = visitor.user;
           const name = `${user?.firstName || ""} ${user?.lastName || ""}`.trim();
