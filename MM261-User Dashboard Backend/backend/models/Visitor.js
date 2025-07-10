@@ -1,15 +1,20 @@
 import mongoose from "mongoose";
 
 const visitorSchema = new mongoose.Schema({
-  name: String,
-  avatarUrl: String,
-  userId: {
-  type: mongoose.Schema.Types.ObjectId,
-  ref: "User",
-  required: true
-}
-
-
+  visitedUserId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    required: true
+  },
+  visitorUserId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    required: true
+  },
+  visitedAt: {
+    type: Date,
+    default: Date.now
+  }
 });
 
 const Visitor = mongoose.model("Visitor", visitorSchema);

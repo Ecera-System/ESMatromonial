@@ -3,38 +3,82 @@ import axios from "axios";
 
 function RecentVisitors() {
   const [visitors, setVisitors] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  // Fetch individual user by ID
+  const fetchUser = async (userId) => {
+    console.log(`Fetching user data for ID: ${userId}`);
+    try {
+      const res = await axios.get(`http://localhost:5000/api/v1/users/${userId}`);
+      console.log(`User data fetched for ${userId}:`, res.data);
+      return res.data;
+    } catch (err) {
+      console.error(`Failed to fetch user ${userId}:`, err);
+      return null;
+    }
+  };
 
   useEffect(() => {
-    axios
-      .get("http://localhost:5000/api/v1/visitors")
-      .then((res) => {
-        const sorted = res.data
+    console.log("useEffect running to fetch recent visitors...");
+
+    const fetchVisitors = async () => {
+      try {
+        const res = await axios.get("http://localhost:5000/api/v1/visitors");
+        console.log("Raw visitors fetched:", res.data);
+
+        const rawVisitors = res.data
           .sort((a, b) => new Date(b.visitedAt) - new Date(a.visitedAt))
-          .slice(0, 4);//for latest 4 visitors
-        setVisitors(sorted);
-        console.log("Fetched visitors:", sorted);
-      })
-      .catch((err) => console.error("API error:", err));
+          .slice(0, 4);
+
+        console.log("Top 4 sorted visitors:", rawVisitors);
+
+        const enriched = await Promise.all(
+          rawVisitors.map(async (visit) => {
+            const user = await fetchUser(visit.visitorUserId);
+            return {
+              ...visit,
+              user,
+            };
+          })
+        );
+
+        console.log("Enriched visitors with user data:", enriched);
+        setVisitors(enriched);
+      } catch (err) {
+        console.error("Error fetching visitors:", err);
+        setError("Failed to load visitors.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchVisitors();
   }, []);
 
   return (
-    <section className="p-4 bg-white rounded-xl shadow-sm">
-      <h2 className="text-lg font-semibold text-gray-800 mb-3">Recent Visitors</h2>
+    <section className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl w-full transition-all duration-300 border border-gray-100">
+      <h2 className="text-2xl font-bold mb-6 text-gray-800 flex items-center gap-3">Recent Visitors</h2>
 
-      <div className="flex gap-4 overflow-x-auto">
+      {loading && <p className="text-gray-500 text-sm">Loading...</p>}
+      {error && <p className="text-red-500 text-sm">{error}</p>}
+
+      <div className="flex gap-18 overflow-x-auto">
         {visitors.map((visitor) => {
-          const user = visitor.userId;
-          const avatar = user?.avatar;
-          const name = user?.name;
+          const user = visitor.user;
+          const name = `${user?.firstName || ""} ${user?.lastName || ""}`.trim();
+          const photos =
+            user?.photos ||
+            "https://cdn-icons-png.flaticon.com/512/2922/2922510.png";
 
           return (
             <div
               key={visitor._id}
-              className="flex flex-col items-center bg-gray-50 rounded-xl p-3 w-[80px] h-[100px] justify-between shadow-sm border"
+              className="flex flex-col items-cols bg-blue-50 rounded-xl p-5 w-[100px] h-[120px] justify-between shadow-sm border"
             >
               <img
-                src={avatar || "https://cdn-icons-png.flaticon.com/512/2922/2922510.png"}
-                alt={name || "User"}
+                src={photos}
+                alt={name}
                 className="w-12 h-12 rounded-full object-cover border"
               />
               <span className="text-[13px] font-medium text-gray-700 text-center truncate w-full">
