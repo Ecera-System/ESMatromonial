@@ -30,7 +30,8 @@ router.post('/', authenticate, (req, res) => {
         resourceType: req.file.resource_type || 'auto',
         size: req.file.bytes || req.file.size,
         width: req.file.width,
-        height: req.file.height
+        height: req.file.height,
+        storage: process.env.CLOUDINARY_CLOUD_NAME ? 'cloudinary' : 'local'
       };
 
       res.json({
@@ -57,4 +58,4 @@ router.get('/info/:publicId', authenticate, async (req, res) => {
   }
 });
 
-export default router;
+export default router; 

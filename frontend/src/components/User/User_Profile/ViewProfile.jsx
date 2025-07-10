@@ -18,9 +18,32 @@ import {
   Edit
 } from 'lucide-react';
 import BackButton from '../../BackButton';
+import { useAuth } from '../../../contexts/Chat/AuthContext';
+import axios from 'axios';
 
-const ViewProfile = ({ profileData, onBackToCreate, isDarkMode }) => {
+const ViewProfile = ({ onBackToCreate, isDarkMode }) => {
+  const { user } = useAuth();
+  const [profileData, setProfileData] = React.useState(null);
+  const [loading, setLoading] = React.useState(true);
+  const [error, setError] = React.useState(null);
   const navigate = useNavigate();
+
+  React.useEffect(() => {
+    const fetchProfile = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const response = await axios.get(`/api/v1/users/${user._id}`);
+        setProfileData(response.data);
+      } catch (err) {
+        setError('Failed to load profile');
+      } finally {
+        setLoading(false);
+      }
+    };
+    if (user && user._id) fetchProfile();
+  }, [user]);
+
   const calculateAge = (dateOfBirth) => {
     if (!dateOfBirth) return '';
     const today = new Date();
@@ -52,6 +75,10 @@ const ViewProfile = ({ profileData, onBackToCreate, isDarkMode }) => {
       </div>
     );
   };
+
+  if (loading) return <div className="min-h-screen flex items-center justify-center text-xl">Loading profile...</div>;
+  if (error) return <div className="min-h-screen flex items-center justify-center text-xl text-red-600">{error}</div>;
+  if (!profileData) return null;
 
   return (
     <div className="min-h-screen bg-white dark:bg-black py-8 px-4 transition-colors duration-300">
@@ -98,7 +125,7 @@ const ViewProfile = ({ profileData, onBackToCreate, isDarkMode }) => {
                   {profileData.photos.map((photo, index) => (
                     <img
                       key={index}
-                      src={URL.createObjectURL(photo)}
+                      src={photo}
                       alt={`Photo ${index + 1}`}
                       className="w-full h-64 object-cover rounded-lg border border-gray-300 dark:border-gray-600"
                     />

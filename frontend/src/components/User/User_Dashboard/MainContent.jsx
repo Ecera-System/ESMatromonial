@@ -35,7 +35,7 @@ function UserDashboard() {
       )}
       {/* Main content */}
       <div
-        className={`flex-1 overflow-y-auto p-4 lg:p-6 bg-white w-full lg:w-auto transition-all duration-300
+        className={`flex-1 overflow-y-auto p-4 lg:p-6 bg-white w-full lg:w-auto transition-all duration-300 custom-scrollbar
           ${sidebarOpen ? 'filter blur-sm lg:blur-none' : ''}
         `}
       >

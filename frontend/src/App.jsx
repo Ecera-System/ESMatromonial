@@ -1,70 +1,66 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
-import { useState } from 'react';
-import { AuthProvider } from './contexts/AuthContext';
-import { SocketProvider } from './contexts/SocketContext';
-import { NotificationProvider } from './contexts/NotificationContext';
-import ProtectedRoute from './components/ProtectedRoute';
-import Login from './components/User/Auth/Login';
-import Chat from './pages/User/Chat';
-import MatrimonyFeed from "./components/User/User-Feed/Feed";
-import Signup from './components/User/Auth/Signup';
-import Plans from "./components/User/User-Plan/Plans";
-import VerificationSuite from './components/User/verification_suite';
-import AdminSignIn from "./components/Admin/AdminSignIn";
-import AdminSignUp from "./components/Admin/AdminSignUp";
-import Landing from "./components/User/Landing-Page/Landing";
+import { AuthProvider, useAuth } from './contexts/Chat/AuthContext';
+import { SocketProvider } from './contexts/Chat/SocketContext';
+import { NotificationProvider } from './contexts/Chat/NotificationContext';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { Toaster } from 'react-hot-toast';
+import Login from './pages/Login';
+import Signup from './pages/Signup';
+import Chat from './pages/Chat';
+import Landing from './components/User/Landing-Page/Landing';
+import UserLayout from './components/User/UserLayout';
+import DashboardLayout from './components/User/User_Dashboard/DashboardLayout';
+import MainContent from './components/User/User_Dashboard/MainContent';
 import CreateProfile from './components/User/User_Profile/CreateProfile';
 import ViewProfile from './components/User/User_Profile/ViewProfile';
-import Layout from './components/Layout/Layout';
-import Dashboard from './pages/User/Dashboard';
+import Feed from './components/User/User-Feed/Feed';
+import Plans from './components/User/User-Plan/Plans';
+import UserVerificationDashboard from './components/User/verification_suite';
 import ScrollToTop from './components/ScrollToTop';
-import AuthDebug from './components/AuthDebug';
-import './styles/scrollbar.css';
+import ProtectedRoute from './components/ProtectedRoute';
+import './App.css'
+import UserProfilePage from './pages/UserProfilePage';
 
 function App() {
-  const [profileData, setProfileData] = useState(null);
-  const [isDarkMode, setIsDarkMode] = useState(false);
-  
-  const handleProfileCreated = (data) => {
-    setProfileData(data);
-  };
-
   return (
     <AuthProvider>
-      <SocketProvider>
-        <NotificationProvider>
-          <Router>
-            <ScrollToTop />
-            <AuthDebug />
-            <Routes>
-              <Route path="/" element={<Navigate to="/landing" replace />} />
-              <Route path="/landing" element={<Landing />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/signup" element={<Signup />} />
-              <Route path="/admin/signin" element={<AdminSignIn />} />
-              <Route path="/admin/signup" element={<AdminSignUp />} />
-              
-              {/* Protected Routes with Layout */}
-              <Route element={
-                <ProtectedRoute>
-                  <Layout />
-                </ProtectedRoute>
-              }>
-                <Route path="/dashboard" element={<Dashboard />} />
-                <Route path="/feed" element={<MatrimonyFeed />} />
-                <Route path="/chat" element={<Chat />} />
-                <Route path="/plans" element={<Plans />} />
-                <Route path="/verify" element={<VerificationSuite />} />
-                <Route path="/profile/create" element={<CreateProfile onProfileCreated={handleProfileCreated} initialData={profileData} />} />
-                <Route path="/profile/view" element={<ViewProfile profileData={profileData} onBackToCreate={() => window.history.back()} isDarkMode={isDarkMode} />} />
-              </Route>
-            </Routes>
-          </Router>
-        </NotificationProvider>
-      </SocketProvider>
+      <Router>
+        <ScrollToTop />
+        <Routes>
+          <Route path="/" element={<Landing />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
+          
+          {/* User Layout Routes - All protected routes with Header and Sidebar */}
+          <Route path="/" element={<ProtectedRoute><UserLayout /></ProtectedRoute>}>
+            <Route path="dashboard" element={<DashboardLayout />}>
+              <Route index element={<MainContent />} />
+            </Route>
+            <Route path="profile/create" element={<CreateProfile />} />
+            <Route path="profile/view" element={<ViewProfile />} />
+            <Route path="profile/edit" element={<ProtectedRoute><CreateProfile /></ProtectedRoute>} />
+            <Route path="verification" element={<UserVerificationDashboard />} />
+            <Route path="feed" element={<Feed />} />
+            <Route path="plans" element={<Plans />} />
+            <Route path="chat" element={<ProtectedRoute><ChatWithProviders /></ProtectedRoute>} />
+            <Route path="/chat/:userId" element={<ProtectedRoute><ChatWithProviders /></ProtectedRoute>} />
+            <Route path="/profile/:userId" element={<UserProfilePage />} />
+          </Route>
+        </Routes>
+        <Toaster position="top-right" />
+      </Router>
     </AuthProvider>
+  )
+}
+
+function ChatWithProviders() {
+  return (
+    <SocketProvider>
+      <NotificationProvider>
+        <Chat />
+      </NotificationProvider>
+    </SocketProvider>
   );
 }
 
-export default App;
-             
+export default App
+

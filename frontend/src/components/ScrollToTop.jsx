@@ -5,7 +5,7 @@ const ScrollToTop = () => {
   const { pathname } = useLocation();
 
   useEffect(() => {
-    window.scrollTo(50, 50);
+    window.scrollTo(0, 0);
   }, [pathname]);
 
   return null;

@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import {useNavigate} from 'react-router-dom';
+import React, { useState, useEffect, useRef } from 'react';
+import {useNavigate, useLocation} from 'react-router-dom';
 import {
   User,
   Briefcase,
@@ -23,8 +23,10 @@ import {
   DollarSign
 } from 'lucide-react';
 import BackButton from '../../BackButton';
+import { useAuth } from '../../../contexts/Chat/AuthContext';
+import axios from 'axios';
 
-const CreateProfile = ({ onProfileCreated }) => {
+const CreateProfile = ({ onProfileCreated = () => {} }) => {
   const [currentStep, setCurrentStep] = useState(1);
   const [profileData, setProfileData] = useState({
     firstName: '',
@@ -81,7 +83,17 @@ const CreateProfile = ({ onProfileCreated }) => {
     photos: []
   });
   const navigate = useNavigate();
+  const location = useLocation();
   const totalSteps = 6;
+  const { user } = useAuth();
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(null);
+  const [error, setError] = useState(null);
+
+  // Refs for focusable fields
+  const aboutMeRef = useRef(null);
+  const photosRef = useRef(null);
+  const emailRef = useRef(null);
 
   const steps = [
     { id: 1, title: 'Personal Info', icon: User },
@@ -99,12 +111,25 @@ const CreateProfile = ({ onProfileCreated }) => {
     }));
   };
 
-  const handlePhotoUpload = (event) => {
+  const handlePhotoUpload = async (event) => {
     const files = Array.from(event.target.files || []);
-    setProfileData(prev => ({
-      ...prev,
-      photos: [...prev.photos, ...files].slice(0, 10) // Max 10 photos
-    }));
+    if (!files.length) return;
+    const file = files[0]; // Only one at a time for now
+    const formData = new FormData();
+    formData.append('photo', file);
+    try {
+      // Optionally show upload progress
+      const response = await axios.post('/api/v1/users/upload-photo', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+      const photoUrl = response.data.photoUrl;
+      setProfileData(prev => ({
+        ...prev,
+        photos: [...prev.photos, photoUrl].slice(0, 10) // Max 10 photos
+      }));
+    } catch (err) {
+      setError('Photo upload failed');
+    }
   };
 
   const removePhoto = (index) => {
@@ -126,12 +151,23 @@ const CreateProfile = ({ onProfileCreated }) => {
     }
   };
 
-  const handleSubmit = () => {
-    console.log('Profile Data:', profileData);
-    onProfileCreated(profileData);
-    navigate('/profile/view');
-    
-
+  const handleSubmit = async () => {
+    setLoading(true);
+    setSuccess(null);
+    setError(null);
+    try {
+      // Prepare form data (handle photos if needed)
+      const formData = { ...profileData };
+      // If you want to handle photo uploads, you may need to use FormData and a separate endpoint
+      const response = await axios.put(`/api/v1/users/${user._id}`, formData);
+      setSuccess('Profile updated successfully!');
+      onProfileCreated(response.data);
+      navigate('/profile/view');
+    } catch (err) {
+      setError(err.response?.data?.error || 'Failed to update profile');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleViewProfile = () => {
@@ -139,6 +175,57 @@ const CreateProfile = ({ onProfileCreated }) => {
     navigate('/profile/view');
    
   };
+
+  // Focus/scroll logic
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const focusField = params.get('focus');
+    if (focusField) {
+      // Map field to step and ref
+      const fieldToStep = {
+        aboutMe: 5,
+        photos: 6,
+        email: 2,
+        // add more mappings as needed
+      };
+      const fieldToRef = {
+        aboutMe: aboutMeRef,
+        photos: photosRef,
+        email: emailRef,
+        // add more mappings as needed
+      };
+      const step = fieldToStep[focusField];
+      if (step) setCurrentStep(step);
+      setTimeout(() => {
+        const ref = fieldToRef[focusField];
+        if (ref && ref.current) {
+          ref.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          if (ref.current.focus) ref.current.focus();
+        }
+      }, 400); // Wait for step to render
+    }
+    // eslint-disable-next-line
+  }, [location.search]);
+
+  useEffect(() => {
+    // Fetch user profile and pre-fill form
+    const fetchProfile = async () => {
+      if (!user || !user._id) return;
+      setLoading(true);
+      setError(null);
+      try {
+        const response = await axios.get(`/api/v1/users/${user._id}`);
+        if (response.data) {
+          setProfileData(prev => ({ ...prev, ...response.data }));
+        }
+      } catch (err) {
+        setError('Failed to load profile data');
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProfile();
+  }, [user]);
 
   const renderStepContent = () => {
     switch (currentStep) {
@@ -299,6 +386,8 @@ const CreateProfile = ({ onProfileCreated }) => {
                   onChange={(e) => handleInputChange('email', e.target.value)}
                   className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-black dark:focus:ring-white focus:border-transparent bg-white dark:bg-black text-black dark:text-white"
                   placeholder="Enter your email"
+                  ref={emailRef}
+                  readOnly={!!profileData.email}
                 />
               </div>
               
@@ -618,6 +707,7 @@ const CreateProfile = ({ onProfileCreated }) => {
                 rows={4}
                 className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-black dark:focus:ring-white focus:border-transparent bg-white dark:bg-black text-black dark:text-white"
                 placeholder="Tell us about yourself..."
+                ref={aboutMeRef}
               />
             </div>
             
@@ -704,11 +794,11 @@ const CreateProfile = ({ onProfileCreated }) => {
             <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl p-8 text-center bg-gray-50 dark:bg-gray-900">
               <input
                 type="file"
-                multiple
                 accept="image/*"
                 onChange={handlePhotoUpload}
                 className="hidden"
                 id="photo-upload"
+                ref={photosRef}
               />
               <label htmlFor="photo-upload" className="cursor-pointer">
                 <Upload className="w-12 h-12 text-gray-400 dark:text-gray-500 mx-auto mb-4" />
@@ -722,7 +812,7 @@ const CreateProfile = ({ onProfileCreated }) => {
                 {profileData.photos.map((photo, index) => (
                   <div key={index} className="relative">
                     <img
-                      src={URL.createObjectURL(photo)}
+                      src={photo}
                       alt={`Photo ${index + 1}`}
                       className="w-full h-32 object-cover rounded-lg border border-gray-300 dark:border-gray-600"
                     />
@@ -821,6 +911,9 @@ const CreateProfile = ({ onProfileCreated }) => {
 
         {/* Form Content */}
         <div className="bg-white dark:bg-black rounded-2xl shadow-xl p-8 mb-8 border border-gray-300 dark:border-gray-700">
+          {success && <div className="text-green-600 font-semibold mb-4">{success}</div>}
+          {error && <div className="text-red-600 font-semibold mb-4">{error}</div>}
+          {loading && <div className="text-center py-4">Loading profile data...</div>}
           {renderStepContent()}
         </div>
 
@@ -851,9 +944,10 @@ const CreateProfile = ({ onProfileCreated }) => {
             <button
               onClick={handleSubmit}
               className="flex items-center space-x-2 px-8 py-3 bg-black dark:bg-white text-white dark:text-black rounded-full font-semibold hover:bg-gray-800 dark:hover:bg-gray-200 transition-all shadow-lg hover:shadow-xl"
+              disabled={loading}
             >
               <Check className="w-5 h-5" />
-              <span>Create Profile</span>
+              <span>{loading ? 'Saving...' : 'Create Profile'}</span>
             </button>
           )}
         </div>

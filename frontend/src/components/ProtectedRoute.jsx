@@ -1,11 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth } from '../contexts/Chat/AuthContext';
 
 const ProtectedRoute = ({ children }) => {
-  const { user, loading, isAuthenticated } = useAuth();
+  const { user, loading } = useAuth();
   const [showModal, setShowModal] = useState(false);
   const location = useLocation();
+
+  // Check if user is authenticated based on user object
+  const isAuthenticated = !!user;
 
   console.log('ProtectedRoute: Auth state', { 
     user: user ? `${user.firstName} ${user.lastName}` : null, 

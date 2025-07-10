@@ -1,12 +1,40 @@
 import React from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { useAuth } from '../../../contexts/AuthContext';
+import { useAuth } from '../../../contexts/Chat/AuthContext';
 import userProfile from '../../../assets/userprofile/profile.png';
+import axios from 'axios';
 
 function Sidebar({ onClose }) {
   const { user, logout } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
+
+  const [profile, setProfile] = React.useState(null);
+  const [loading, setLoading] = React.useState(true);
+  const [error, setError] = React.useState(null);
+  const [matches, setMatches] = React.useState(0);
+  const [interests, setInterests] = React.useState(0);
+
+  React.useEffect(() => {
+    const fetchProfile = async () => {
+      if (!user || !user._id) return;
+      setLoading(true);
+      setError(null);
+      try {
+        const response = await axios.get(`/api/v1/users/${user._id}`);
+        setProfile(response.data);
+        // Optionally fetch matches and interests if you have endpoints for them
+        // For now, use dummy values or extract from response if available
+        setMatches(response.data.matches?.length || 8); // fallback to 8
+        setInterests(response.data.interests?.length || 45); // fallback to 45
+      } catch (err) {
+        setError('Failed to load profile');
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProfile();
+  }, [user]);
 
   const handleLogout = async () => {
     try {
@@ -23,21 +51,11 @@ function Sidebar({ onClose }) {
     { icon: '📰', text: 'Feed Page', to: '/feed', active: location.pathname === '/feed' },
     { icon: '💬', text: 'Chat Page', to: '/chat', active: location.pathname === '/chat' },
     { icon: '✏️', text: 'Profile Page', to: '/profile/create', active: location.pathname.includes('/profile') },
-    { icon: '✅', text: 'Verification', to: '/verify', active: location.pathname === '/verify' },
+    { icon: '✅', text: 'Verification', to: '/verification', active: location.pathname === '/verification' },
   ];
 
   return (
     <aside className="w-[280px] lg:w-[300px] bg-white border-r border-gray-200 py-6 lg:py-8 px-4 lg:px-6 shadow-lg h-full overflow-y-auto scrollbar-hide">
-      {/* Custom CSS for hiding scrollbar */}
-      <style jsx>{`
-        .scrollbar-hide {
-          -ms-overflow-style: none;  /* IE and Edge */
-          scrollbar-width: none;  /* Firefox */
-        }
-        .scrollbar-hide::-webkit-scrollbar {
-          display: none;  /* Chrome, Safari and Opera */
-        }
-      `}</style>
 
       {/* Mobile Close Button */}
       <div className="lg:hidden flex mt-[-25px] justify-end mb-4">
@@ -56,7 +74,7 @@ function Sidebar({ onClose }) {
       <div className="text-center mb-8 lg:mb-10">
         <div className="w-20 h-20 lg:w-24 lg:h-24 mx-auto mb-4 relative">
           <img
-            src={user?.avatar || userProfile}
+            src={profile?.photos?.[0] || user?.avatar || userProfile}
             alt="User"
             className="w-full h-full object-cover rounded-full border-4 border-blue-100"
           />
@@ -66,20 +84,26 @@ function Sidebar({ onClose }) {
           {user ? `${user.firstName} ${user.lastName}` : 'User Name'}
         </h2>
         <p className="text-xs lg:text-sm text-blue-600 mb-4 lg:mb-6 font-semibold bg-blue-50 px-2 lg:px-3 py-1 rounded-full inline-block">
-          {user?.planType || 'Free Member'}
+          {profile?.subscription?.isActive && profile?.subscription?.planName
+            ? profile.subscription.planName
+            : 'Free Member'}
         </p>
 
         <div className="grid grid-cols-3 gap-2 lg:gap-4 mb-6">
-          {[
-            { number: '123', label: 'Profile Views' },
-            { number: '8', label: 'Matches' },
-            { number: '45', label: 'Interests' },
-          ].map((stat, i) => (
-            <div key={i} className="flex flex-col items-center gap-1 p-2 lg:p-3 bg-gray-50 rounded-xl">
-              <span className="text-sm lg:text-lg font-bold text-gray-800">{stat.number}</span>
-              <span className="text-xs text-gray-600 text-center leading-tight">{stat.label}</span>
-            </div>
-          ))}
+          {loading ? (
+            <div className="col-span-3 text-center text-gray-400">Loading stats...</div>
+          ) : (
+            [
+              { number: profile?.profileViews ?? 0, label: 'Profile Views' },
+              { number: matches, label: 'Matches' },
+              { number: interests, label: 'Interests' },
+            ].map((stat, i) => (
+              <div key={i} className="flex flex-col items-center gap-1 p-2 lg:p-3 bg-gray-50 rounded-xl">
+                <span className="text-sm lg:text-lg font-bold text-gray-800">{stat.number}</span>
+                <span className="text-xs text-gray-600 text-center leading-tight">{stat.label}</span>
+              </div>
+            ))
+          )}
         </div>
       </div>
 

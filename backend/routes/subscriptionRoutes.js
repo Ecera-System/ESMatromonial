@@ -1,28 +1,24 @@
-// import express from "express";
-// import {
-//   getPlans,
-//   createPlan,
-//   deletePlan,
-//   createOrder,
-//   handleWebhook
-// } from "../controllers/subscriptionController.js";
-// import Plan from "../models/Plan.js"; // Import Plan model
+import express from 'express';
+import rateLimit from 'express-rate-limit';
+import {
+  getPlans,
+  createOrder,
+  verifyPayment
+} from '../controllers/subscriptionController.js';
+import { authenticate, requireUser } from '../middleware/auth.js';
 
-// const router = express.Router();
+const router = express.Router();
 
-// router.get("/plans", getPlans);
-// router.post("/plans", createPlan);
-// router.delete("/plans/:id", deletePlan);
-// router.post("/create-order", createOrder);
-// router.post("/webhook", express.json({ type: "*/*" }), handleWebhook);
+// Rate limiting
+const paymentLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100,
+  message: 'Too many payment attempts, please try again later'
+});
 
-// router.delete("/clear", async (req, res) => {
-//   try {
-//     const result = await Plan.deleteMany({});
-//     res.json({ message: `🧹 ${result.deletedCount} plans deleted successfully.` });
-//   } catch (err) {
-//     res.status(500).json({ error: "Failed to delete all plans" });
-//   }
-// });
+// Routes
+router.get('/plans', getPlans);
+router.post('/payment/order', authenticate, requireUser, paymentLimiter, createOrder);
+router.post('/payment/verify', authenticate, requireUser, paymentLimiter, verifyPayment);
 
-// export default router;
+export default router;

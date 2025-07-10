@@ -50,7 +50,6 @@ router.post('/', authenticate, async (req, res) => {
 router.get('/users/search', authenticate, async (req, res) => {
   try {
     const { query } = req.query;
-    
     const users = await User.find({
       $and: [
         { _id: { $ne: req.user._id } },
@@ -63,11 +62,16 @@ router.get('/users/search', authenticate, async (req, res) => {
         }
       ]
     }).select('firstName lastName email avatar isOnline lastSeen').limit(10);
-
-    res.json(users);
+    const mappedUsers = users.map(user => ({
+      ...user,
+      name: user.firstName && user.lastName
+        ? `${user.firstName} ${user.lastName}`
+        : user.email // fallback if no names
+    }));
+    res.json(mappedUsers);
   } catch (error) {
     res.status(500).json({ message: 'Server error' });
   }
 });
 
-export default router;
+export default router; 

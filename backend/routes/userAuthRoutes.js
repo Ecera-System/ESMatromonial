@@ -1,15 +1,36 @@
 import express from "express";
-import { register, login, getMe, debugUser, fixPassword } from "../controllers/authController.js";
-import { authenticateToken, requireUser } from "../middleware/auth.js";
+import { 
+  register, 
+  login, 
+  getMe, 
+  logout,
+  forgotPassword,
+  resetPassword,
+  validateResetToken,
+  verifyEmail,
+  resendVerificationEmail,
+  testEmail
+} from "../controllers/authController.js";
+import { authenticate, requireUser } from "../middleware/auth.js";
 
 const userAuthRouter = express.Router();
 
-userAuthRouter.post("/api/v1/auth/register", register);
-userAuthRouter.post("/api/v1/auth/login", login);
-userAuthRouter.get("/api/v1/auth/me", authenticateToken, requireUser, getMe);
+// User authentication routes
+userAuthRouter.post("/register", register);
+userAuthRouter.post("/login", login);
+userAuthRouter.get("/me", authenticate, requireUser, getMe);
+userAuthRouter.post("/logout", logout);
 
-// Temporary debug routes - REMOVE IN PRODUCTION
-userAuthRouter.get("/api/v1/auth/debug/:email", debugUser);
-userAuthRouter.post("/api/v1/auth/fix-password", fixPassword);
+// Password reset routes
+userAuthRouter.post("/forgot-password", forgotPassword);
+userAuthRouter.get("/validate-reset-token/:token", validateResetToken);
+userAuthRouter.post("/reset-password/:token", resetPassword);
+
+// Email verification routes
+userAuthRouter.get("/verify-email/:token", verifyEmail);
+userAuthRouter.post("/resend-verification", resendVerificationEmail);
+
+// Test route
+userAuthRouter.post("/test-email", testEmail);
 
 export default userAuthRouter;

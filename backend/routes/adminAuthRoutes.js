@@ -8,13 +8,8 @@ import { authenticate, requireAdmin } from "../middleware/auth.js";
 
 const adminAuthRouter = express.Router();
 
-adminAuthRouter.post("/api/v1/auth/admin/register", adminRegister);
-adminAuthRouter.post("/api/v1/auth/admin/login", adminLogin);
-adminAuthRouter.get(
-  "/api/v1/auth/admin/me",
-  authenticate,
-  requireAdmin,
-  adminGetMe
-);
+adminAuthRouter.post("/register", adminRegister);
+adminAuthRouter.post("/login", adminLogin);
+adminAuthRouter.get("/me", authenticate, requireAdmin, adminGetMe);
 
 export default adminAuthRouter;

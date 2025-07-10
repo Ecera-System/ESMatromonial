@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../../../contexts/AuthContext';
+import { useAuth } from '../../../contexts/Chat/AuthContext';
 import userProfile from '../../../assets/userprofile/user.png';
 
 function Header({ onMenuClick }) {
@@ -154,7 +154,7 @@ function Header({ onMenuClick }) {
                   Profile Settings
                 </Link>
                 <Link
-                  to="/verify"
+                  to="/verification"
                   className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
                   onClick={() => setShowUserMenu(false)}
                 >
