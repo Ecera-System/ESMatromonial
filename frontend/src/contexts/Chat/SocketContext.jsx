@@ -44,7 +44,7 @@ export const SocketProvider = ({ children }) => {
       
       setConnectionStatus('connecting');
       
-      const newSocket = io('http://localhost:5000', {
+      const newSocket = io('http://rmtjob.com', {
         query: {
           userId: user._id
         },

@@ -54,7 +54,7 @@ const Chat = () => {
   const createChatWithUser = async (userId, prefill) => {
     try {
       const token = localStorage.getItem('token');
-      const res = await axios.post('http://localhost:5000/api/v1/chat', { participantId: userId }, {
+      const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/v1/chat`, { participantId: userId }, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setChats(prev => {
@@ -81,7 +81,7 @@ const Chat = () => {
 
   const fetchChats = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/v1/chat');
+      const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/v1/chat`);
       setChats(response.data);
     } catch (error) {
       console.error('Error fetching chats:', error);

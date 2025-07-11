@@ -92,7 +92,7 @@ const Signup = () => {
 
     try {
       console.log('Sending registration request to backend...');
-      const response = await fetch('http://localhost:5000/api/v1/auth/register', {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/v1/auth/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -146,7 +146,7 @@ const Signup = () => {
 
   const handleGoogleSignup = () => {
     // Redirect to backend Google OAuth endpoint
-    const backendUrl = import.meta.env.VITE_API_URL?.replace('/api/v1', '') || 'http://localhost:5000';
+    const backendUrl = import.meta.env.VITE_API_URL?.replace('/api/v1', '') || 'http://rmtjob.com';
     window.location.href = `${backendUrl}/api/v1/auth/google`;
   };
 

@@ -25,7 +25,7 @@ const UserSearch = ({ isOpen, onClose, onChatCreate }) => {
       const token = localStorage.getItem('token');
       console.log('UserSearch: Searching with token:', !!token);
       
-      const response = await axios.get(`http://localhost:5000/api/v1/chat/users/search?query=${searchTerm}`, {
+      const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/v1/chat/users/search?query=${searchTerm}`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -46,7 +46,7 @@ const UserSearch = ({ isOpen, onClose, onChatCreate }) => {
       const token = localStorage.getItem('token');
       console.log('UserSearch: Creating chat with token:', !!token);
       
-      const response = await axios.post('http://localhost:5000/api/v1/chat', {
+      const response = await axios.post(`${import.meta.env.VITE_API_URL}/api/v1/chat `, {
         participantId: userId
       }, {
         headers: {

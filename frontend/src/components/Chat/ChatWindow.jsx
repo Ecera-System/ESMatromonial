@@ -458,7 +458,7 @@ const ChatWindow = ({ selectedChat, onMessageSent, onlineUsers = [], mobileBackB
       const token = localStorage.getItem('token');
       console.log('ChatWindow: Fetching messages with token:', !!token);
       
-      const response = await axios.get(`http://localhost:5000/api/v1/messages/${selectedChat._id}`, {
+      const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/v1/messages/${selectedChat._id}`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }

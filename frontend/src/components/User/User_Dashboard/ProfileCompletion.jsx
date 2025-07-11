@@ -23,7 +23,7 @@ function ProfileCompletion() {
     setError(null);
     try {
       const token = localStorage.getItem('token');
-      const res = await axios.get(`http://localhost:5000/api/v1/users/profile-completion/${user._id}`, {
+      const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/v1/users/profile-completion/${user._id}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setCompletion(res.data.completion);

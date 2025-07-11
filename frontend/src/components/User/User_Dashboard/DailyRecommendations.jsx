@@ -23,7 +23,7 @@ function DailyRecommendations() {
     setError(null);
     try {
       const token = localStorage.getItem('token');
-      const res = await axios.get('http://localhost:5000/api/v1/users/daily-recommendation', {
+      const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/v1/users/daily-recommendation`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setRecommendation(res.data.recommendation);
@@ -45,7 +45,7 @@ function DailyRecommendations() {
     if (!recommendation?._id) return;
     try {
       const token = localStorage.getItem('token');
-      await axios.post('http://localhost:5000/api/v1/users/skip', {
+      await axios.post(`${import.meta.env.VITE_API_URL}/api/v1/users/skip`, {
         skippedUserId: recommendation._id,
         recommendationId: recommendation.recommendationId,
       }, {
@@ -64,7 +64,7 @@ function DailyRecommendations() {
     setPopupAvatar(recommendation.avatar || '');
     try {
       const token = localStorage.getItem('token');
-      await axios.post('http://localhost:5000/api/v1/users/like', {
+      await axios.post(`${import.meta.env.VITE_API_URL}/api/v1/users/like`, {
         recommendedUserId: recommendation._id,
         recommendationId: recommendation.recommendationId,
       }, {

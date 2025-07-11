@@ -28,7 +28,7 @@ const Login = () => {
       // Save token, fetch user info, set context, and redirect
       localStorage.setItem('token', token);
       // Optionally, fetch user info from backend
-      fetch('http://localhost:5000/api/v1/auth/me', {
+      fetch(`${import.meta.env.VITE_API_URL}/api/v1/auth/me`, {
         headers: { Authorization: `Bearer ${token}` }
       })
         .then(res => res.json())
@@ -66,7 +66,7 @@ const Login = () => {
     setIsLoading(true);
     setError('');
     try {
-      const response = await fetch('http://localhost:5000/api/v1/auth/login', {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/v1/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
@@ -103,7 +103,7 @@ const Login = () => {
   };
 
   const handleGoogleLogin = () => {
-    const backendUrl = import.meta.env.VITE_API_URL?.replace('/api/v1', '') || 'http://localhost:5000';
+    const backendUrl = import.meta.env.VITE_API_URL?.replace('/api/v1', '') || 'http://rmtjob.com';
     window.location.href = `${backendUrl}/api/v1/auth/google`;
   };
 
@@ -112,7 +112,7 @@ const Login = () => {
     setForgotLoading(true);
     setForgotMessage('');
     try {
-      const response = await fetch('http://localhost:5000/api/v1/auth/forgot-password', {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/v1/auth/forgot-password`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: forgotEmail }),

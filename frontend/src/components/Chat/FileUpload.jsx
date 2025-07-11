@@ -25,7 +25,7 @@ const FileUpload = ({ onFileSelect, isOpen, onToggle, onUploadedFile }) => {
       
       console.log('Uploading file with token:', !!token);
 
-      const response = await axios.post('http://localhost:5000/api/v1/upload', formData, {
+      const response = await axios.post( `${import.meta.env.VITE_API_URL}/api/v1/upload`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
           'Authorization': `Bearer ${token}` // Add authorization header

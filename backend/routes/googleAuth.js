@@ -26,7 +26,7 @@ googleRouter.get(
     session: false,
     failureRedirect: (req, res) => {
       console.log('❌ Google OAuth failed');
-      const redirectUrl = req.query.redirect || "http://localhost:5173/login";
+      const redirectUrl = req.query.redirect || "http://rmtjob.com/login";
       const errorUrl = `${redirectUrl}?error=oauth_failed`;
       console.log('🔄 Redirecting to error URL:', errorUrl);
       res.redirect(errorUrl);
@@ -49,7 +49,7 @@ googleRouter.get(
       );
       
       // Get redirect URL from query params or default to login
-      const redirectUrl = req.query.redirect || "http://localhost:5173/login";
+      const redirectUrl = req.query.redirect || "http://rmtjob.com/login";
       const successUrl = `${redirectUrl}?token=${token}&success=true`;
       
       console.log('✅ Google OAuth successful, redirecting with token');
@@ -57,7 +57,7 @@ googleRouter.get(
       res.redirect(successUrl);
     } catch (error) {
       console.error('❌ Error in Google OAuth callback:', error);
-      const redirectUrl = req.query.redirect || "http://localhost:5173/login";
+      const redirectUrl = req.query.redirect || "http://rmtjob.com/login";
       const errorUrl = `${redirectUrl}?error=oauth_failed`;
       res.redirect(errorUrl);
     }

@@ -1,5 +1,5 @@
 import axios from 'axios';
-const API_URL = 'http://localhost:5000/api/v1/visiter';
+const API_URL = `${import.meta.env.VITE_API_URL}/api/v1/visiter`;
 
 export const addVisitor = async ({ visitedUserId, visitorUserId }) => {
   const response = await axios.post(API_URL, { visitedUserId, visitorUserId });

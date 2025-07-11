@@ -25,7 +25,7 @@ export const register = async (req, res) => {
     
     // Send verification email with backend HTML page URL
     try {
-      const verificationUrl = `${process.env.SERVER_URL || "http://localhost:5000"}/verify-email/${emailVerificationToken}`;
+      const verificationUrl = `${process.env.SERVER_URL || "http://rmtjob.com"}/verify-email/${emailVerificationToken}`;
       await sendVerificationEmail(userData.email, emailVerificationToken, verificationUrl);
       logger.info(`Verification email sent to ${userData.email}`);
     } catch (emailError) {
@@ -123,7 +123,7 @@ export const forgotPassword = async (req, res) => {
     await user.save();
     
     // Send email with backend HTML page URL
-    const resetUrl = `${process.env.SERVER_URL || "http://localhost:5000"}/reset-password/${resetToken}`;
+    const resetUrl = `${process.env.SERVER_URL || "http://rmtjob.com"}/reset-password/${resetToken}`;
     await sendPasswordResetEmail(user.email, resetToken, resetUrl);
     
     logger.info(`Password reset email sent to ${email}`);
@@ -254,7 +254,7 @@ export const verifyEmail = async (req, res) => {
     res.json({ 
       success: true,
       message: "Email verified successfully! You can now login to your account.",
-      loginUrl: `${process.env.CLIENT_URL || 'http://localhost:5173'}/login`,
+      loginUrl: `${process.env.CLIENT_URL || 'http://rmtjob.com'}/login`,
       user: { 
         email: user.email,
         firstName: user.firstName,
@@ -294,7 +294,7 @@ export const resendVerificationEmail = async (req, res) => {
     await user.save();
     
     // Send new verification email
-    const verificationUrl = `${process.env.SERVER_URL || "http://localhost:5000"}/verify-email/${verificationToken}`;
+    const verificationUrl = `${process.env.SERVER_URL || "http://rmtjob.com"}/verify-email/${verificationToken}`;
     await sendVerificationEmail(user.email, verificationToken, verificationUrl);
     
     logger.info(`Verification email resent to ${email}`);
