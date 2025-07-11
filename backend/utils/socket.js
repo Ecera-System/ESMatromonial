@@ -9,12 +9,14 @@ import Call from '../models/Call.js';
 
 let io;
 
+
 const initializeSocket = (server) => {
   io = new Server(server, {
     cors: {
       origin: process.env.CLIENT_URL || 'http://rmtjob.com',
       methods: ['GET', 'POST'],
     },
+    
   });
 
   // Track connected users

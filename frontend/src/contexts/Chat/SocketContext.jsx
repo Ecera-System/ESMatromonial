@@ -3,7 +3,7 @@ import { io } from 'socket.io-client';
 import { useAuth } from './AuthContext';
 
 const SocketContext = createContext();
-
+const wsUrl = import.meta.env.VITE_WS_URL;
 export const useSocket = () => {
   const context = useContext(SocketContext);
   if (!context) {
@@ -44,7 +44,7 @@ export const SocketProvider = ({ children }) => {
       
       setConnectionStatus('connecting');
       
-      const newSocket = io('http://rmtjob.com', {
+      const newSocket = io(wsUrl, {
         query: {
           userId: user._id
         },
