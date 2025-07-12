@@ -5,6 +5,8 @@ const AuthContext = createContext();
 
 const API_URL = `${import.meta.env.VITE_API_URL}/api/v1`;
 
+console.log('API_URL configured as:', API_URL);
+
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
@@ -29,11 +31,22 @@ export const AuthProvider = ({ children }) => {
 
   const checkAuth = async () => {
     try {
-      const response = await axios.get(`${API_URL}/auth/me`);
+      const token = localStorage.getItem('token');
+      console.log('Checking auth with token:', !!token);
+      
+      const response = await axios.get(`${API_URL}/auth/me`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      
+      console.log('Auth check successful:', response.data.user);
       setUser(response.data.user);
     } catch (error) {
+      console.error('Auth check failed:', error);
       localStorage.removeItem('token');
       delete axios.defaults.headers.common['Authorization'];
+      setUser(null);
     } finally {
       setLoading(false);
     }

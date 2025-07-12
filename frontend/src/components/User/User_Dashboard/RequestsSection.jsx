@@ -77,45 +77,47 @@ function RequestsSection() {
   };
 
   return (
-    <section className="bg-white rounded-2xl p-6 shadow-lg w-full h-full border border-gray-100">
-      <h2 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-3">
-        <Heart className="w-6 h-6 text-pink-500" />
-        Connection Requests
+    <section className="bg-white rounded-xl p-4 sm:p-6 shadow-lg border border-gray-100 h-full">
+      <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-800 mb-4 lg:mb-6 flex items-center gap-3">
+        <Heart className="w-5 h-5 lg:w-6 lg:h-6 text-pink-500 flex-shrink-0" />
+        <span className="truncate">Connection Requests</span>
       </h2>
       
-      {/* Tabs */}
-      <div className="flex border-b border-gray-200 mb-6 overflow-x-auto">
-        {Object.keys(tabData).map((tab) => (
-          <button
-            key={tab}
-            onClick={() => setActiveTab(tab)}
-            className={`text-sm font-medium py-3 px-4 mr-4 border-b-2 transition-all duration-300 whitespace-nowrap flex-shrink-0 ${
-              activeTab === tab
-                ? 'text-purple-600 border-purple-600'
-                : 'text-gray-500 border-transparent hover:text-gray-700 hover:border-gray-300'
-            }`}
-          >
-            {tab} {tabData[tab].length > 0 && (
-              <span className="ml-1.5 inline-flex items-center justify-center h-5 w-5 rounded-full bg-purple-100 text-xs text-purple-800">
-                {tabData[tab].length}
-              </span>
-            )}
-          </button>
-        ))}
+      {/* Tabs - Mobile optimized */}
+      <div className="flex border-b border-gray-200 mb-4 lg:mb-6 overflow-x-auto">
+        <div className="flex gap-1 lg:gap-4 min-w-full">
+          {Object.keys(tabData).map((tab) => (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              className={`text-xs sm:text-sm lg:text-base font-medium py-3 px-3 sm:px-4 lg:px-6 border-b-2 transition-all duration-300 whitespace-nowrap flex-shrink-0 touch-manipulation ${
+                activeTab === tab
+                  ? 'text-purple-600 border-purple-600'
+                  : 'text-gray-500 border-transparent hover:text-gray-700 hover:border-gray-300'
+              }`}
+            >
+              {tab} {tabData[tab].length > 0 && (
+                <span className="ml-1 sm:ml-2 inline-flex items-center justify-center h-4 w-4 sm:h-5 sm:w-5 rounded-full bg-purple-100 text-xs text-purple-800">
+                  {tabData[tab].length}
+                </span>
+              )}
+            </button>
+          ))}
+        </div>
       </div>
       
-      {/* Tab Content */}
-      <div className="min-h-[300px]">
+      {/* Tab Content - Mobile optimized */}
+      <div className="min-h-[250px] sm:min-h-[300px] lg:min-h-[400px]">
         {loading ? (
-          <div className="flex flex-col items-center justify-center h-full py-12">
-            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500 mb-4"></div>
-            <p className="text-gray-500">Loading requests...</p>
+          <div className="flex flex-col items-center justify-center h-full py-8 lg:py-12">
+            <div className="animate-spin rounded-full h-8 w-8 lg:h-12 lg:w-12 border-t-2 border-b-2 border-purple-500 mb-4"></div>
+            <p className="text-gray-500 text-sm lg:text-base">Loading requests...</p>
           </div>
         ) : tabData[activeTab].length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-full py-12 text-center">
-            <Send className="w-12 h-12 text-gray-300 mb-4" />
-            <h3 className="text-lg font-medium text-gray-500">No {activeTab.toLowerCase()} requests</h3>
-            <p className="text-sm text-gray-400 mt-2 max-w-md">
+          <div className="flex flex-col items-center justify-center h-full py-8 lg:py-12 text-center px-4">
+            <Send className="w-10 h-10 sm:w-12 sm:h-12 lg:w-16 lg:h-16 text-gray-300 mb-4" />
+            <h3 className="text-sm sm:text-base lg:text-lg font-medium text-gray-500 mb-2">No {activeTab.toLowerCase()} requests</h3>
+            <p className="text-xs sm:text-sm text-gray-400 max-w-sm">
               {activeTab === 'Received'
                 ? "When someone sends you a connection request, it will appear here."
                 : activeTab === 'Sent'
@@ -128,78 +130,78 @@ function RequestsSection() {
             {tabData[activeTab].map((req) => {
               const profile = activeTab === 'Sent' ? req.receiver : req.sender;
               return (
-                <li key={req._id} className="p-4 rounded-xl border border-gray-200 hover:shadow-sm transition-shadow">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-4">
+                <li key={req._id} className="p-3 sm:p-4 rounded-xl border border-gray-200 hover:shadow-sm transition-shadow">
+                  <div className="flex flex-col gap-3 sm:gap-4">
+                    <div className="flex items-start gap-3 sm:gap-4 flex-1 min-w-0">
                       <div className="flex-shrink-0">
                         {profile?.avatar ? (
                           <img
-                            className="h-12 w-12 rounded-full object-cover"
+                            className="h-10 w-10 sm:h-12 sm:w-12 lg:h-14 lg:w-14 rounded-full object-cover"
                             src={profile.avatar}
                             alt={`${profile.firstName} ${profile.lastName}`}
                           />
                         ) : (
-                          <div className="h-12 w-12 rounded-full bg-gradient-to-r from-purple-100 to-blue-100 flex items-center justify-center text-purple-600 font-medium">
+                          <div className="h-10 w-10 sm:h-12 sm:w-12 lg:h-14 lg:w-14 rounded-full bg-gradient-to-r from-purple-100 to-blue-100 flex items-center justify-center text-purple-600 font-medium text-xs sm:text-sm lg:text-base">
                             {profile?.firstName?.[0]}{profile?.lastName?.[0]}
                           </div>
                         )}
                       </div>
-                      <div>
-                        <h4 className="font-medium text-gray-900">
+                      <div className="min-w-0 flex-1">
+                        <h4 className="font-medium text-gray-900 text-sm sm:text-base lg:text-lg truncate">
                           {profile?.firstName} {profile?.lastName}
                         </h4>
                         {req.message && (
-                          <p className="text-sm text-gray-500 mt-1">"{req.message}"</p>
+                          <p className="text-xs sm:text-sm text-gray-500 mt-1 line-clamp-2">"{req.message}"</p>
                         )}
-                        <div className="mt-1">
+                        <div className="mt-2">
                           {getStatusBadge(req.status)}
                         </div>
                       </div>
                     </div>
                     
-                    <div className="flex space-x-2">
+                    <div className="flex flex-col gap-2">
                       {activeTab === 'Received' && req.status === 'pending' && (
-                        <>
+                        <div className="flex gap-2">
                           <button
                             onClick={() => handleRespond(req._id, 'accept')}
                             disabled={responding[req._id] === 'accept'}
-                            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50"
+                            className="flex-1 py-2 sm:py-3 px-3 sm:px-4 bg-green-600 text-white hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50 flex items-center justify-center rounded-lg font-medium text-xs sm:text-sm transition-colors touch-manipulation"
                           >
                             {responding[req._id] === 'accept' ? (
                               'Accepting...'
                             ) : (
                               <>
-                                <Check className="w-4 h-4 mr-2" /> Accept
+                                <Check className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" /> Accept
                               </>
                             )}
                           </button>
                           <button
                             onClick={() => handleRespond(req._id, 'reject')}
                             disabled={responding[req._id] === 'reject'}
-                            className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 disabled:opacity-50"
+                            className="flex-1 py-2 sm:py-3 px-3 sm:px-4 border border-gray-300 text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 disabled:opacity-50 flex items-center justify-center rounded-lg font-medium text-xs sm:text-sm transition-colors touch-manipulation"
                           >
                             {responding[req._id] === 'reject' ? (
                               'Rejecting...'
                             ) : (
                               <>
-                                <X className="w-4 h-4 mr-2" /> Reject
+                                <X className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" /> Reject
                               </>
                             )}
                           </button>
-                        </>
+                        </div>
                       )}
                       
                       {(activeTab === 'Accepted' || req.status === 'accepted') && (
                         <button
                           onClick={() => handleViewProfile(profile?._id)}
-                          className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
+                          className="py-2 sm:py-3 px-3 sm:px-4 bg-purple-600 text-white hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 flex items-center justify-center rounded-lg font-medium text-xs sm:text-sm transition-colors touch-manipulation"
                         >
-                          <User className="w-4 h-4 mr-2" /> View Profile
+                          <User className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" /> View Profile
                         </button>
                       )}
                       
                       {activeTab === 'Sent' && (
-                        <span className="text-sm text-gray-500">
+                        <span className="text-xs sm:text-sm text-gray-500 text-center">
                           Sent {new Date(req.createdAt).toLocaleDateString()}
                         </span>
                       )}

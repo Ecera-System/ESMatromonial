@@ -13,23 +13,37 @@ let io;
 const initializeSocket = (server) => {
   io = new Server(server, {
     cors: {
-      origin: process.env.CLIENT_URL || 'http://rmtjob.com',
+      origin: process.env.CLIENT_URL || 'http://localhost:5173',
       methods: ['GET', 'POST'],
+      credentials: true
     },
-    
   });
 
   // Track connected users
   const connectedUsers = new Map();
+  // Track active calls (userId <-> { with, socketId })
+  const activeCalls = new Map();
 
   io.on('connection', async (socket) => {
     // Expect userId in handshake query
     const userId = socket.handshake.query.userId;
-    if (!userId) return;
+    console.log('🔌 New socket connection attempt, userId:', userId);
+    
+    if (!userId) {
+      console.log('❌ No userId provided in handshake');
+      return;
+    }
+    
     const user = await User.findById(userId);
-    if (!user) return;
+    if (!user) {
+      console.log('❌ User not found:', userId);
+      return;
+    }
+    
     socket.userId = user._id.toString();
     socket.user = user;
+
+    console.log('✅ User connected:', user.firstName, user.lastName, 'Socket ID:', socket.id);
 
     // Store user connection
     connectedUsers.set(user._id.toString(), socket.id);
@@ -43,6 +57,9 @@ const initializeSocket = (server) => {
     // Send the list of currently online users to the newly connected user
     socket.emit('online-users', Array.from(connectedUsers.keys()));
 
+    // Emit online status to all connected users
+    io.emit('user-online', { userId: user._id });
+
     // Join user to their chat rooms
     const userChats = await Chat.find({ participants: user._id });
     userChats.forEach(chat => {
@@ -52,18 +69,26 @@ const initializeSocket = (server) => {
     // Handle joining a chat room
     socket.on('join-chat', (chatId) => {
       socket.join(chatId);
+      console.log(`User ${user._id} joined chat ${chatId}`);
     });
 
     // Handle sending messages
     socket.on('send-message', async (data) => {
       try {
+        console.log('📨 Received message:', data);
         const { chatId, content, messageType = 'text', file } = data;
+        
         // Verify user is part of the chat
         const chat = await Chat.findOne({
           _id: chatId,
           participants: user._id
         }).populate('participants', 'firstName lastName avatar');
-        if (!chat) return;
+        
+        if (!chat) {
+          console.log('❌ User not part of chat or chat not found');
+          return;
+        }
+
         // Create message
         const messageData = {
           chat: chatId,
@@ -71,24 +96,34 @@ const initializeSocket = (server) => {
           content,
           messageType
         };
+
         if (file && messageType !== 'text') {
           messageData.file = file;
         }
+
         const message = new Message(messageData);
         await message.save();
         await message.populate('sender', 'firstName lastName avatar');
+
+        console.log('💾 Message saved:', message._id);
+
         // Update chat's last message
         chat.lastMessage = message._id;
         chat.updatedAt = new Date();
         await chat.save();
+
         // Emit message to chat room
         io.to(chatId).emit('new-message', message);
+        console.log('📤 Message emitted to chat room:', chatId);
+
         // Send real-time notification to other participants
         const otherParticipants = chat.participants.filter(
           p => p._id.toString() !== user._id.toString()
         );
+
         for (const participant of otherParticipants) {
           const participantSocketId = connectedUsers.get(participant._id.toString());
+          
           // Create notification in DB
           await Notification.create({
             user: participant._id,
@@ -98,6 +133,7 @@ const initializeSocket = (server) => {
             fromUser: user._id,
             isRead: false
           });
+
           if (participantSocketId) {
             io.to(participantSocketId).emit('message-notification', {
               chatId,
@@ -110,6 +146,7 @@ const initializeSocket = (server) => {
               messageType,
               timestamp: new Date()
             });
+
             io.to(participantSocketId).emit('chat-updated', {
               chatId,
               lastMessage: message
@@ -118,6 +155,7 @@ const initializeSocket = (server) => {
         }
       } catch (error) {
         console.error('Error sending message:', error);
+        socket.emit('message-error', { error: 'Failed to send message' });
       }
     });
 
@@ -175,21 +213,18 @@ const initializeSocket = (server) => {
     socket.on('callToUser', (data) => {
       const calleeSocketId = connectedUsers.get(data.callToUserId);
       console.log('[CALL] callToUser event received from', socket.userId, 'to', data.callToUserId, 'calleeSocketId:', calleeSocketId);
+      
       if (!calleeSocketId) {
         socket.emit('userUnavailable', { message: 'User is offline.' });
         return;
       }
+      
       // If callee is already in a call
       if (activeCalls.has(data.callToUserId)) {
         socket.emit('userBusy', { message: 'User is currently in another call.' });
-        io.to(calleeSocketId).emit('incomingCallWhileBusy', {
-          from: data.from,
-          name: data.name,
-          email: data.email,
-          profilepic: data.profilepic,
-        });
         return;
       }
+      
       // Relay call to callee
       io.to(calleeSocketId).emit('callToUser', {
         signal: data.signalData,
@@ -270,9 +305,6 @@ const initializeSocket = (server) => {
     });
 
     // --- Video/Voice Call Presence & Signaling Extensions ---
-    // Track active calls (userId <-> { with, socketId })
-    const activeCalls = new Map();
-
     // Send the socket ID to the connected user (for WebRTC peer signaling)
     socket.emit('me', socket.id);
 
@@ -334,34 +366,28 @@ const initializeSocket = (server) => {
       activeCalls.delete(data.to);
     });
 
-    // On disconnect, clean up active calls and presence
-    socket.on('disconnect', () => {
-      const user = Array.from(connectedUsers.entries()).find(([_, id]) => id === socket.id);
-      if (user) {
-        const userId = user[0];
-        activeCalls.delete(userId);
-        // Remove all calls where this user was the peer
-        for (const [key, value] of activeCalls.entries()) {
-          if (value.with === userId) activeCalls.delete(key);
-        }
-        connectedUsers.delete(userId);
+    // On disconnect, clean up
+    socket.on('disconnect', async () => {
+      console.log('👋 User disconnected:', user.firstName, user.lastName);
+      
+      // Update user offline status
+      await User.findByIdAndUpdate(user._id, {
+        isOnline: false,
+        lastActive: new Date(),
+      });
+
+      // Clean up active calls
+      activeCalls.delete(user._id.toString());
+      for (const [key, value] of activeCalls.entries()) {
+        if (value.with === user._id.toString()) activeCalls.delete(key);
       }
+
+      // Remove from connected users
+      connectedUsers.delete(user._id.toString());
+      
+      // Emit updated online users list
       io.emit('online-users', Array.from(connectedUsers.keys()));
-      socket.broadcast.emit('discounnectUser', { disUser: socket.id });
-    });
-
-    // Emit online status to all connected users
-    io.emit('user-online', { userId: user._id });
-
-    // Relay all WebRTC signals (offer, answer, ICE candidates)
-    socket.on('webrtc-signal', (data) => {
-      const toSocketId = connectedUsers.get(data.to);
-      if (toSocketId) {
-        io.to(toSocketId).emit('webrtc-signal', {
-          from: data.from,
-          signal: data.signal,
-        });
-      }
+      io.emit('user-offline', { userId: user._id });
     });
   });
 };

@@ -15,7 +15,18 @@ export default defineConfig([
     ],
     languageOptions: {
       ecmaVersion: 2020,
-      globals: globals.browser,
+      globals: {
+        ...globals.browser,
+        // Mobile-specific globals
+        'window': 'readonly',
+        'document': 'readonly',
+        'navigator': 'readonly',
+        'screen': 'readonly',
+        'TouchEvent': 'readonly',
+        'PointerEvent': 'readonly',
+        'DeviceOrientationEvent': 'readonly',
+        'DeviceMotionEvent': 'readonly',
+      },
       parserOptions: {
         ecmaVersion: 'latest',
         ecmaFeatures: { jsx: true },
@@ -23,7 +34,17 @@ export default defineConfig([
       },
     },
     rules: {
-      'no-unused-vars': ['error', { varsIgnorePattern: '^[A-Z_]' }],
+      'no-unused-vars': ['error', { 
+        varsIgnorePattern: '^[A-Z_]',
+        argsIgnorePattern: '^_',
+        ignoreRestSiblings: true 
+      }],
+      // Mobile-specific rules
+      'no-console': ['warn', { allow: ['warn', 'error'] }],
+      'prefer-const': 'error',
+      'no-var': 'error',
+      // Allow touch event handlers
+      'no-undef': ['error', { typeof: true }],
     },
   },
 ])

@@ -62,7 +62,7 @@ googleRouter.get(
       );
       
       // Get redirect URL from query params or default to frontend
-      const redirectUrl = req.query.redirect || process.env.CLIENT_URL + "/login";
+      const redirectUrl = req.query.redirect || (process.env.CLIENT_URL || "http://localhost:5173") + "/login";
       const successUrl = `${redirectUrl}?token=${token}&success=true`;
       
       console.log('✅ Google OAuth successful, redirecting with token');
@@ -70,7 +70,7 @@ googleRouter.get(
       res.redirect(successUrl);
     } catch (error) {
       console.error('❌ Error in Google OAuth callback:', error);
-      const redirectUrl = req.query.redirect || process.env.CLIENT_URL + "/login";
+      const redirectUrl = req.query.redirect || (process.env.CLIENT_URL || "http://localhost:5173") + "/login";
       const errorUrl = `${redirectUrl}?error=oauth_failed&message=${encodeURIComponent(error.message)}`;
       res.redirect(errorUrl);
     }

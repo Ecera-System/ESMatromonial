@@ -84,25 +84,31 @@ function DailyRecommendations() {
 
   // UI rendering
   return (
-    <section className="bg-white rounded-2xl p-4 lg:p-8 shadow-lg w-full border border-gray-100">
-      <h2 className="text-xl lg:text-2xl font-bold text-gray-800 mb-4 lg:mb-6 flex items-center gap-3">
-        <span className="text-xl lg:text-2xl">✨</span>
-        Daily Recommendations
+    <section className="bg-white rounded-xl p-4 sm:p-6 shadow-lg border border-gray-100">
+      <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-800 mb-4 lg:mb-6 flex items-center gap-3">
+        <span className="text-lg sm:text-xl lg:text-2xl">✨</span>
+        <span className="truncate">Daily Recommendations</span>
       </h2>
-      <div className="relative min-h-[180px]">
-        {/* Animated Popup */}
+      
+      <div className="relative min-h-[200px] lg:min-h-[250px]">
+        {/* Animated Popup - Mobile optimized */}
         {showPopup && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center  bg-opacity-30 backdrop-blur-sm backdrop-saturate-150">
-            <div className="bg-gradient-to-br from-blue-100 via-white to-indigo-100 rounded-2xl shadow-2xl px-8 py-10 flex flex-col items-center animate-pop-in">
-              <div className="text-5xl mb-4 animate-bounce">🎉</div>
-              <h3 className="text-2xl font-bold text-blue-700 mb-2 animate-fade-in">Invitation Sent!</h3>
-              <p className="text-gray-600 text-center mb-4 animate-fade-in">You've sent an invitation to <span className="font-semibold">{popupName}</span>.<br/>Redirecting to chat...</p>
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-2xl p-6 lg:p-8 max-w-sm w-full mx-auto shadow-2xl animate-pop-in">
+              <div className="text-3xl sm:text-4xl lg:text-5xl mb-4 animate-bounce text-center">🎉</div>
+              <h3 className="text-lg sm:text-xl lg:text-2xl font-bold text-blue-700 mb-3 text-center">Invitation Sent!</h3>
+              <p className="text-gray-600 text-center mb-4 text-sm sm:text-base leading-relaxed">
+                You've sent an invitation to <span className="font-semibold">{popupName}</span>.
+                <br />
+                Redirecting to chat...
+              </p>
               {popupAvatar && (
-                <div className="w-16 h-16 rounded-full overflow-hidden border-4 border-blue-200 mb-2 animate-fade-in">
+                <div className="w-16 h-16 lg:w-20 lg:h-20 rounded-full overflow-hidden border-4 border-blue-200 mx-auto animate-fade-in">
                   <img src={popupAvatar} alt={popupName} className="w-full h-full object-cover" />
                 </div>
               )}
             </div>
+            
             {/* Animations */}
             <style>{`
               .animate-pop-in {
@@ -121,56 +127,139 @@ function DailyRecommendations() {
             `}</style>
           </div>
         )}
+        
         {loading ? (
-          <div className="flex items-center justify-center h-40 text-lg text-gray-500">Loading...</div>
+          <div className="flex items-center justify-center h-48 lg:h-60">
+            <div className="flex flex-col items-center gap-3">
+              <div className="animate-spin rounded-full h-8 w-8 lg:h-12 lg:w-12 border-t-2 border-b-2 border-blue-500"></div>
+              <p className="text-sm lg:text-base text-gray-500">Finding your perfect match...</p>
+            </div>
+          </div>
         ) : error ? (
-          <div className="flex flex-col items-center justify-center h-40 text-center text-red-500">
-            <div className="text-2xl mb-2">😕</div>
-            <div>{error}</div>
-            <button className="mt-4 px-4 py-2 bg-blue-500 text-white rounded-full" onClick={fetchRecommendation}>Try Again</button>
+          <div className="flex flex-col items-center justify-center h-48 lg:h-60 text-center p-4">
+            <div className="text-3xl sm:text-4xl lg:text-5xl mb-3">😕</div>
+            <div className="text-sm lg:text-base text-red-500 mb-4 break-words">{error}</div>
+            <button 
+              className="py-2 px-4 bg-blue-500 text-white hover:bg-blue-600 rounded-lg text-sm sm:text-base transition-colors" 
+              onClick={fetchRecommendation}
+            >
+              Try Again
+            </button>
           </div>
         ) : recommendation ? (
-          <div className="flex items-center gap-8 py-4 w-full transition-all duration-300">
-            {/* Profile Info */}
-            <div className="flex items-center gap-6 flex-1 min-w-0">
-              {/* Avatar */}
-              <div className="w-24 h-24 sm:w-28 sm:h-28 lg:w-32 lg:h-32 rounded-3xl bg-gradient-to-br from-blue-100 to-indigo-200 overflow-hidden cursor-pointer transition-all duration-300 hover:scale-105 shadow-lg flex-shrink-0 flex items-center justify-center text-4xl font-bold text-blue-700">
-                {recommendation.avatar ? (
-                  <img src={recommendation.avatar} alt={recommendation.firstName} className="w-full h-full object-cover" />
-                ) : (
-                  <span>
-                    {recommendation.firstName?.charAt(0)?.toUpperCase() || ''}
-                    {recommendation.lastName?.charAt(0)?.toUpperCase() || ''}
+          <div className="space-y-4 lg:space-y-0">
+            {/* Mobile Layout */}
+            <div className="block lg:hidden space-y-4">
+              {/* Profile section */}
+              <div className="flex items-center gap-3 sm:gap-4">
+                <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-gradient-to-br from-blue-100 to-indigo-200 overflow-hidden flex-shrink-0 flex items-center justify-center shadow-lg">
+                  {recommendation.avatar ? (
+                    <img src={recommendation.avatar} alt={recommendation.firstName} className="w-full h-full object-cover" />
+                  ) : (
+                    <span className="text-lg sm:text-xl md:text-2xl font-bold text-blue-700">
+                      {recommendation.firstName?.charAt(0)?.toUpperCase() || ''}
+                      {recommendation.lastName?.charAt(0)?.toUpperCase() || ''}
+                    </span>
+                  )}
+                </div>
+                
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-base sm:text-lg font-bold text-gray-800 truncate">
+                    {recommendation.firstName} {recommendation.lastName}
+                  </h3>
+                  <p className="text-sm text-gray-600 truncate">
+                    {recommendation.age} • {recommendation.profession}
+                  </p>
+                  <p className="text-sm text-gray-500 truncate">
+                    {recommendation.city}, {recommendation.country}
+                  </p>
+                </div>
+                
+                <div className="text-center flex-shrink-0">
+                  <div className="text-xl sm:text-2xl font-bold text-green-600">{match}%</div>
+                  <span className="text-xs font-semibold text-green-600 bg-green-50 px-2 py-1 rounded-full whitespace-nowrap">
+                    Match
                   </span>
-                )}
+                </div>
               </div>
-              {/* Profile Details */}
-              <div className="flex flex-col gap-2 min-w-0">
-                <h3 className="text-xl lg:text-2xl font-bold text-gray-800 m-0 truncate">{recommendation.firstName} {recommendation.lastName}</h3>
-                <p className="text-base lg:text-lg text-gray-600 m-0 font-medium">{recommendation.age} • {recommendation.profession}</p>
-                <p className="text-sm lg:text-base text-gray-500 m-0 truncate">{recommendation.city}, {recommendation.country}</p>
-                <button className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold py-2 lg:py-3 px-6 lg:px-8 rounded-full mt-2 lg:mt-4 transition-all duration-300 hover:shadow-xl hover:scale-105 hover:from-blue-700 hover:to-indigo-700 text-sm lg:text-base w-fit"
+              
+              {/* Action buttons */}
+              <div className="flex gap-2 sm:gap-3">
+                <button
+                  className="flex-1 py-2 sm:py-3 px-3 sm:px-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold hover:shadow-lg hover:scale-105 transition-all rounded-lg text-sm sm:text-base"
                   onClick={handleConnect}
                 >
                   Connect
                 </button>
+                <button
+                  className="py-2 sm:py-3 px-4 sm:px-6 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold transition-all rounded-lg text-sm sm:text-base"
+                  onClick={handleSkip}
+                >
+                  Skip
+                </button>
               </div>
             </div>
-            {/* Match Info & Skip Button on right */}
-            <div className="flex flex-col items-end justify-center min-w-[120px] lg:min-w-[140px] gap-3 lg:gap-4 ml-auto">
-              <div className="text-right">
-                <div className="text-3xl lg:text-4xl font-bold text-green-600 mb-1 lg:mb-2">{match}%</div>
-                <span className="text-xs lg:text-sm font-semibold text-green-600 bg-green-50 px-3 lg:px-4 py-1 lg:py-2 rounded-full">Perfect Match</span>
+            
+            {/* Desktop Layout */}
+            <div className="hidden lg:flex items-center gap-6 py-4">
+              {/* Profile Info */}
+              <div className="flex items-center gap-6 flex-1 min-w-0">
+                {/* Avatar */}
+                <div className="w-24 h-24 xl:w-28 xl:h-28 rounded-3xl bg-gradient-to-br from-blue-100 to-indigo-200 overflow-hidden cursor-pointer transition-all duration-300 hover:scale-105 shadow-lg flex-shrink-0 flex items-center justify-center">
+                  {recommendation.avatar ? (
+                    <img src={recommendation.avatar} alt={recommendation.firstName} className="w-full h-full object-cover" />
+                  ) : (
+                    <span className="text-3xl font-bold text-blue-700">
+                      {recommendation.firstName?.charAt(0)?.toUpperCase() || ''}
+                      {recommendation.lastName?.charAt(0)?.toUpperCase() || ''}
+                    </span>
+                  )}
+                </div>
+                
+                {/* Profile Details */}
+                <div className="flex flex-col gap-2 min-w-0 flex-1">
+                  <h3 className="text-xl xl:text-2xl font-bold text-gray-800 truncate">
+                    {recommendation.firstName} {recommendation.lastName}
+                  </h3>
+                  <p className="text-lg text-gray-600 font-medium truncate">
+                    {recommendation.age} • {recommendation.profession}
+                  </p>
+                  <p className="text-base text-gray-500 truncate">
+                    {recommendation.city}, {recommendation.country}
+                  </p>
+                  <button 
+                    className="py-3 px-6 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold mt-4 transition-all duration-300 hover:shadow-xl hover:scale-105 hover:from-blue-700 hover:to-indigo-700 w-fit rounded-lg"
+                    onClick={handleConnect}
+                  >
+                    Connect
+                  </button>
+                </div>
               </div>
-              <button
-                className="bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold py-2 lg:py-3 px-4 lg:px-6 rounded-full transition-all duration-300 hover:shadow-md hover:scale-105 text-sm lg:text-base"
-                onClick={handleSkip}
-              >
-                ⏭️ Skip
-              </button>
+              
+              {/* Match Info & Skip Button */}
+              <div className="flex flex-col items-end gap-4 min-w-fit">
+                <div className="text-center">
+                  <div className="text-3xl xl:text-4xl font-bold text-green-600 mb-2">{match}%</div>
+                  <span className="text-sm font-semibold text-green-600 bg-green-50 px-4 py-2 rounded-full">
+                    Perfect Match
+                  </span>
+                </div>
+                <button
+                  className="py-3 px-6 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold transition-all duration-300 hover:shadow-md hover:scale-105 rounded-lg"
+                  onClick={handleSkip}
+                >
+                  <span>⏭️ Skip</span>
+                </button>
+              </div>
             </div>
           </div>
-        ) : null}
+        ) : (
+          <div className="flex flex-col items-center justify-center h-48 lg:h-60 text-center p-4">
+            <div className="text-3xl sm:text-4xl lg:text-5xl mb-3">💫</div>
+            <p className="text-base lg:text-lg text-gray-500">No recommendations available right now</p>
+            <p className="text-sm text-gray-400 mt-2">Check back later for new matches!</p>
+          </div>
+        )}
       </div>
     </section>
   );

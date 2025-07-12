@@ -69,9 +69,9 @@ const ChatSidebar = ({ chats, selectedChat, onChatSelect, onNewChat, onShowUserS
 
   return (
     <>
-      <div className="h-full flex flex-col  bg-gray-50">
+      <div className="h-full flex flex-col bg-gray-50 min-h-0">
         {/* Header */}
-        <div className="p-3 sm:p-6 bg-white border-b border-gray-200">
+        <div className="p-3 sm:p-6 bg-white border-b border-gray-200 flex-shrink-0">
           {/* User Profile */}
           <div className="flex items-center justify-between mb-4 sm:mb-6">
             <div className="flex items-center space-x-2 sm:space-x-3 min-w-0 flex-1">
@@ -149,9 +149,9 @@ const ChatSidebar = ({ chats, selectedChat, onChatSelect, onNewChat, onShowUserS
         </div>
 
         {/* Chat List */}
-        <div className="flex-1 overflow-y-auto chat-scroll">
+        <div className="flex-1 overflow-y-auto chat-scroll min-h-0">
           {filteredChats.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-full p-4 sm:p-8">
+            <div className="flex flex-col items-center justify-center h-full p-4 sm:p-8 min-h-[300px]">
               <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-r from-rose-100 to-pink-100 rounded-full flex items-center justify-center mb-4 sm:mb-6">
                 <MessageCircle className="w-8 h-8 sm:w-10 sm:h-10 text-rose-500" />
               </div>
@@ -173,7 +173,7 @@ const ChatSidebar = ({ chats, selectedChat, onChatSelect, onNewChat, onShowUserS
               )}
             </div>
           ) : (
-            <div className="p-2 sm:p-3 space-y-1">
+            <div className="p-2 sm:p-3 space-y-1 pb-4">
               {filteredChats.map((chat) => {
                 const otherUser = chat.participants.find(p => p._id !== user._id);
                 const isSelected = selectedChat?._id === chat._id;
@@ -228,8 +228,6 @@ const ChatSidebar = ({ chats, selectedChat, onChatSelect, onNewChat, onShowUserS
           )}
         </div>
       </div>
-
-
     </>
   );
 };
