@@ -366,7 +366,7 @@ export const sendWelcomeEmail = async (email, firstName) => {
         </div>
         
         <div class="button-container">
-          <a href="${process.env.CLIENT_URL || 'http://rmtjob.com'}/dashboard" class="button">
+          <a href="${process.env.CLIENT_URL }/dashboard" class="button">
             Complete Your Profile
           </a>
         </div>

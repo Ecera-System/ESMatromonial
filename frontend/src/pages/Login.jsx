@@ -103,8 +103,9 @@ const Login = () => {
   };
 
   const handleGoogleLogin = () => {
-    const backendUrl = import.meta.env.VITE_API_URL?.replace('/api/v1', '') || 'http://rmtjob.com';
-    window.location.href = `${backendUrl}/api/v1/auth/google`;
+    const backendUrl = import.meta.env.VITE_API_URL?.replace('/api/v1', '') || 'https://matromatch.com';
+    const redirectUrl = encodeURIComponent(window.location.origin + '/login');
+    window.location.href = `${backendUrl}/api/v1/auth/google?redirect=${redirectUrl}`;
   };
 
   const handleForgotPassword = async (e) => {
