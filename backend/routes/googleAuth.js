@@ -32,7 +32,7 @@ googleRouter.get(
     session: false,
     failureRedirect: (req, res) => {
       console.log('❌ Google OAuth failed');
-      const redirectUrl = req.query.redirect || (process.env.CLIENT_URL || "http://localhost:5173") + "/login";
+      const redirectUrl = req.query.redirect || (process.env.CLIENT_URL ) + "/login";
       const errorUrl = `${redirectUrl}?error=oauth_failed`;
       console.log('🔄 Redirecting to error URL:', errorUrl);
       res.redirect(errorUrl);
@@ -44,7 +44,7 @@ googleRouter.get(
       
       if (!req.user) {
         console.error('❌ No user object found after authentication');
-        const redirectUrl = req.query.redirect || (process.env.CLIENT_URL || "http://localhost:5173") + "/login";
+        const redirectUrl = req.query.redirect || (process.env.CLIENT_URL ) + "/login";
         const errorUrl = `${redirectUrl}?error=no_user`;
         return res.redirect(errorUrl);
       }
