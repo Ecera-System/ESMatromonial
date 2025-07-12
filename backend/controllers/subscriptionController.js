@@ -11,7 +11,7 @@ const razorpay = new Razorpay({
   key_id: process.env.RAZORPAY_KEY_ID ||"rzp_test_Nib0mJvpfJr98Q",
   key_secret: process.env.RAZORPAY_KEY_SECRET || "UyFPAWHj1GljEQDCBpxC2a40",
 });
-console.log(razorpay);
+
 
 
 export const getPlans = async (req, res) => {

@@ -146,8 +146,9 @@ const Signup = () => {
 
   const handleGoogleSignup = () => {
     // Redirect to backend Google OAuth endpoint
-    const backendUrl = import.meta.env.VITE_API_URL?.replace('/api/v1', '') || 'http://rmtjob.com';
-    window.location.href = `${backendUrl}/api/v1/auth/google`;
+    const backendUrl = import.meta.env.VITE_API_URL?.replace('/api/v1', '') || 'https://matromatch.com';
+    const redirectUrl = encodeURIComponent(window.location.origin + '/signup');
+    window.location.href = `${backendUrl}/api/v1/auth/google?redirect=${redirectUrl}`;
   };
 
   return (
