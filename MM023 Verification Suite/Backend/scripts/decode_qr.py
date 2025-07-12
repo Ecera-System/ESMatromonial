@@ -3,7 +3,7 @@ from pyaadhaar.utils import Qr_img_to_text
 import sys, json
 
 # Use hardcoded path or accept from command line
-img_path = r"C:\Users\Kurian Tony Aloor\OneDrive\Pictures\Screenshots\Screenshot190938.png"
+img_path = sys.argv[1]
 
 try:
     qr_data_list = Qr_img_to_text(img_path)
