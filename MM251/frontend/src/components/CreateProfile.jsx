@@ -81,12 +81,12 @@ const CreateProfile = ({ onProfileCreated }) => {
   const totalSteps = 6;
 
   const steps = [
-    { id: 1, title: 'Personal Info', icon: User },
-    { id: 2, title: 'Contact & Location', icon: MapPin },
-    { id: 3, title: 'Professional', icon: Briefcase },
-    { id: 4, title: 'Family', icon: Home },
-    { id: 5, title: 'Lifestyle', icon: Heart },
-    { id: 6, title: 'Photos', icon: Camera }
+    { id: 1, icon: User },
+    { id: 2, icon: MapPin },
+    { id: 3,  icon: Briefcase },
+    { id: 4,  icon: Home },
+    { id: 5,  icon: Heart },
+    { id: 6, icon: Camera }
   ];
 
   const handleInputChange = (field, value) => {
@@ -807,21 +807,20 @@ const CreateProfile = ({ onProfileCreated }) => {
   };
 
   return (
-    <div className="min-h-screen bg-white dark:bg-black py-8 px-4 transition-colors duration-300">
-      <div className="max-w-4xl mx-auto">
+    <div className="min-h-screen bg-white dark:bg-black py-6 px-2 sm:py-8 sm:px-4 transition-colors duration-300">
+      <div className="max-w-4xl mx-auto w-full">
         {/* Header with View Profile Button */}
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex flex-col sm:flex-row items-center justify-between mb-6 sm:mb-8 gap-4 sm:gap-0">
           <div className="text-center flex-1">
-            <h1 className="text-3xl lg:text-4xl font-bold text-black dark:text-white mb-2">Create Your Profile</h1>
-            <p className="text-gray-600 dark:text-gray-400">Find your perfect life partner with a complete profile</p>
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-black dark:text-white mb-1 sm:mb-2">Create Your Profile</h1>
+            <p className="text-gray-600 dark:text-gray-400 text-sm sm:text-base">Find your perfect life partner with a complete profile</p>
           </div>
-          
           <button
             onClick={handleViewProfile}
-            className="flex items-center space-x-2 px-6 py-3 bg-black dark:bg-white text-white dark:text-black rounded-full font-semibold hover:bg-gray-800 dark:hover:bg-gray-200 transition-all shadow-lg hover:shadow-xl"
+            className="flex items-center space-x-2 px-4 sm:px-6 py-2 sm:py-3 bg-black dark:bg-white text-white dark:text-black rounded-full font-semibold hover:bg-gray-800 dark:hover:bg-gray-200 transition-all shadow-lg hover:shadow-xl mt-4 sm:mt-0"
           >
             <Eye className="w-5 h-5" />
-            <span>View Profile</span>
+            <span className="text-sm sm:text-base">View Profile</span>
           </button>
         </div>
 
@@ -839,16 +838,15 @@ const CreateProfile = ({ onProfileCreated }) => {
         )}
 
         {/* Progress Steps */}
-        <div className="bg-white dark:bg-black rounded-2xl shadow-xl p-6 mb-8 border border-gray-300 dark:border-gray-700">
-          <div className="flex items-center justify-between mb-6">
+        <div className="bg-white dark:bg-black rounded-2xl shadow-xl p-4 sm:p-6 mb-6 sm:mb-8 border border-gray-300 dark:border-gray-700">
+          <div className="flex flex-wrap sm:flex-nowrap items-center justify-between mb-4 sm:mb-6 gap-2 sm:gap-0">
             {steps.map((step, index) => {
               const Icon = step.icon;
               const isActive = currentStep === step.id;
               const isCompleted = currentStep > step.id;
-              
               return (
-                <div key={step.id} className="flex items-center">
-                  <div className={`flex items-center justify-center w-12 h-12 rounded-full border-2 transition-all ${
+                <div key={step.id} className="flex items-center min-w-[60px]">
+                  <div className={`flex items-center justify-center w-9 h-9 sm:w-12 sm:h-12 rounded-full border-2 transition-all ${
                     isCompleted 
                       ? 'bg-black dark:bg-white border-black dark:border-white text-white dark:text-black' 
                       : isActive 
@@ -856,25 +854,25 @@ const CreateProfile = ({ onProfileCreated }) => {
                         : 'border-gray-300 dark:border-gray-600 text-gray-400 dark:text-gray-500'
                   }`}>
                     {isCompleted ? (
-                      <Check className="w-6 h-6" />
+                      <Check className="w-5 h-5 sm:w-6 sm:h-6" />
                     ) : (
-                      <Icon className="w-6 h-6" />
+                      <Icon className="w-5 h-5 sm:w-6 sm:h-6" />
                     )}
                   </div>
-                  <div className="ml-3 hidden md:block">
-                    <p className={`text-sm font-medium ${
+                  <div className="ml-2 sm:ml-3 hidden md:block">
+                    <p className={`text-xs sm:text-sm font-medium ${
                       isActive ? 'text-black dark:text-white' : isCompleted ? 'text-black dark:text-white' : 'text-gray-500 dark:text-gray-400'
                     }`}>
                       Step {step.id}
                     </p>
-                    <p className={`text-xs ${
+                    <p className={`text-[10px] sm:text-xs ${
                       isActive ? 'text-black dark:text-white' : isCompleted ? 'text-black dark:text-white' : 'text-gray-400 dark:text-gray-500'
                     }`}>
                       {step.title}
                     </p>
                   </div>
                   {index < steps.length - 1 && (
-                    <div className={`w-8 h-0.5 ml-4 ${
+                    <div className={`w-4 sm:w-8 h-0.5 ml-2 sm:ml-4 ${
                       isCompleted ? 'bg-black dark:bg-white' : 'bg-gray-300 dark:bg-gray-600'
                     }`} />
                   )}
@@ -882,26 +880,25 @@ const CreateProfile = ({ onProfileCreated }) => {
               );
             })}
           </div>
-          
-          <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+          <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5 sm:h-2">
             <div 
-              className="bg-black dark:bg-white h-2 rounded-full transition-all duration-300"
+              className="bg-black dark:bg-white h-1.5 sm:h-2 rounded-full transition-all duration-300"
               style={{ width: `${(currentStep / totalSteps) * 100}%` }}
             />
           </div>
         </div>
 
         {/* Form Content */}
-        <div className="bg-white dark:bg-black rounded-2xl shadow-xl p-8 mb-8 border border-gray-300 dark:border-gray-700">
+        <div className="bg-white dark:bg-black rounded-2xl shadow-xl p-4 sm:p-8 mb-6 sm:mb-8 border border-gray-300 dark:border-gray-700">
           {renderStepContent()}
         </div>
 
         {/* Navigation Buttons */}
-        <div className="flex justify-between">
+        <div className="flex flex-col sm:flex-row justify-between gap-4">
           <button
             onClick={prevStep}
             disabled={currentStep === 1}
-            className={`flex items-center space-x-2 px-6 py-3 rounded-full font-semibold transition-all ${
+            className={`flex items-center space-x-2 px-4 sm:px-6 py-2 sm:py-3 rounded-full font-semibold transition-all text-sm sm:text-base ${
               currentStep === 1
                 ? 'bg-gray-200 dark:bg-gray-800 text-gray-400 dark:text-gray-500 cursor-not-allowed'
                 : 'bg-gray-600 dark:bg-gray-400 text-white dark:text-black hover:bg-gray-700 dark:hover:bg-gray-300'
@@ -910,11 +907,10 @@ const CreateProfile = ({ onProfileCreated }) => {
             <ChevronLeft className="w-5 h-5" />
             <span>Previous</span>
           </button>
-          
           {currentStep < totalSteps ? (
             <button
               onClick={nextStep}
-              className="flex items-center space-x-2 px-6 py-3 bg-black dark:bg-white text-white dark:text-black rounded-full font-semibold hover:bg-gray-800 dark:hover:bg-gray-200 transition-all shadow-lg hover:shadow-xl"
+              className="flex items-center space-x-2 px-4 sm:px-6 py-2 sm:py-3 bg-black dark:bg-white text-white dark:text-black rounded-full font-semibold hover:bg-gray-800 dark:hover:bg-gray-200 transition-all shadow-lg hover:shadow-xl text-sm sm:text-base"
             >
               <span>Next</span>
               <ChevronRight className="w-5 h-5" />
@@ -923,7 +919,7 @@ const CreateProfile = ({ onProfileCreated }) => {
             <button
               onClick={handleSubmit}
               disabled={isLoading}
-              className="flex items-center space-x-2 px-8 py-3 bg-black dark:bg-white text-white dark:text-black rounded-full font-semibold hover:bg-gray-800 dark:hover:bg-gray-200 transition-all shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex items-center space-x-2 px-6 sm:px-8 py-2 sm:py-3 bg-black dark:bg-white text-white dark:text-black rounded-full font-semibold hover:bg-gray-800 dark:hover:bg-gray-200 transition-all shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base"
             >
               {isLoading ? (
                 <>

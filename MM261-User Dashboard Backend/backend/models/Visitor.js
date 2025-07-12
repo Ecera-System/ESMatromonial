@@ -1,9 +1,14 @@
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
 
 const visitorSchema = new mongoose.Schema({
-  userId: {
+  visitedUserId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'User', //it match the name of your User model
+    ref: "User",
+    required: true
+  },
+  visitorUserId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
     required: true
   },
   visitedAt: {
@@ -12,5 +17,5 @@ const visitorSchema = new mongoose.Schema({
   }
 });
 
-const Visitor = mongoose.model('Visitor', visitorSchema);
+const Visitor = mongoose.model("Visitor", visitorSchema);
 export default Visitor;
