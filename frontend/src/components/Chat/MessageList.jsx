@@ -58,7 +58,7 @@ const MessageList = ({ messages, currentUserId }) => {
   });
 
   return (
-    <div className="p-2 sm:p-4 space-y-2 sm:space-y-4 chat-scroll">
+    <div className="p-2 sm:p-4 space-y-2 sm:space-y-4 pb-4">
       {filteredMessages.map((message, index) => {
         const isOwnMessage = message.sender._id === currentUserId;
         const previousMessage = filteredMessages[index - 1];
@@ -84,7 +84,7 @@ const MessageList = ({ messages, currentUserId }) => {
               transition={{ duration: 0.3 }}
               className={`flex ${isOwnMessage ? 'justify-end' : 'justify-start'} mb-1 sm:mb-2`}
             >
-              <div className={`flex items-end space-x-1 sm:space-x-2 max-w-[280px] sm:max-w-xs lg:max-w-md ${isOwnMessage ? 'flex-row-reverse space-x-reverse' : ''} ${isOwnMessage ? 'ml-auto' : 'mr-auto'}`}>
+              <div className={`flex items-end space-x-1 sm:space-x-2 max-w-[280px] sm:max-w-xs lg:max-w-md ${isOwnMessage ? 'flex-row-reverse space-x-reverse' : ''}`}>
                 {/* Avatar */}
                 {!isOwnMessage && (
                   <div className="w-6 h-6 sm:w-8 sm:h-8 bg-gradient-to-r from-rose-400 to-pink-500 rounded-full flex items-center justify-center text-white text-xs sm:text-sm font-semibold flex-shrink-0 shadow-sm">
@@ -135,7 +135,7 @@ const MessageList = ({ messages, currentUserId }) => {
                 
                 {/* Time for emoji-only and file messages */}
                 {(emojiOnly || isFileMessage) && (
-                  <div className={`text-xs text-gray-500 ${isOwnMessage ? 'text-right' : 'text-left'} mt-1`}>
+                  <div className={`text-xs text-gray-500 ${isOwnMessage ? 'text-right' : 'text-left'} mt-1 px-2`}>
                     {formatMessageTime(message.createdAt)}
                   </div>
                 )}
@@ -144,6 +144,8 @@ const MessageList = ({ messages, currentUserId }) => {
           </div>
         );
       })}
+      {/* Extra padding at bottom to ensure last message is visible */}
+      <div className="h-4"></div>
     </div>
   );
 };

@@ -54,9 +54,19 @@ const Chat = () => {
   const createChatWithUser = async (userId, prefill) => {
     try {
       const token = localStorage.getItem('token');
-      const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/v1/chat`, { participantId: userId }, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      console.log('Creating chat with user:', userId, 'token:', !!token);
+      
+      const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/v1/chat`, 
+        { participantId: userId }, 
+        {
+          headers: { 
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+      
+      console.log('Chat created successfully:', res.data);
       setChats(prev => {
         // Prevent duplicate chats
         if (prev.some(chat => chat._id === res.data._id)) return prev;
@@ -65,7 +75,8 @@ const Chat = () => {
       setSelectedChat(res.data);
       if (prefill) setPrefillMessage(decodeURIComponent(prefill));
     } catch (err) {
-      // Optionally show error
+      console.error('Error creating chat:', err);
+      console.error('Error details:', err.response?.data);
     }
   };
 
@@ -81,10 +92,25 @@ const Chat = () => {
 
   const fetchChats = async () => {
     try {
-      const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/v1/chat`);
+      const token = localStorage.getItem('token');
+      console.log('Fetching chats with token:', !!token);
+      console.log('API URL:', import.meta.env.VITE_API_URL);
+      
+      const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/v1/chat`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      
+      console.log('Chats fetched successfully:', response.data);
       setChats(response.data);
     } catch (error) {
       console.error('Error fetching chats:', error);
+      console.error('Error details:', error.response?.data);
+      if (error.response?.status === 401) {
+        console.error('Authentication failed - redirecting to login');
+        // Optionally redirect to login
+      }
     } finally {
       setLoading(false);
     }
@@ -129,18 +155,18 @@ const Chat = () => {
 
   if (loading) {
     return (
-      <div className="fixed inset-0 flex items-center justify-center bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900">
+      <div className="mobile-viewport flex items-center justify-center bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900">
         <div className="w-8 h-8 border-4 border-white/20 border-t-white rounded-full animate-spin"></div>
       </div>
     );
   }
 
   return (
-    <div className="h-full flex bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 rounded-lg overflow-hidden">
+    <div className="h-screen flex bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 overflow-hidden">
       {/* Desktop Layout - Sidebar + Chat */}
-      <div className="hidden lg:flex w-full">
+      <div className="hidden lg:flex w-full h-full">
         {/* Sidebar */}
-        <div className="w-80 lg:w-96 relative border-r border-white/10">
+        <div className="w-80 xl:w-96 relative border-r border-white/10 h-full flex-shrink-0">
           <ChatSidebar 
             chats={chats}
             selectedChat={selectedChat}
@@ -152,7 +178,7 @@ const Chat = () => {
         </div>
         
         {/* Main chat area */}
-        <div className="flex-1 relative min-w-0">
+        <div className="flex-1 relative min-w-0 h-full">
           <ChatWindow 
             selectedChat={selectedChat}
             onMessageSent={handleMessageSent}
@@ -163,10 +189,10 @@ const Chat = () => {
       </div>
 
       {/* Mobile Layout - Full Screen */}
-      <div className="lg:hidden w-full">
+      <div className="lg:hidden w-full h-full">
         {selectedChat ? (
           // Full screen chat window
-          <div className="h-full relative">
+          <div className="h-full">
             <ChatWindow 
               selectedChat={selectedChat}
               onMessageSent={handleMessageSent}
@@ -191,12 +217,14 @@ const Chat = () => {
       </div>
 
       {/* In-page notifications */}
-      <InPageNotificationContainer 
-        notifications={inPageNotifications}
-        removeNotification={removeInPageNotification}
-      />
+      <div className="fixed top-4 left-4 right-4 z-50 lg:top-6 lg:left-6 lg:right-6 pointer-events-none">
+        <InPageNotificationContainer 
+          notifications={inPageNotifications}
+          removeNotification={removeInPageNotification}
+        />
+      </div>
 
-      {/* Modals - Rendered at root level */}
+      {/* Modals */}
       <UserSearch
         isOpen={showUserSearch}
         onClose={() => setShowUserSearch(false)}

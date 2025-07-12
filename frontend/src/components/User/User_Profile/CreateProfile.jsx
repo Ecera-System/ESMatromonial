@@ -118,9 +118,12 @@ const CreateProfile = ({ onProfileCreated = () => {} }) => {
     const formData = new FormData();
     formData.append('photo', file);
     try {
-      // Optionally show upload progress
-      const response = await axios.post('/api/v1/users/upload-photo', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
+      const token = localStorage.getItem('token');
+      const response = await axios.post(`${import.meta.env.VITE_API_URL}/api/v1/users/upload-photo`, formData, {
+        headers: { 
+          'Content-Type': 'multipart/form-data',
+          'Authorization': `Bearer ${token}`
+        },
       });
       const photoUrl = response.data.photoUrl;
       setProfileData(prev => ({
@@ -156,10 +159,11 @@ const CreateProfile = ({ onProfileCreated = () => {} }) => {
     setSuccess(null);
     setError(null);
     try {
-      // Prepare form data (handle photos if needed)
+      const token = localStorage.getItem('token');
       const formData = { ...profileData };
-      // If you want to handle photo uploads, you may need to use FormData and a separate endpoint
-      const response = await axios.put(`/api/v1/users/${user._id}`, formData);
+      const response = await axios.put(`${import.meta.env.VITE_API_URL}/api/v1/users/${user._id}`, formData, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
       setSuccess('Profile updated successfully!');
       onProfileCreated(response.data);
       navigate('/profile/view');
@@ -214,7 +218,10 @@ const CreateProfile = ({ onProfileCreated = () => {} }) => {
       setLoading(true);
       setError(null);
       try {
-        const response = await axios.get(`/api/v1/users/${user._id}`);
+        const token = localStorage.getItem('token');
+        const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/v1/users/${user._id}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
         if (response.data) {
           setProfileData(prev => ({ ...prev, ...response.data }));
         }
@@ -232,47 +239,47 @@ const CreateProfile = ({ onProfileCreated = () => {} }) => {
       case 1:
         return (
           <div className="space-y-6">
-            <h3 className="text-2xl font-bold text-black dark:text-white mb-6">Personal Information</h3>
+            <h3 className="text-2xl font-bold text-gray-800 mb-6">Personal Information</h3>
             
             <div className="grid md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm font-medium text-black dark:text-white mb-2">First Name *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">First Name *</label>
                 <input
                   type="text"
                   value={profileData.firstName}
                   onChange={(e) => handleInputChange('firstName', e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-black dark:focus:ring-white focus:border-transparent bg-white dark:bg-black text-black dark:text-white"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 bg-gray-50 text-gray-800 placeholder-gray-500 transition-all duration-200"
                   placeholder="Enter your first name"
                 />
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-black dark:text-white mb-2">Last Name *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Last Name *</label>
                 <input
                   type="text"
                   value={profileData.lastName}
                   onChange={(e) => handleInputChange('lastName', e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-black dark:focus:ring-white focus:border-transparent bg-white dark:bg-black text-black dark:text-white"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 bg-gray-50 text-gray-800 placeholder-gray-500 transition-all duration-200"
                   placeholder="Enter your last name"
                 />
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-black dark:text-white mb-2">Date of Birth *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Date of Birth *</label>
                 <input
                   type="date"
                   value={profileData.dateOfBirth}
                   onChange={(e) => handleInputChange('dateOfBirth', e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-black dark:focus:ring-white focus:border-transparent bg-white dark:bg-black text-black dark:text-white"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 bg-gray-50 text-gray-800 transition-all duration-200"
                 />
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-black dark:text-white mb-2">Gender *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Gender *</label>
                 <select
                   value={profileData.gender}
                   onChange={(e) => handleInputChange('gender', e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-black dark:focus:ring-white focus:border-transparent bg-white dark:bg-black text-black dark:text-white"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 bg-gray-50 text-gray-800 transition-all duration-200"
                 >
                   <option value="">Select Gender</option>
                   <option value="Male">Male</option>
@@ -281,11 +288,11 @@ const CreateProfile = ({ onProfileCreated = () => {} }) => {
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-black dark:text-white mb-2">Height *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Height *</label>
                 <select
                   value={profileData.height}
                   onChange={(e) => handleInputChange('height', e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-black dark:focus:ring-white focus:border-transparent bg-white dark:bg-black text-black dark:text-white"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 bg-gray-50 text-gray-800 transition-all duration-200"
                 >
                   <option value="">Select Height</option>
                   <option value={"4'6\""}>4'6"</option>
@@ -315,11 +322,11 @@ const CreateProfile = ({ onProfileCreated = () => {} }) => {
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-black dark:text-white mb-2">Marital Status *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Marital Status *</label>
                 <select
                   value={profileData.maritalStatus}
                   onChange={(e) => handleInputChange('maritalStatus', e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-black dark:focus:ring-white focus:border-transparent bg-white dark:bg-black text-black dark:text-white"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 bg-gray-50 text-gray-800 transition-all duration-200"
                 >
                   <option value="">Select Status</option>
                   <option value="Never Married">Never Married</option>
@@ -330,11 +337,11 @@ const CreateProfile = ({ onProfileCreated = () => {} }) => {
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-black dark:text-white mb-2">Religion *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Religion *</label>
                 <select
                   value={profileData.religion}
                   onChange={(e) => handleInputChange('religion', e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-black dark:focus:ring-white focus:border-transparent bg-white dark:bg-black text-black dark:text-white"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 bg-gray-50 text-gray-800 transition-all duration-200"
                 >
                   <option value="">Select Religion</option>
                   <option value="Hindu">Hindu</option>
@@ -348,11 +355,11 @@ const CreateProfile = ({ onProfileCreated = () => {} }) => {
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-black dark:text-white mb-2">Mother Tongue *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Mother Tongue *</label>
                 <select
                   value={profileData.motherTongue}
                   onChange={(e) => handleInputChange('motherTongue', e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-black dark:focus:ring-white focus:border-transparent bg-white dark:bg-black text-black dark:text-white"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 bg-gray-50 text-gray-800 transition-all duration-200"
                 >
                   <option value="">Select Language</option>
                   <option value="Hindi">Hindi</option>
@@ -375,16 +382,16 @@ const CreateProfile = ({ onProfileCreated = () => {} }) => {
       case 2:
         return (
           <div className="space-y-6">
-            <h3 className="text-2xl font-bold text-black dark:text-white mb-6">Contact & Location</h3>
+            <h3 className="text-2xl font-bold text-gray-800 mb-6">Contact & Location</h3>
             
             <div className="grid md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm font-medium text-black dark:text-white mb-2">Email *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Email *</label>
                 <input
                   type="email"
                   value={profileData.email}
                   onChange={(e) => handleInputChange('email', e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-black dark:focus:ring-white focus:border-transparent bg-white dark:bg-black text-black dark:text-white"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 bg-gray-50 text-gray-800 placeholder-gray-500 transition-all duration-200"
                   placeholder="Enter your email"
                   ref={emailRef}
                   readOnly={!!profileData.email}
@@ -392,22 +399,22 @@ const CreateProfile = ({ onProfileCreated = () => {} }) => {
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-black dark:text-white mb-2">Phone Number *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Phone Number *</label>
                 <input
                   type="tel"
                   value={profileData.phone}
                   onChange={(e) => handleInputChange('phone', e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-black dark:focus:ring-white focus:border-transparent bg-white dark:bg-black text-black dark:text-white"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 bg-gray-50 text-gray-800 placeholder-gray-500 transition-all duration-200"
                   placeholder="Enter your phone number"
                 />
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-black dark:text-white mb-2">Country *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Country *</label>
                 <select
                   value={profileData.country}
                   onChange={(e) => handleInputChange('country', e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-black dark:focus:ring-white focus:border-transparent bg-white dark:bg-black text-black dark:text-white"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 bg-gray-50 text-gray-800 transition-all duration-200"
                 >
                   <option value="">Select Country</option>
                   <option value="India">India</option>
@@ -420,33 +427,33 @@ const CreateProfile = ({ onProfileCreated = () => {} }) => {
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-black dark:text-white mb-2">State *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">State *</label>
                 <input
                   type="text"
                   value={profileData.state}
                   onChange={(e) => handleInputChange('state', e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-black dark:focus:ring-white focus:border-transparent bg-white dark:bg-black text-black dark:text-white"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 bg-gray-50 text-gray-800 placeholder-gray-500 transition-all duration-200"
                   placeholder="Enter your state"
                 />
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-black dark:text-white mb-2">City *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">City *</label>
                 <input
                   type="text"
                   value={profileData.city}
                   onChange={(e) => handleInputChange('city', e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-black dark:focus:ring-white focus:border-transparent bg-white dark:bg-black text-black dark:text-white"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 bg-gray-50 text-gray-800 placeholder-gray-500 transition-all duration-200"
                   placeholder="Enter your city"
                 />
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-black dark:text-white mb-2">Residential Status</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Residential Status</label>
                 <select
                   value={profileData.residentialStatus}
                   onChange={(e) => handleInputChange('residentialStatus', e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-black dark:focus:ring-white focus:border-transparent bg-white dark:bg-black text-black dark:text-white"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 bg-gray-50 text-gray-800 transition-all duration-200"
                 >
                   <option value="">Select Status</option>
                   <option value="Citizen">Citizen</option>
@@ -463,15 +470,15 @@ const CreateProfile = ({ onProfileCreated = () => {} }) => {
       case 3:
         return (
           <div className="space-y-6">
-            <h3 className="text-2xl font-bold text-black dark:text-white mb-6">Professional Information</h3>
+            <h3 className="text-2xl font-bold text-gray-800 mb-6">Professional Information</h3>
             
             <div className="grid md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm font-medium text-black dark:text-white mb-2">Education *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Education *</label>
                 <select
                   value={profileData.education}
                   onChange={(e) => handleInputChange('education', e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-black dark:focus:ring-white focus:border-transparent bg-white dark:bg-black text-black dark:text-white"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 bg-gray-50 text-gray-800 transition-all duration-200"
                 >
                   <option value="">Select Education</option>
                   <option value="High School">High School</option>
@@ -484,22 +491,22 @@ const CreateProfile = ({ onProfileCreated = () => {} }) => {
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-black dark:text-white mb-2">Education Details</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Education Details</label>
                 <input
                   type="text"
                   value={profileData.educationDetails}
                   onChange={(e) => handleInputChange('educationDetails', e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-black dark:focus:ring-white focus:border-transparent bg-white dark:bg-black text-black dark:text-white"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 bg-gray-50 text-gray-800 placeholder-gray-500 transition-all duration-200"
                   placeholder="e.g., B.Tech in Computer Science"
                 />
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-black dark:text-white mb-2">Occupation *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Occupation *</label>
                 <select
                   value={profileData.occupation}
                   onChange={(e) => handleInputChange('occupation', e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-black dark:focus:ring-white focus:border-transparent bg-white dark:bg-black text-black dark:text-white"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 bg-gray-50 text-gray-800 transition-all duration-200"
                 >
                   <option value="">Select Occupation</option>
                   <option value="Software Engineer">Software Engineer</option>
@@ -514,22 +521,22 @@ const CreateProfile = ({ onProfileCreated = () => {} }) => {
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-black dark:text-white mb-2">Occupation Details</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Occupation Details</label>
                 <input
                   type="text"
                   value={profileData.occupationDetails}
                   onChange={(e) => handleInputChange('occupationDetails', e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-black dark:focus:ring-white focus:border-transparent bg-white dark:bg-black text-black dark:text-white"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 bg-gray-50 text-gray-800 placeholder-gray-500 transition-all duration-200"
                   placeholder="e.g., Senior Software Developer at Google"
                 />
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-black dark:text-white mb-2">Annual Income</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Annual Income</label>
                 <select
                   value={profileData.annualIncome}
                   onChange={(e) => handleInputChange('annualIncome', e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-black dark:focus:ring-white focus:border-transparent bg-white dark:bg-black text-black dark:text-white"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 bg-gray-50 text-gray-800 transition-all duration-200"
                 >
                   <option value="">Select Income Range</option>
                   <option value="Below ₹2 LPA">Below ₹2 LPA</option>
@@ -543,12 +550,12 @@ const CreateProfile = ({ onProfileCreated = () => {} }) => {
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-black dark:text-white mb-2">Work Location</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Work Location</label>
                 <input
                   type="text"
                   value={profileData.workLocation}
                   onChange={(e) => handleInputChange('workLocation', e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-black dark:focus:ring-white focus:border-transparent bg-white dark:bg-black text-black dark:text-white"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 bg-gray-50 text-gray-800 placeholder-gray-500 transition-all duration-200"
                   placeholder="Enter work location"
                 />
               </div>
@@ -559,15 +566,15 @@ const CreateProfile = ({ onProfileCreated = () => {} }) => {
       case 4:
         return (
           <div className="space-y-6">
-            <h3 className="text-2xl font-bold text-black dark:text-white mb-6">Family Information</h3>
+            <h3 className="text-2xl font-bold text-gray-800 mb-6">Family Information</h3>
             
             <div className="grid md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm font-medium text-black dark:text-white mb-2">Family Type</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Family Type</label>
                 <select
                   value={profileData.familyType}
                   onChange={(e) => handleInputChange('familyType', e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-black dark:focus:ring-white focus:border-transparent bg-white dark:bg-black text-black dark:text-white"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 bg-gray-50 text-gray-800 transition-all duration-200"
                 >
                   <option value="">Select Family Type</option>
                   <option value="Joint Family">Joint Family</option>
@@ -576,11 +583,11 @@ const CreateProfile = ({ onProfileCreated = () => {} }) => {
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-black dark:text-white mb-2">Family Status</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Family Status</label>
                 <select
                   value={profileData.familyStatus}
                   onChange={(e) => handleInputChange('familyStatus', e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-black dark:focus:ring-white focus:border-transparent bg-white dark:bg-black text-black dark:text-white"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 bg-gray-50 text-gray-800 transition-all duration-200"
                 >
                   <option value="">Select Status</option>
                   <option value="Middle Class">Middle Class</option>
@@ -591,45 +598,45 @@ const CreateProfile = ({ onProfileCreated = () => {} }) => {
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-black dark:text-white mb-2">Father's Occupation</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Father's Occupation</label>
                 <input
                   type="text"
                   value={profileData.fatherOccupation}
                   onChange={(e) => handleInputChange('fatherOccupation', e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-black dark:focus:ring-white focus:border-transparent bg-white dark:bg-black text-black dark:text-white"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 bg-gray-50 text-gray-800 placeholder-gray-500 transition-all duration-200"
                   placeholder="Enter father's occupation"
                 />
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-black dark:text-white mb-2">Mother's Occupation</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Mother's Occupation</label>
                 <input
                   type="text"
                   value={profileData.motherOccupation}
                   onChange={(e) => handleInputChange('motherOccupation', e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-black dark:focus:ring-white focus:border-transparent bg-white dark:bg-black text-black dark:text-white"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 bg-gray-50 text-gray-800 placeholder-gray-500 transition-all duration-200"
                   placeholder="Enter mother's occupation"
                 />
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-black dark:text-white mb-2">Siblings</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Siblings</label>
                 <input
                   type="text"
                   value={profileData.siblings}
                   onChange={(e) => handleInputChange('siblings', e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-black dark:focus:ring-white focus:border-transparent bg-white dark:bg-black text-black dark:text-white"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 bg-gray-50 text-gray-800 placeholder-gray-500 transition-all duration-200"
                   placeholder="e.g., 1 Brother, 1 Sister"
                 />
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-black dark:text-white mb-2">Family Location</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Family Location</label>
                 <input
                   type="text"
                   value={profileData.familyLocation}
                   onChange={(e) => handleInputChange('familyLocation', e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-black dark:focus:ring-white focus:border-transparent bg-white dark:bg-black text-black dark:text-white"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 bg-gray-50 text-gray-800 placeholder-gray-500 transition-all duration-200"
                   placeholder="Enter family location"
                 />
               </div>
@@ -640,15 +647,15 @@ const CreateProfile = ({ onProfileCreated = () => {} }) => {
       case 5:
         return (
           <div className="space-y-6">
-            <h3 className="text-2xl font-bold text-black dark:text-white mb-6">Lifestyle & About Me</h3>
+            <h3 className="text-2xl font-bold text-gray-800 mb-6">Lifestyle & About Me</h3>
             
             <div className="grid md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm font-medium text-black dark:text-white mb-2">Diet</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Diet</label>
                 <select
                   value={profileData.diet}
                   onChange={(e) => handleInputChange('diet', e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-black dark:focus:ring-white focus:border-transparent bg-white dark:bg-black text-black dark:text-white"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 bg-gray-50 text-gray-800 transition-all duration-200"
                 >
                   <option value="">Select Diet</option>
                   <option value="Vegetarian">Vegetarian</option>
@@ -659,11 +666,11 @@ const CreateProfile = ({ onProfileCreated = () => {} }) => {
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-black dark:text-white mb-2">Smoking</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Smoking</label>
                 <select
                   value={profileData.smoking}
                   onChange={(e) => handleInputChange('smoking', e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-black dark:focus:ring-white focus:border-transparent bg-white dark:bg-black text-black dark:text-white"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 bg-gray-50 text-gray-800 transition-all duration-200"
                 >
                   <option value="">Select Option</option>
                   <option value="Never">Never</option>
@@ -673,11 +680,11 @@ const CreateProfile = ({ onProfileCreated = () => {} }) => {
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-black dark:text-white mb-2">Drinking</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Drinking</label>
                 <select
                   value={profileData.drinking}
                   onChange={(e) => handleInputChange('drinking', e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-black dark:focus:ring-white focus:border-transparent bg-white dark:bg-black text-black dark:text-white"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 bg-gray-50 text-gray-800 transition-all duration-200"
                 >
                   <option value="">Select Option</option>
                   <option value="Never">Never</option>
@@ -688,82 +695,82 @@ const CreateProfile = ({ onProfileCreated = () => {} }) => {
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-black dark:text-white mb-2">Hobbies</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Hobbies</label>
                 <input
                   type="text"
                   value={profileData.hobbies}
                   onChange={(e) => handleInputChange('hobbies', e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-black dark:focus:ring-white focus:border-transparent bg-white dark:bg-black text-black dark:text-white"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 bg-gray-50 text-gray-800 placeholder-gray-500 transition-all duration-200"
                   placeholder="e.g., Reading, Traveling, Music"
                 />
               </div>
             </div>
             
             <div>
-              <label className="block text-sm font-medium text-black dark:text-white mb-2">About Me</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">About Me</label>
               <textarea
                 value={profileData.aboutMe}
                 onChange={(e) => handleInputChange('aboutMe', e.target.value)}
                 rows={4}
-                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-black dark:focus:ring-white focus:border-transparent bg-white dark:bg-black text-black dark:text-white"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 bg-gray-50 text-gray-800 placeholder-gray-500 transition-all duration-200"
                 placeholder="Tell us about yourself..."
                 ref={aboutMeRef}
               />
             </div>
             
-            <div className="bg-gray-100 dark:bg-gray-900 p-6 rounded-xl border border-gray-300 dark:border-gray-600">
-              <h4 className="text-lg font-semibold text-black dark:text-white mb-4">Partner Preferences</h4>
+            <div className="bg-purple-50 p-6 rounded-xl border border-purple-200">
+              <h4 className="text-lg font-semibold text-gray-800 mb-4">Partner Preferences</h4>
               
               <div className="grid md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-black dark:text-white mb-2">Age Range</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Age Range</label>
                   <div className="flex space-x-2">
                     <input
                       type="number"
                       value={profileData.partnerAgeMin}
                       onChange={(e) => handleInputChange('partnerAgeMin', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-black dark:focus:ring-white focus:border-transparent bg-white dark:bg-black text-black dark:text-white"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 bg-white text-gray-800 placeholder-gray-500 transition-all duration-200"
                       placeholder="Min"
                     />
                     <input
                       type="number"
                       value={profileData.partnerAgeMax}
                       onChange={(e) => handleInputChange('partnerAgeMax', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-black dark:focus:ring-white focus:border-transparent bg-white dark:bg-black text-black dark:text-white"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 bg-white text-gray-800 placeholder-gray-500 transition-all duration-200"
                       placeholder="Max"
                     />
                   </div>
                 </div>
                 
                 <div>
-                  <label className="block text-sm font-medium text-black dark:text-white mb-2">Education</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Education</label>
                   <input
                     type="text"
                     value={profileData.partnerEducation}
                     onChange={(e) => handleInputChange('partnerEducation', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-black dark:focus:ring-white focus:border-transparent bg-white dark:bg-black text-black dark:text-white"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 bg-white text-gray-800 placeholder-gray-500 transition-all duration-200"
                     placeholder="Preferred education"
                   />
                 </div>
                 
                 <div>
-                  <label className="block text-sm font-medium text-black dark:text-white mb-2">Occupation</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Occupation</label>
                   <input
                     type="text"
                     value={profileData.partnerOccupation}
                     onChange={(e) => handleInputChange('partnerOccupation', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-black dark:focus:ring-white focus:border-transparent bg-white dark:bg-black text-black dark:text-white"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 bg-white text-gray-800 placeholder-gray-500 transition-all duration-200"
                     placeholder="Preferred occupation"
                   />
                 </div>
                 
                 <div>
-                  <label className="block text-sm font-medium text-black dark:text-white mb-2">Location</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Location</label>
                   <input
                     type="text"
                     value={profileData.partnerLocation}
                     onChange={(e) => handleInputChange('partnerLocation', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-black dark:focus:ring-white focus:border-transparent bg-white dark:bg-black text-black dark:text-white"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 bg-white text-gray-800 placeholder-gray-500 transition-all duration-200"
                     placeholder="Preferred location"
                   />
                 </div>
@@ -775,14 +782,14 @@ const CreateProfile = ({ onProfileCreated = () => {} }) => {
       case 6:
         return (
           <div className="space-y-6">
-            <h3 className="text-2xl font-bold text-black dark:text-white mb-6">Upload Photos</h3>
+            <h3 className="text-2xl font-bold text-gray-800 mb-6">Upload Photos</h3>
             
-            <div className="bg-gray-100 dark:bg-gray-900 p-6 rounded-xl border border-gray-300 dark:border-gray-600">
+            <div className="bg-blue-50 p-6 rounded-xl border border-blue-200">
               <div className="flex items-center space-x-3 mb-4">
-                <Shield className="w-6 h-6 text-black dark:text-white" />
-                <h4 className="text-lg font-semibold text-black dark:text-white">Photo Guidelines</h4>
+                <Shield className="w-6 h-6 text-blue-600" />
+                <h4 className="text-lg font-semibold text-gray-800">Photo Guidelines</h4>
               </div>
-              <ul className="text-sm text-black dark:text-white space-y-1">
+              <ul className="text-sm text-gray-700 space-y-1">
                 <li>• Upload clear, recent photos of yourself</li>
                 <li>• Face should be clearly visible</li>
                 <li>• No group photos or photos with other people</li>
@@ -791,7 +798,7 @@ const CreateProfile = ({ onProfileCreated = () => {} }) => {
               </ul>
             </div>
             
-            <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl p-8 text-center bg-gray-50 dark:bg-gray-900">
+            <div className="border-2 border-dashed border-purple-300 rounded-xl p-8 text-center bg-purple-50 hover:bg-purple-100 transition-colors duration-200">
               <input
                 type="file"
                 accept="image/*"
@@ -801,9 +808,9 @@ const CreateProfile = ({ onProfileCreated = () => {} }) => {
                 ref={photosRef}
               />
               <label htmlFor="photo-upload" className="cursor-pointer">
-                <Upload className="w-12 h-12 text-gray-400 dark:text-gray-500 mx-auto mb-4" />
-                <p className="text-lg font-medium text-black dark:text-white mb-2">Upload Photos</p>
-                <p className="text-sm text-gray-500 dark:text-gray-400">Click to select photos or drag and drop</p>
+                <Upload className="w-12 h-12 text-purple-500 mx-auto mb-4" />
+                <p className="text-lg font-medium text-gray-800 mb-2">Upload Photos</p>
+                <p className="text-sm text-gray-600">Click to select photos or drag and drop</p>
               </label>
             </div>
             
@@ -814,11 +821,11 @@ const CreateProfile = ({ onProfileCreated = () => {} }) => {
                     <img
                       src={photo}
                       alt={`Photo ${index + 1}`}
-                      className="w-full h-32 object-cover rounded-lg border border-gray-300 dark:border-gray-600"
+                      className="w-full h-32 object-cover rounded-lg border border-gray-300 shadow-sm"
                     />
                     <button
                       onClick={() => removePhoto(index)}
-                      className="absolute -top-2 -right-2 bg-black dark:bg-white text-white dark:text-black rounded-full p-1 hover:bg-gray-800 dark:hover:bg-gray-200 transition-colors shadow-lg"
+                      className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition-colors shadow-lg"
                     >
                       <X className="w-4 h-4" />
                     </button>
@@ -835,97 +842,167 @@ const CreateProfile = ({ onProfileCreated = () => {} }) => {
   };
 
   return (
-    <div className="min-h-screen bg-white dark:bg-black py-8 px-4 transition-colors duration-300">
-      <div className="max-w-4xl mx-auto">
-        <div className="mb-6">
+    <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-indigo-50 py-4 sm:py-6 lg:py-8 px-4 transition-all duration-300">
+      <div className="max-w-6xl mx-auto">
+        <div className="mb-4 sm:mb-6">
           <BackButton />
         </div>
+        
         {/* Header with View Profile Button */}
-        <div className="flex items-center justify-between mb-8">
-          <div className="text-center flex-1">
-            <h1 className="text-3xl lg:text-4xl font-bold text-black dark:text-white mb-2">Create Your Profile</h1>
-            <p className="text-gray-600 dark:text-gray-400">Find your perfect life partner with a complete profile</p>
+        <div className="flex flex-col sm:flex-row items-center justify-between mb-6 sm:mb-8 space-y-4 sm:space-y-0">
+          <div className="text-center sm:text-left flex-1">
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold bg-gradient-to-r from-pink-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent mb-2">
+              Create Your Profile
+            </h1>
+            <p className="text-gray-600 text-sm sm:text-base">Find your perfect life partner with a complete profile</p>
           </div>
           
           <button
             onClick={handleViewProfile}
-            className="flex items-center space-x-2 px-6 py-3 bg-black dark:bg-white text-white dark:text-black rounded-full font-semibold hover:bg-gray-800 dark:hover:bg-gray-200 transition-all shadow-lg hover:shadow-xl"
+            className="flex items-center space-x-2 px-4 sm:px-6 py-2 sm:py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-full font-semibold hover:from-purple-600 hover:to-pink-600 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-1 text-sm sm:text-base"
           >
-            <Eye className="w-5 h-5" />
+            <Eye className="w-4 h-4 sm:w-5 sm:h-5" />
             <span>View Profile</span>
           </button>
         </div>
 
-        {/* Progress Steps */}
-        <div className="bg-white dark:bg-black rounded-2xl shadow-xl p-6 mb-8 border border-gray-300 dark:border-gray-700">
-          <div className="flex items-center justify-between mb-6">
-            {steps.map((step, index) => {
-              const Icon = step.icon;
-              const isActive = currentStep === step.id;
-              const isCompleted = currentStep > step.id;
-              
-              return (
-                <div key={step.id} className="flex items-center">
-                  <div className={`flex items-center justify-center w-12 h-12 rounded-full border-2 transition-all ${
-                    isCompleted 
-                      ? 'bg-black dark:bg-white border-black dark:border-white text-white dark:text-black' 
-                      : isActive 
-                        ? 'bg-black dark:bg-white border-black dark:border-white text-white dark:text-black' 
-                        : 'border-gray-300 dark:border-gray-600 text-gray-400 dark:text-gray-500'
-                  }`}>
-                    {isCompleted ? (
-                      <Check className="w-6 h-6" />
-                    ) : (
-                      <Icon className="w-6 h-6" />
+        {/* Progress Steps - Redesigned for Mobile */}
+        <div className="bg-white rounded-2xl shadow-xl p-4 sm:p-6 mb-6 sm:mb-8 border border-gray-100">
+          {/* Mobile Progress - Compact Design */}
+          <div className="block lg:hidden">
+            <div className="flex items-center justify-between mb-3">
+              <div className="text-sm font-medium text-gray-700">
+                Step {currentStep} of {totalSteps}
+              </div>
+              <div className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
+                {steps[currentStep - 1]?.title}
+              </div>
+            </div>
+            
+            {/* Mobile Progress Bar */}
+            <div className="w-full bg-gray-200 rounded-full h-2 mb-4">
+              <div 
+                className="bg-gradient-to-r from-purple-500 to-pink-500 h-2 rounded-full transition-all duration-500"
+                style={{ width: `${(currentStep / totalSteps) * 100}%` }}
+              />
+            </div>
+            
+            {/* Mobile Steps Icons */}
+            <div className="flex justify-between items-center">
+              {steps.map((step, index) => {
+                const Icon = step.icon;
+                const isActive = currentStep === step.id;
+                const isCompleted = currentStep > step.id;
+                
+                return (
+                  <div key={step.id} className="flex flex-col items-center">
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs transition-all duration-300 ${
+                      isCompleted 
+                        ? 'bg-gradient-to-r from-green-400 to-green-600 text-white' 
+                        : isActive 
+                          ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white' 
+                          : 'bg-gray-200 text-gray-400'
+                    }`}>
+                      {isCompleted ? (
+                        <Check className="w-4 h-4" />
+                      ) : (
+                        <Icon className="w-4 h-4" />
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Desktop Progress - Full Layout */}
+          <div className="hidden lg:block">
+            <div className="flex items-center justify-between mb-6">
+              {steps.map((step, index) => {
+                const Icon = step.icon;
+                const isActive = currentStep === step.id;
+                const isCompleted = currentStep > step.id;
+                
+                return (
+                  <div key={step.id} className="flex items-center flex-1">
+                    <div className="flex items-center">
+                      <div className={`flex items-center justify-center w-12 h-12 rounded-full transition-all duration-300 ${
+                        isCompleted 
+                          ? 'bg-gradient-to-r from-green-400 to-green-600 text-white shadow-lg' 
+                          : isActive 
+                            ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg' 
+                            : 'bg-gray-200 text-gray-400'
+                      }`}>
+                        {isCompleted ? (
+                          <Check className="w-6 h-6" />
+                        ) : (
+                          <Icon className="w-6 h-6" />
+                        )}
+                      </div>
+                      <div className="ml-4">
+                        <p className={`text-sm font-medium ${
+                          isActive ? 'text-purple-600' : isCompleted ? 'text-green-600' : 'text-gray-500'
+                        }`}>
+                          Step {step.id}
+                        </p>
+                        <p className={`text-xs ${
+                          isActive ? 'text-purple-500' : isCompleted ? 'text-green-500' : 'text-gray-400'
+                        }`}>
+                          {step.title}
+                        </p>
+                      </div>
+                    </div>
+                    {index < steps.length - 1 && (
+                      <div className={`flex-1 h-0.5 mx-4 transition-all duration-300 ${
+                        isCompleted ? 'bg-gradient-to-r from-green-400 to-green-600' : 'bg-gray-300'
+                      }`} />
                     )}
                   </div>
-                  <div className="ml-3 hidden md:block">
-                    <p className={`text-sm font-medium ${
-                      isActive ? 'text-black dark:text-white' : isCompleted ? 'text-black dark:text-white' : 'text-gray-500 dark:text-gray-400'
-                    }`}>
-                      Step {step.id}
-                    </p>
-                    <p className={`text-xs ${
-                      isActive ? 'text-black dark:text-white' : isCompleted ? 'text-black dark:text-white' : 'text-gray-400 dark:text-gray-500'
-                    }`}>
-                      {step.title}
-                    </p>
-                  </div>
-                  {index < steps.length - 1 && (
-                    <div className={`w-8 h-0.5 ml-4 ${
-                      isCompleted ? 'bg-black dark:bg-white' : 'bg-gray-300 dark:bg-gray-600'
-                    }`} />
-                  )}
-                </div>
-              );
-            })}
-          </div>
-          
-          <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-            <div 
-              className="bg-black dark:bg-white h-2 rounded-full transition-all duration-300"
-              style={{ width: `${(currentStep / totalSteps) * 100}%` }}
-            />
+                );
+              })}
+            </div>
+            
+            <div className="w-full bg-gray-200 rounded-full h-2">
+              <div 
+                className="bg-gradient-to-r from-purple-500 to-pink-500 h-2 rounded-full transition-all duration-500"
+                style={{ width: `${(currentStep / totalSteps) * 100}%` }}
+              />
+            </div>
           </div>
         </div>
 
-        {/* Form Content */}
-        <div className="bg-white dark:bg-black rounded-2xl shadow-xl p-8 mb-8 border border-gray-300 dark:border-gray-700">
-          {success && <div className="text-green-600 font-semibold mb-4">{success}</div>}
-          {error && <div className="text-red-600 font-semibold mb-4">{error}</div>}
-          {loading && <div className="text-center py-4">Loading profile data...</div>}
+        {/* Form Content - Enhanced Design */}
+        <div className="bg-white rounded-2xl shadow-xl p-6 sm:p-8 mb-6 sm:mb-8 border border-gray-100">
+          {success && (
+            <div className="bg-gradient-to-r from-green-50 to-green-100 border border-green-200 text-green-800 px-4 py-3 rounded-lg mb-6 flex items-center">
+              <Check className="w-5 h-5 mr-2" />
+              {success}
+            </div>
+          )}
+          {error && (
+            <div className="bg-gradient-to-r from-red-50 to-red-100 border border-red-200 text-red-800 px-4 py-3 rounded-lg mb-6 flex items-center">
+              <X className="w-5 h-5 mr-2" />
+              {error}
+            </div>
+          )}
+          {loading && (
+            <div className="text-center py-8">
+              <div className="w-8 h-8 border-4 border-purple-200 border-t-purple-600 rounded-full animate-spin mx-auto mb-4"></div>
+              <p className="text-gray-600">Loading profile data...</p>
+            </div>
+          )}
           {renderStepContent()}
         </div>
 
-        {/* Navigation Buttons */}
-        <div className="flex justify-between">
+        {/* Navigation Buttons - Enhanced Design */}
+        <div className="flex flex-col sm:flex-row justify-between space-y-4 sm:space-y-0 sm:space-x-4">
           <button
             onClick={prevStep}
             disabled={currentStep === 1}
-            className={`flex items-center space-x-2 px-6 py-3 rounded-full font-semibold transition-all ${
+            className={`flex items-center justify-center space-x-2 px-6 py-3 rounded-full font-semibold transition-all duration-300 ${
               currentStep === 1
-                ? 'bg-gray-200 dark:bg-gray-800 text-gray-400 dark:text-gray-500 cursor-not-allowed'
-                : 'bg-gray-600 dark:bg-gray-400 text-white dark:text-black hover:bg-gray-700 dark:hover:bg-gray-300'
+                ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                : 'bg-gradient-to-r from-gray-400 to-gray-600 text-white hover:from-gray-500 hover:to-gray-700 shadow-lg hover:shadow-xl transform hover:-translate-y-1'
             }`}
           >
             <ChevronLeft className="w-5 h-5" />
@@ -935,7 +1012,7 @@ const CreateProfile = ({ onProfileCreated = () => {} }) => {
           {currentStep < totalSteps ? (
             <button
               onClick={nextStep}
-              className="flex items-center space-x-2 px-6 py-3 bg-black dark:bg-white text-white dark:text-black rounded-full font-semibold hover:bg-gray-800 dark:hover:bg-gray-200 transition-all shadow-lg hover:shadow-xl"
+              className="flex items-center justify-center space-x-2 px-8 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-full font-semibold hover:from-purple-600 hover:to-pink-600 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
             >
               <span>Next</span>
               <ChevronRight className="w-5 h-5" />
@@ -943,7 +1020,7 @@ const CreateProfile = ({ onProfileCreated = () => {} }) => {
           ) : (
             <button
               onClick={handleSubmit}
-              className="flex items-center space-x-2 px-8 py-3 bg-black dark:bg-white text-white dark:text-black rounded-full font-semibold hover:bg-gray-800 dark:hover:bg-gray-200 transition-all shadow-lg hover:shadow-xl"
+              className="flex items-center justify-center space-x-2 px-8 py-3 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-full font-semibold hover:from-green-600 hover:to-green-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
               disabled={loading}
             >
               <Check className="w-5 h-5" />

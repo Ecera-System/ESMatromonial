@@ -457,15 +457,19 @@ const ChatWindow = ({ selectedChat, onMessageSent, onlineUsers = [], mobileBackB
     try {
       const token = localStorage.getItem('token');
       console.log('ChatWindow: Fetching messages with token:', !!token);
+      console.log('ChatWindow: Chat ID:', selectedChat._id);
       
       const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/v1/messages/${selectedChat._id}`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
       });
+      
+      console.log('Messages fetched successfully:', response.data);
       setMessages(response.data);
     } catch (error) {
       console.error('Error fetching messages:', error);
+      console.error('Error details:', error.response?.data);
       if (error.response?.status === 401) {
         console.error('Auth error in ChatWindow');
       }
@@ -724,15 +728,15 @@ const ChatWindow = ({ selectedChat, onMessageSent, onlineUsers = [], mobileBackB
 
   if (!selectedChat) {
     return (
-      <div className="h-full flex items-center justify-center bg-gradient-to-br from-rose-50 to-pink-50">
-        <div className="text-center max-w-md mx-auto p-4 sm:p-8">
-          <div className="w-24 h-24 sm:w-32 sm:h-32 bg-gradient-to-r from-rose-100 to-pink-100 rounded-full flex items-center justify-center mx-auto mb-6 sm:mb-8">
-            <MessageCircle className="w-12 h-12 sm:w-16 sm:h-16 text-rose-500" />
+      <div className="h-full flex items-center justify-center bg-gradient-to-br from-rose-50 to-pink-50 mobile-spacing">
+        <div className="text-center max-w-sm mx-auto">
+          <div className="w-20 h-20 sm:w-24 sm:h-24 md:w-32 md:h-32 bg-gradient-to-r from-rose-100 to-pink-100 rounded-full flex items-center justify-center mx-auto mb-4 sm:mb-6 md:mb-8">
+            <MessageCircle className="w-10 h-10 sm:w-12 sm:h-12 md:w-16 md:h-16 text-rose-500" />
           </div>
-          <h3 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-4">
+          <h3 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800 mb-3 sm:mb-4">
             Welcome to Chat
           </h3>
-          <p className="text-base sm:text-lg text-gray-600 mb-6 sm:mb-8 leading-relaxed px-4">
+          <p className="text-sm sm:text-base md:text-lg text-gray-600 mb-4 sm:mb-6 md:mb-8 leading-relaxed">
             Select a conversation from the sidebar to start chatting, or create a new conversation to connect with someone special.
           </p>
           <div className="flex items-center justify-center space-x-2 text-rose-500">
@@ -749,17 +753,17 @@ const ChatWindow = ({ selectedChat, onMessageSent, onlineUsers = [], mobileBackB
   const isOtherUserOnline = otherUser ? onlineUsers.includes(otherUser._id) : false;
 
   return (
-    <div className="h-full flex flex-col bg-white">
-      {/* Chat Header */}
+    <div className="h-full flex flex-col bg-white min-h-0">
+      {/* Chat Header - Mobile optimized */}
       {selectedChat && (
-        <div className="p-3 sm:p-6 border-b border-gray-200 bg-white">
+        <div className="p-3 sm:p-4 md:p-6 border-b border-gray-200 bg-white flex-shrink-0">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2 sm:space-x-4 min-w-0 flex-1">
+            <div className="flex items-center space-x-2 sm:space-x-3 md:space-x-4 min-w-0 flex-1">
               {/* Back button for mobile only */}
               {mobileBackButton && (
                 <button
                   onClick={mobileBackButton}
-                  className="lg:hidden p-2 mr-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors"
+                  className="lg:hidden p-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors flex-shrink-0"
                 >
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -779,14 +783,14 @@ const ChatWindow = ({ selectedChat, onMessageSent, onlineUsers = [], mobileBackB
                   )}
                 </div>
                 {isOtherUserOnline && (
-                  <div className="absolute -bottom-1 -right-1 w-3 h-3 sm:w-4 sm:h-4 bg-emerald-500 rounded-full border-2 border-white"></div>
+                  <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 sm:w-4 sm:h-4 bg-emerald-500 rounded-full border-2 border-white"></div>
                 )}
               </div>
               <div className="min-w-0 flex-1">
-                <h3 className="font-bold text-gray-900 text-base sm:text-lg truncate">
+                <h3 className="font-bold text-gray-900 text-sm sm:text-base md:text-lg truncate">
                   {otherUser?.firstName} {otherUser?.lastName}
                 </h3>
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center space-x-1 sm:space-x-2">
                   {isOtherUserOnline ? (
                     <>
                       <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
@@ -806,7 +810,7 @@ const ChatWindow = ({ selectedChat, onMessageSent, onlineUsers = [], mobileBackB
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => handleStartCall("voice")}
-                className="p-2 sm:p-3 bg-rose-100 hover:bg-rose-200 text-rose-600 rounded-xl transition-all duration-200"
+                className="p-2 sm:p-2.5 bg-rose-100 hover:bg-rose-200 text-rose-600 rounded-xl transition-all duration-200"
                 title="Voice Call"
               >
                 <Phone className="w-4 h-4 sm:w-5 sm:h-5" />
@@ -815,7 +819,7 @@ const ChatWindow = ({ selectedChat, onMessageSent, onlineUsers = [], mobileBackB
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => handleStartCall("video")}
-                className="p-2 sm:p-3 bg-rose-500 hover:bg-rose-600 text-white rounded-xl transition-all duration-200"
+                className="p-2 sm:p-2.5 bg-rose-500 hover:bg-rose-600 text-white rounded-xl transition-all duration-200"
                 title="Video Call"
               >
                 <Video className="w-4 h-4 sm:w-5 sm:h-5" />
@@ -823,7 +827,7 @@ const ChatWindow = ({ selectedChat, onMessageSent, onlineUsers = [], mobileBackB
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                className="p-2 sm:p-3 bg-gray-100 hover:bg-gray-200 rounded-xl transition-all duration-200"
+                className="p-2 sm:p-2.5 bg-gray-100 hover:bg-gray-200 rounded-xl transition-all duration-200"
               >
                 <MoreVertical className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600" />
               </motion.button>
@@ -832,37 +836,28 @@ const ChatWindow = ({ selectedChat, onMessageSent, onlineUsers = [], mobileBackB
         </div>
       )}
 
-      {/* Messages Area */}
-      <div className="flex-1 overflow-y-auto bg-gradient-to-b from-gray-50 to-white scrollbar-hide">
-        {/* Custom CSS for hiding scrollbar */}
-        <style jsx>{`
-          .scrollbar-hide {
-            -ms-overflow-style: none;  /* IE and Edge */
-            scrollbar-width: none;  /* Firefox */
-          }
-          .scrollbar-hide::-webkit-scrollbar {
-            display: none;  /* Chrome, Safari and Opera */
-          }
-        `}</style>
-
+      {/* Messages Area - Fixed height and overflow */}
+      <div className="flex-1 min-h-0 overflow-hidden bg-gradient-to-b from-gray-50 to-white">
         {loading ? (
           <div className="flex items-center justify-center h-full">
-            <div className="flex flex-col items-center space-y-4">
-              <div className="w-8 h-8 border-4 border-rose-200 border-t-rose-500 rounded-full animate-spin"></div>
-              <p className="text-gray-500">Loading messages...</p>
+            <div className="flex flex-col items-center space-y-3 sm:space-y-4">
+              <div className="w-6 h-6 sm:w-8 sm:h-8 border-4 border-rose-200 border-t-rose-500 rounded-full animate-spin"></div>
+              <p className="text-sm sm:text-base text-gray-500">Loading messages...</p>
             </div>
           </div>
         ) : (
-          <>
-            <MessageList messages={messages} currentUserId={user._id} />
-            <TypingIndicator typingUsers={typingUsers} />
-            <div ref={messagesEndRef} />
-          </>
+          <div className="h-full flex flex-col">
+            <div className="flex-1 overflow-y-auto">
+              <MessageList messages={messages} currentUserId={user._id} />
+              <TypingIndicator typingUsers={typingUsers} />
+              <div ref={messagesEndRef} />
+            </div>
+          </div>
         )}
       </div>
 
-      {/* Message Input */}
-      <div className="p-3 sm:p-6 bg-white border-t border-gray-200">
+      {/* Message Input - Fixed at bottom */}
+      <div className="p-3 sm:p-4 md:p-6 bg-white border-t border-gray-200 flex-shrink-0">
         {/* File Previews */}
         {uploadedFiles.length > 0 && (
           <div className="mb-3 sm:mb-4 p-2 sm:p-3 bg-gray-50 rounded-lg border border-gray-200">
@@ -870,12 +865,12 @@ const ChatWindow = ({ selectedChat, onMessageSent, onlineUsers = [], mobileBackB
               <h4 className="text-xs sm:text-sm font-medium text-gray-700">Files to send:</h4>
               <button
                 onClick={() => setUploadedFiles([])}
-                className="text-xs text-gray-500 hover:text-gray-700"
+                className="text-xs text-gray-500 hover:text-gray-700 p-1"
               >
                 Clear all
               </button>
             </div>
-            <div className="space-y-2">
+            <div className="space-y-2 max-h-32 overflow-y-auto">
               {uploadedFiles.map((file) => (
                 <div key={file.id} className="flex items-center justify-between p-2 bg-white rounded border">
                   <div className="flex items-center space-x-2 flex-1 min-w-0">
@@ -888,7 +883,7 @@ const ChatWindow = ({ selectedChat, onMessageSent, onlineUsers = [], mobileBackB
                   </div>
                   <button
                     onClick={() => handleRemoveUploadedFile(file.id)}
-                    className="p-1 text-gray-400 hover:text-gray-600"
+                    className="p-1 text-gray-400 hover:text-gray-600 flex-shrink-0"
                     title="Remove file"
                   >
                     <X className="w-3 h-3 sm:w-4 sm:h-4" />
@@ -899,7 +894,7 @@ const ChatWindow = ({ selectedChat, onMessageSent, onlineUsers = [], mobileBackB
           </div>
         )}
 
-        <form onSubmit={handleSendMessage} className="flex items-end space-x-2 sm:space-x-4">
+        <form onSubmit={handleSendMessage} className="flex items-end space-x-2 sm:space-x-3">
           <div className="flex-1 relative">
             <div className="flex items-end bg-gray-50 rounded-2xl border-2 border-gray-200 focus-within:border-rose-500 focus-within:bg-white transition-all duration-200">
               <input
@@ -908,7 +903,7 @@ const ChatWindow = ({ selectedChat, onMessageSent, onlineUsers = [], mobileBackB
                 value={newMessage}
                 onChange={(e) => handleTyping(e.target.value)}
                 placeholder={uploadedFiles.length > 0 ? "Add a message (optional)..." : "Type your message..."}
-                className="flex-1 px-4 sm:px-6 py-3 sm:py-4 bg-transparent outline-none rounded-2xl text-gray-800 placeholder-gray-500 text-sm sm:text-base"
+                className="flex-1 px-4 sm:px-5 py-3 sm:py-4 bg-transparent outline-none rounded-2xl text-gray-800 placeholder-gray-500 text-sm sm:text-base resize-none"
                 onKeyDown={(e) => {
                   if (e.key === "Enter" && !e.shiftKey) {
                     e.preventDefault();
@@ -945,7 +940,7 @@ const ChatWindow = ({ selectedChat, onMessageSent, onlineUsers = [], mobileBackB
         </form>
       </div>
 
-      {/* Calling Modal for Caller */}
+      {/* Call Modals and Components - unchanged */}
       {callState === "calling" && (
         <CallingModal
           callee={otherUser}
@@ -954,7 +949,6 @@ const ChatWindow = ({ selectedChat, onMessageSent, onlineUsers = [], mobileBackB
         />
       )}
 
-      {/* Incoming Call Modal for Receiver */}
       {callState === "incoming" && incomingCall && (
         <IncomingCallModal
           caller={incomingCall.caller}
@@ -964,7 +958,6 @@ const ChatWindow = ({ selectedChat, onMessageSent, onlineUsers = [], mobileBackB
         />
       )}
 
-      {/* Call Screen */}
       {callActive && (
         <CallScreen
           localStream={localStream}
@@ -975,7 +968,6 @@ const ChatWindow = ({ selectedChat, onMessageSent, onlineUsers = [], mobileBackB
         />
       )}
 
-      {/* Video Call Modal */}
       {videoCallOpen && (
         <VideoCall
           isOpen={videoCallOpen}
@@ -987,9 +979,7 @@ const ChatWindow = ({ selectedChat, onMessageSent, onlineUsers = [], mobileBackB
           callee={selectedChat?.participants?.find((p) => p._id !== user._id)}
           incomingCall={incomingCallData}
           callType={videoCallType}
-          onCallStatus={(status) => {
-            console.log('[ChatWindow] VideoCall status:', status);
-          }}
+          onCallStatus={console.log}
         />
       )}
     </div>
@@ -997,3 +987,4 @@ const ChatWindow = ({ selectedChat, onMessageSent, onlineUsers = [], mobileBackB
 };
 
 export default ChatWindow;
+

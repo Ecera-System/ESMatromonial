@@ -4,6 +4,7 @@ import { getAllUsers } from '../services/userService';
 import { sendRequest } from '../services/requestService';
 import { useAuth } from '../contexts/Chat/AuthContext';
 import { MessageCircle, Heart, Star, Globe, Briefcase, GraduationCap, MapPin, Cake, Smartphone, User, Camera, Smile, Globe2, Coffee, Music, BookOpen } from 'lucide-react';
+import axios from 'axios';
 
 export default function UserProfilePage() {
   const { userId } = useParams();
@@ -15,14 +16,25 @@ export default function UserProfilePage() {
   const [activeTab, setActiveTab] = useState('about');
 
   useEffect(() => {
-    setLoading(true);
-    getAllUsers()
-      .then(data => {
-        const users = Array.isArray(data) ? data : data.users || [];
-        setProfile(users.find(u => u._id === userId) || null);
-      })
-      .catch(() => setProfile(null))
-      .finally(() => setLoading(false));
+    const fetchProfile = async () => {
+      setLoading(true);
+      try {
+        const token = localStorage.getItem('token');
+        const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/v1/users/${userId}`, {
+          headers: token ? { Authorization: `Bearer ${token}` } : {}
+        });
+        setProfile(response.data);
+      } catch (error) {
+        console.error('Error fetching profile:', error);
+        setProfile(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (userId) {
+      fetchProfile();
+    }
   }, [userId]);
 
   const handleSendInvite = async () => {

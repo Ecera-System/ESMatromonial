@@ -33,7 +33,10 @@ const ViewProfile = ({ onBackToCreate, isDarkMode }) => {
       setLoading(true);
       setError(null);
       try {
-        const response = await axios.get(`/api/v1/users/${user._id}`);
+        const token = localStorage.getItem('token');
+        const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/v1/users/${user._id}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
         setProfileData(response.data);
       } catch (err) {
         setError('Failed to load profile');
@@ -56,85 +59,126 @@ const ViewProfile = ({ onBackToCreate, isDarkMode }) => {
     return age;
   };
 
-  const InfoCard = ({ title, icon: Icon, children }) => (
-    <div className="bg-white dark:bg-black rounded-2xl shadow-xl p-6 border border-gray-300 dark:border-gray-700">
-      <div className="flex items-center space-x-3 mb-4">
-        <Icon className="w-6 h-6 text-black dark:text-white" />
-        <h3 className="text-xl font-bold text-black dark:text-white">{title}</h3>
+  const InfoCard = ({ title, icon: Icon, children, gradient = "from-purple-500 to-pink-500" }) => (
+    <div className="bg-white rounded-2xl shadow-xl p-6 border border-gray-100 hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1">
+      <div className="flex items-center space-x-3 mb-6">
+        <div className={`w-12 h-12 rounded-full bg-gradient-to-r ${gradient} flex items-center justify-center shadow-lg`}>
+          <Icon className="w-6 h-6 text-white" />
+        </div>
+        <h3 className="text-xl font-bold bg-gradient-to-r from-gray-700 to-gray-900 bg-clip-text text-transparent">{title}</h3>
       </div>
       {children}
     </div>
   );
 
-  const InfoRow = ({ label, value }) => {
+  const InfoRow = ({ label, value, icon: Icon }) => {
     if (!value) return null;
     return (
-      <div className="flex justify-between py-2 border-b border-gray-200 dark:border-gray-700 last:border-b-0">
-        <span className="text-gray-600 dark:text-gray-400 font-medium">{label}:</span>
-        <span className="text-black dark:text-white">{value}</span>
+      <div className="flex items-center justify-between py-3 border-b border-gray-100 last:border-b-0 hover:bg-gray-50 transition-colors duration-200 rounded-lg px-2">
+        <div className="flex items-center space-x-2">
+          {Icon && <Icon className="w-4 h-4 text-gray-500" />}
+          <span className="text-gray-600 font-medium">{label}:</span>
+        </div>
+        <span className="text-gray-900 font-semibold">{value}</span>
       </div>
     );
   };
 
-  if (loading) return <div className="min-h-screen flex items-center justify-center text-xl">Loading profile...</div>;
-  if (error) return <div className="min-h-screen flex items-center justify-center text-xl text-red-600">{error}</div>;
+  if (loading) return (
+    <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-indigo-50 flex items-center justify-center">
+      <div className="text-center">
+        <div className="w-12 h-12 border-4 border-purple-200 border-t-purple-600 rounded-full animate-spin mx-auto mb-4"></div>
+        <p className="text-xl text-gray-600">Loading profile...</p>
+      </div>
+    </div>
+  );
+  
+  if (error) return (
+    <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-indigo-50 flex items-center justify-center">
+      <div className="text-center">
+        <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+          <X className="w-8 h-8 text-red-500" />
+        </div>
+        <p className="text-xl text-red-600">{error}</p>
+      </div>
+    </div>
+  );
+  
   if (!profileData) return null;
 
   return (
-    <div className="min-h-screen bg-white dark:bg-black py-8 px-4 transition-colors duration-300">
-      <div className="max-w-6xl mx-auto">
-        <div className="mb-6">
+    <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-indigo-50 py-4 sm:py-6 lg:py-8 px-4 transition-all duration-300">
+      <div className="max-w-7xl mx-auto">
+        <div className="mb-4 sm:mb-6">
           <BackButton />
         </div>
-        {/* Header */}
-        <div className="flex items-center justify-between mb-8">
+        
+        {/* Header - Enhanced Design */}
+        <div className="flex flex-col sm:flex-row items-center justify-between mb-6 sm:mb-8 space-y-4 sm:space-y-0">
           <button
             onClick={onBackToCreate}
-            className="flex items-center space-x-2 px-4 py-2 bg-gray-600 dark:bg-gray-400 text-white dark:text-black rounded-full font-semibold hover:bg-gray-700 dark:hover:bg-gray-300 transition-all"
+            className="flex items-center space-x-2 px-4 sm:px-6 py-2 sm:py-3 bg-gradient-to-r from-gray-400 to-gray-600 text-white rounded-full font-semibold hover:from-gray-500 hover:to-gray-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1 text-sm sm:text-base"
           >
-            <ArrowLeft className="w-5 h-5" />
+            <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5" />
             <span>Back to Edit</span>
           </button>
           
           <div className="text-center">
-            <h1 className="text-3xl lg:text-4xl font-bold text-black dark:text-white mb-2">
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold bg-gradient-to-r from-pink-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent mb-2">
               {profileData.firstName} {profileData.lastName}
             </h1>
-            <p className="text-gray-600 dark:text-gray-400">
-              {calculateAge(profileData.dateOfBirth) && `${calculateAge(profileData.dateOfBirth)} years old`}
-              {profileData.city && profileData.state && ` • ${profileData.city}, ${profileData.state}`}
-            </p>
+            <div className="flex items-center justify-center space-x-2 text-gray-600">
+              {calculateAge(profileData.dateOfBirth) && (
+                <span className="flex items-center space-x-1">
+                  <Calendar className="w-4 h-4" />
+                  <span>{calculateAge(profileData.dateOfBirth)} years old</span>
+                </span>
+              )}
+              {profileData.city && profileData.state && (
+                <>
+                  <span>•</span>
+                  <span className="flex items-center space-x-1">
+                    <MapPin className="w-4 h-4" />
+                    <span>{profileData.city}, {profileData.state}</span>
+                  </span>
+                </>
+              )}
+            </div>
           </div>
           
           <button
             onClick={onBackToCreate}
-            className="flex items-center space-x-2 px-4 py-2 bg-black dark:bg-white text-white dark:text-black rounded-full font-semibold hover:bg-gray-800 dark:hover:bg-gray-200 transition-all"
+            className="flex items-center space-x-2 px-4 sm:px-6 py-2 sm:py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-full font-semibold hover:from-purple-600 hover:to-pink-600 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1 text-sm sm:text-base"
           >
-            <Edit className="w-5 h-5" />
+            <Edit className="w-4 h-4 sm:w-5 sm:h-5" />
             <span>Edit Profile</span>
           </button>
         </div>
 
-        {/* Profile Content */}
-        <div className="grid lg:grid-cols-3 gap-8">
+        {/* Profile Content - Enhanced Layout */}
+        <div className="grid lg:grid-cols-3 gap-6 sm:gap-8">
           {/* Left Column - Photos */}
           <div className="lg:col-span-1">
-            <InfoCard title="Photos" icon={Camera}>
+            <InfoCard title="Photos" icon={Camera} gradient="from-pink-500 to-rose-500">
               {profileData.photos.length > 0 ? (
                 <div className="grid grid-cols-1 gap-4">
                   {profileData.photos.map((photo, index) => (
-                    <img
-                      key={index}
-                      src={photo}
-                      alt={`Photo ${index + 1}`}
-                      className="w-full h-64 object-cover rounded-lg border border-gray-300 dark:border-gray-600"
-                    />
+                    <div key={index} className="relative overflow-hidden rounded-xl">
+                      <img
+                        src={photo}
+                        alt={`Photo ${index + 1}`}
+                        className="w-full h-64 object-cover rounded-xl border border-gray-200 hover:scale-105 transition-transform duration-300"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-300"></div>
+                    </div>
                   ))}
                 </div>
               ) : (
-                <div className="text-center py-8">
-                  <Camera className="w-12 h-12 text-gray-400 dark:text-gray-500 mx-auto mb-4" />
-                  <p className="text-gray-500 dark:text-gray-400">No photos uploaded</p>
+                <div className="text-center py-12">
+                  <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Camera className="w-8 h-8 text-gray-400" />
+                  </div>
+                  <p className="text-gray-500">No photos uploaded</p>
                 </div>
               )}
             </InfoCard>
@@ -143,10 +187,10 @@ const ViewProfile = ({ onBackToCreate, isDarkMode }) => {
           {/* Right Column - Information */}
           <div className="lg:col-span-2 space-y-6">
             {/* Personal Information */}
-            <InfoCard title="Personal Information" icon={User}>
-              <div className="space-y-2">
+            <InfoCard title="Personal Information" icon={User} gradient="from-blue-500 to-purple-600">
+              <div className="space-y-1">
                 <InfoRow label="Full Name" value={`${profileData.firstName} ${profileData.lastName}`} />
-                <InfoRow label="Date of Birth" value={profileData.dateOfBirth} />
+                <InfoRow label="Date of Birth" value={profileData.dateOfBirth} icon={Calendar} />
                 <InfoRow label="Age" value={calculateAge(profileData.dateOfBirth).toString()} />
                 <InfoRow label="Gender" value={profileData.gender} />
                 <InfoRow label="Height" value={profileData.height} />
@@ -157,10 +201,10 @@ const ViewProfile = ({ onBackToCreate, isDarkMode }) => {
             </InfoCard>
 
             {/* Contact Information */}
-            <InfoCard title="Contact & Location" icon={MapPin}>
-              <div className="space-y-2">
-                <InfoRow label="Email" value={profileData.email} />
-                <InfoRow label="Phone" value={profileData.phone} />
+            <InfoCard title="Contact & Location" icon={MapPin} gradient="from-green-500 to-teal-600">
+              <div className="space-y-1">
+                <InfoRow label="Email" value={profileData.email} icon={Mail} />
+                <InfoRow label="Phone" value={profileData.phone} icon={Phone} />
                 <InfoRow label="Country" value={profileData.country} />
                 <InfoRow label="State" value={profileData.state} />
                 <InfoRow label="City" value={profileData.city} />
@@ -169,48 +213,53 @@ const ViewProfile = ({ onBackToCreate, isDarkMode }) => {
             </InfoCard>
 
             {/* Professional Information */}
-            <InfoCard title="Professional Information" icon={Briefcase}>
-              <div className="space-y-2">
-                <InfoRow label="Education" value={profileData.education} />
+            <InfoCard title="Professional Information" icon={Briefcase} gradient="from-orange-500 to-red-500">
+              <div className="space-y-1">
+                <InfoRow label="Education" value={profileData.education} icon={GraduationCap} />
                 <InfoRow label="Education Details" value={profileData.educationDetails} />
-                <InfoRow label="Occupation" value={profileData.occupation} />
+                <InfoRow label="Occupation" value={profileData.occupation} icon={Building} />
                 <InfoRow label="Occupation Details" value={profileData.occupationDetails} />
-                <InfoRow label="Annual Income" value={profileData.annualIncome} />
+                <InfoRow label="Annual Income" value={profileData.annualIncome} icon={DollarSign} />
                 <InfoRow label="Work Location" value={profileData.workLocation} />
               </div>
             </InfoCard>
 
             {/* Family Information */}
-            <InfoCard title="Family Information" icon={Home}>
-              <div className="space-y-2">
+            <InfoCard title="Family Information" icon={Home} gradient="from-emerald-500 to-green-600">
+              <div className="space-y-1">
                 <InfoRow label="Family Type" value={profileData.familyType} />
                 <InfoRow label="Family Status" value={profileData.familyStatus} />
                 <InfoRow label="Father's Occupation" value={profileData.fatherOccupation} />
                 <InfoRow label="Mother's Occupation" value={profileData.motherOccupation} />
-                <InfoRow label="Siblings" value={profileData.siblings} />
+                <InfoRow label="Siblings" value={profileData.siblings} icon={Users} />
                 <InfoRow label="Family Location" value={profileData.familyLocation} />
               </div>
             </InfoCard>
 
             {/* Lifestyle Information */}
-            <InfoCard title="Lifestyle & About Me" icon={Heart}>
-              <div className="space-y-2">
+            <InfoCard title="Lifestyle & About Me" icon={Heart} gradient="from-pink-500 to-purple-600">
+              <div className="space-y-1">
                 <InfoRow label="Diet" value={profileData.diet} />
                 <InfoRow label="Smoking" value={profileData.smoking} />
                 <InfoRow label="Drinking" value={profileData.drinking} />
                 <InfoRow label="Hobbies" value={profileData.hobbies} />
                 {profileData.aboutMe && (
-                  <div className="pt-4">
-                    <h4 className="text-lg font-semibold text-black dark:text-white mb-2">About Me</h4>
-                    <p className="text-gray-700 dark:text-gray-300 leading-relaxed">{profileData.aboutMe}</p>
+                  <div className="pt-4 border-t border-gray-100">
+                    <h4 className="text-lg font-semibold text-gray-800 mb-3 flex items-center">
+                      <Heart className="w-5 h-5 mr-2 text-pink-500" />
+                      About Me
+                    </h4>
+                    <div className="bg-gradient-to-r from-pink-50 to-purple-50 p-4 rounded-lg border border-pink-200">
+                      <p className="text-gray-700 leading-relaxed">{profileData.aboutMe}</p>
+                    </div>
                   </div>
                 )}
               </div>
             </InfoCard>
 
             {/* Partner Preferences */}
-            <InfoCard title="Partner Preferences" icon={Users}>
-              <div className="space-y-2">
+            <InfoCard title="Partner Preferences" icon={Users} gradient="from-indigo-500 to-blue-600">
+              <div className="space-y-1">
                 <InfoRow 
                   label="Age Range" 
                   value={profileData.partnerAgeMin && profileData.partnerAgeMax ? 
@@ -224,19 +273,21 @@ const ViewProfile = ({ onBackToCreate, isDarkMode }) => {
           </div>
         </div>
 
-        {/* Action Buttons */}
-        <div className="flex justify-center mt-8 space-x-4">
+        {/* Action Buttons - Enhanced Design */}
+        <div className="flex flex-col sm:flex-row justify-center mt-8 space-y-4 sm:space-y-0 sm:space-x-6">
           <button
             onClick={onBackToCreate}
-            className="px-8 py-3 bg-gray-600 dark:bg-gray-400 text-white dark:text-black rounded-full font-semibold hover:bg-gray-700 dark:hover:bg-gray-300 transition-all shadow-lg hover:shadow-xl"
+            className="px-8 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-full font-semibold hover:from-purple-600 hover:to-pink-600 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1 flex items-center justify-center space-x-2"
           >
-            Edit Profile
+            <Edit className="w-5 h-5" />
+            <span>Edit Profile</span>
           </button>
           <button
             onClick={() => window.print()}
-            className="px-8 py-3 bg-black dark:bg-white text-white dark:text-black rounded-full font-semibold hover:bg-gray-800 dark:hover:bg-gray-200 transition-all shadow-lg hover:shadow-xl"
+            className="px-8 py-3 bg-gradient-to-r from-gray-600 to-gray-700 text-white rounded-full font-semibold hover:from-gray-700 hover:to-gray-800 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1 flex items-center justify-center space-x-2"
           >
-            Print Profile
+            <Camera className="w-5 h-5" />
+            <span>Print Profile</span>
           </button>
         </div>
       </div>

@@ -3,7 +3,13 @@ import { io } from 'socket.io-client';
 import { useAuth } from './AuthContext';
 
 const SocketContext = createContext();
-const wsUrl = import.meta.env.VITE_WS_URL;
+
+// Use WS_URL from env, fallback to API_URL with different port, or localhost:5000
+const wsUrl = import.meta.env.VITE_WS_URL || 
+              (import.meta.env.VITE_API_URL ? import.meta.env.VITE_API_URL.replace(/:\d+/, ':5000') : 'http://localhost:5000');
+
+console.log('Socket connecting to:', wsUrl);
+
 export const useSocket = () => {
   const context = useContext(SocketContext);
   if (!context) {
@@ -33,14 +39,9 @@ export const SocketProvider = ({ children }) => {
   }, []);
 
   useEffect(() => {
-    if (user) {
-      console.log('🔌 Attempting to connect to socket for user:', user);
-      console.log('User data:', user);
-      
-      if (!user._id) {
-        console.error('❌ No user ID found');
-        return;
-      }
+    if (user && user._id) {
+      console.log('🔌 Attempting to connect to socket for user:', user._id);
+      console.log('Socket URL:', wsUrl);
       
       setConnectionStatus('connecting');
       
@@ -48,7 +49,12 @@ export const SocketProvider = ({ children }) => {
         query: {
           userId: user._id
         },
-        transports: ['websocket', 'polling']
+        transports: ['websocket', 'polling'],
+        timeout: 20000,
+        forceNew: true,
+        reconnection: true,
+        reconnectionAttempts: 5,
+        reconnectionDelay: 1000,
       });
 
       newSocket.on('connect', () => {
@@ -60,6 +66,7 @@ export const SocketProvider = ({ children }) => {
 
       newSocket.on('connect_error', (error) => {
         console.error('❌ Socket connection error:', error);
+        console.error('Attempted URL:', wsUrl);
         setConnectionStatus('error');
       });
 
@@ -81,6 +88,7 @@ export const SocketProvider = ({ children }) => {
       });
 
       newSocket.on('online-users', (userIds) => {
+        console.log('📋 Online users updated:', userIds);
         setOnlineUsers(userIds);
       });
 
