@@ -14,8 +14,12 @@ window.ReadableStream = window.ReadableStream || Readable;
 window.WritableStream = window.WritableStream || Writable;
 window.DuplexStream = window.DuplexStream || Duplex;
 
+import { ThemeProvider } from './contexts/ThemeContext.jsx';
+
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <App />
+    <ThemeProvider>
+      <App />
+    </ThemeProvider>
   </StrictMode>,
 )

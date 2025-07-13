@@ -132,19 +132,19 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-indigo-100 flex items-center justify-center px-4 py-8 relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-indigo-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-700 flex items-center justify-center px-4 sm:px-6 lg:px-8 py-8 relative overflow-hidden">
       {/* Forgot Password Popup */}
       {showForgotPassword && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 z-50">
-          <div className="bg-white rounded-2xl shadow-xl p-8 max-w-sm text-center">
-            <h2 className="text-xl font-bold mb-4">Forgot Password?</h2>
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8 max-w-sm w-full mx-4 text-center">
+            <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">Forgot Password?</h2>
             <form onSubmit={handleForgotPassword}>
               <input
                 type="email"
                 value={forgotEmail}
                 onChange={e => setForgotEmail(e.target.value)}
                 placeholder="Enter your email"
-                className="w-full px-4 py-2 border rounded mb-4"
+                className="w-full px-4 py-2 border rounded mb-4 bg-gray-100 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                 required
               />
               <button
@@ -155,7 +155,7 @@ const Login = () => {
                 {forgotLoading ? 'Sending...' : 'Send Reset Link'}
               </button>
             </form>
-            {forgotMessage && <div className="mt-4 text-sm text-gray-700">{forgotMessage}</div>}
+            {forgotMessage && <div className="mt-4 text-sm text-gray-700 dark:text-gray-300">{forgotMessage}</div>}
             <button
               className="mt-6 text-pink-600 hover:underline font-semibold"
               onClick={() => setShowForgotPassword(false)}
@@ -184,25 +184,25 @@ const Login = () => {
               <div className="absolute inset-0 bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-600 rounded-2xl blur-md opacity-30 -z-10"></div>
             </div>
           </div>
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-gray-900 via-purple-900 to-indigo-900 bg-clip-text text-transparent mb-3">
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-gray-900 via-purple-900 to-indigo-900 bg-clip-text text-transparent dark:from-white dark:via-gray-200 dark:to-gray-400 mb-3">
             Welcome Back
           </h1>
-          <p className="text-gray-600 text-lg font-medium">Sign in to your HeartConnect account</p>
+          <p className="text-gray-600 dark:text-gray-300 text-lg font-medium">Sign in to your HeartConnect account</p>
           <div className="flex items-center justify-center mt-2 space-x-2">
             <Shield className="w-4 h-4 text-green-500" />
-            <span className="text-sm text-green-600 font-medium">Secure & Trusted</span>
+            <span className="text-sm text-green-600 dark:text-green-400 font-medium">Secure & Trusted</span>
           </div>
         </div>
 
         {/* Enhanced Login Form */}
-        <div className="bg-white/80 backdrop-blur-lg rounded-3xl shadow-2xl p-8 border border-white/20 relative overflow-hidden">
+        <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg rounded-3xl shadow-2xl p-8 border border-white/20 dark:border-gray-700/20 relative overflow-hidden">
           {/* Subtle gradient overlay */}
-          <div className="absolute inset-0 bg-gradient-to-br from-white/50 to-purple-50/30 rounded-3xl"></div>
+          <div className="absolute inset-0 bg-gradient-to-br from-white/50 to-purple-50/30 dark:from-gray-700/50 dark:to-gray-800/30 rounded-3xl"></div>
           
           <form onSubmit={handleSubmit} className="space-y-6 relative z-10">
             {/* Enhanced Email Field */}
             <div className="group">
-              <label htmlFor="email" className="block text-sm font-semibold text-gray-700 mb-3">
+              <label htmlFor="email" className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
                 Email Address
               </label>
               <div className="relative">
@@ -216,7 +216,7 @@ const Login = () => {
                   value={formData.email}
                   onChange={handleInputChange}
                   placeholder="Enter your email"
-                  className="w-full pl-12 pr-4 py-4 border border-gray-200 rounded-xl focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all duration-300 bg-white/70 backdrop-blur-sm shadow-sm hover:shadow-md font-medium"
+                  className="w-full pl-12 pr-4 py-4 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all duration-300 bg-white/70 dark:bg-gray-700/70 backdrop-blur-sm shadow-sm hover:shadow-md font-medium text-gray-900 dark:text-white"
                   required
                 />
               </div>
@@ -224,7 +224,7 @@ const Login = () => {
 
             {/* Enhanced Password Field */}
             <div className="group">
-              <label htmlFor="password" className="block text-sm font-semibold text-gray-700 mb-3">
+              <label htmlFor="password" className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
                 Password
               </label>
               <div className="relative">
@@ -238,13 +238,13 @@ const Login = () => {
                   value={formData.password}
                   onChange={handleInputChange}
                   placeholder="Enter your password"
-                  className="w-full pl-12 pr-14 py-4 border border-gray-200 rounded-xl focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all duration-300 bg-white/70 backdrop-blur-sm shadow-sm hover:shadow-md font-medium"
+                  className="w-full pl-12 pr-14 py-4 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all duration-300 bg-white/70 dark:bg-gray-700/70 backdrop-blur-sm shadow-sm hover:shadow-md font-medium text-gray-900 dark:text-white"
                   required
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 pr-4 flex items-center hover:bg-gray-50 rounded-r-xl transition-colors"
+                  className="absolute inset-y-0 right-0 pr-4 flex items-center hover:bg-gray-50 dark:hover:bg-gray-700 rounded-r-xl transition-colors"
                 >
                   {showPassword ? (
                     <EyeOff className="h-5 w-5 text-gray-400 hover:text-gray-600" />
@@ -261,9 +261,9 @@ const Login = () => {
                 <input
                   id="remember-me"
                   type="checkbox"
-                  className="h-4 w-4 text-pink-600 focus:ring-pink-500 border-gray-300 rounded transition-colors"
+                  className="h-4 w-4 text-pink-600 focus:ring-pink-500 border-gray-300 dark:border-gray-600 rounded transition-colors"
                 />
-                <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-700 font-medium group-hover:text-gray-900 transition-colors">
+                <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-700 dark:text-gray-300 font-medium group-hover:text-gray-900 dark:group-hover:text-white transition-colors">
                   Remember me
                 </label>
               </div>
@@ -274,13 +274,13 @@ const Login = () => {
 
             {/* Enhanced Error Message */}
             {error && (
-              <div className="bg-red-50 border border-red-200 rounded-xl p-4 backdrop-blur-sm">
-                <p className="text-red-800 text-sm font-medium">{error}</p>
+              <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-500/30 rounded-xl p-4 backdrop-blur-sm">
+                <p className="text-red-800 dark:text-red-300 text-sm font-medium">{error}</p>
               </div>
             )}
             {socialLoginWarning && (
-              <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4 backdrop-blur-sm mt-2">
-                <p className="text-yellow-800 text-sm font-medium">{socialLoginWarning}</p>
+              <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-500/30 rounded-xl p-4 backdrop-blur-sm mt-2">
+                <p className="text-yellow-800 dark:text-yellow-300 text-sm font-medium">{socialLoginWarning}</p>
               </div>
             )}
 
@@ -309,10 +309,10 @@ const Login = () => {
           <div className="mt-8">
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-200" />
+                <div className="w-full border-t border-gray-200 dark:border-gray-600" />
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-4 bg-white text-gray-500 font-medium rounded-full">Or continue with</span>
+                <span className="px-4 bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400 font-medium rounded-full">Or continue with</span>
               </div>
             </div>
           </div>
@@ -322,7 +322,7 @@ const Login = () => {
             <button
               type="button"
               onClick={handleGoogleLogin}
-              className="w-full inline-flex ml-[100px] justify-center py-3 px-4 border border-gray-200 rounded-xl shadow-sm bg-white/70 backdrop-blur-sm text-sm font-semibold text-gray-700 hover:bg-white hover:shadow-md transition-all duration-300 hover:scale-105 active:scale-95"
+              className="w-full inline-flex ml-[100px] justify-center py-3 px-4 border border-gray-200 dark:border-gray-600 rounded-xl shadow-sm bg-white/70 dark:bg-gray-700/70 backdrop-blur-sm text-sm font-semibold text-gray-700 dark:text-gray-300 hover:bg-white dark:hover:bg-gray-700 hover:shadow-md transition-all duration-300 hover:scale-105 active:scale-95"
             >
               <svg className="w-6 h-6" viewBox="0 0 24 24">
                 <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -336,7 +336,7 @@ const Login = () => {
 
           {/* Enhanced Sign Up Link */}
           <div className="mt-8 text-center">
-  <p className="text-sm text-gray-600 font-medium">
+  <p className="text-sm text-gray-600 dark:text-gray-300 font-medium">
     Don't have an account?{' '}
     <Link
       to="/signup"

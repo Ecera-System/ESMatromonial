@@ -1,44 +1,47 @@
-import { motion } from 'framer-motion';
-import { format, isToday, isYesterday } from 'date-fns';
-import FileMessage from './FileMessage';
+import { motion } from "framer-motion";
+import { format, isToday, isYesterday } from "date-fns";
+import FileMessage from "./FileMessage";
 
 const MessageList = ({ messages, currentUserId }) => {
   const formatMessageTime = (date) => {
     const messageDate = new Date(date);
-    
+
     if (isToday(messageDate)) {
-      return format(messageDate, 'HH:mm');
+      return format(messageDate, "HH:mm");
     } else if (isYesterday(messageDate)) {
-      return `Yesterday ${format(messageDate, 'HH:mm')}`;
+      return `Yesterday ${format(messageDate, "HH:mm")}`;
     } else {
-      return format(messageDate, 'MMM dd, HH:mm');
+      return format(messageDate, "MMM dd, HH:mm");
     }
   };
 
   const shouldShowDateSeparator = (currentMessage, previousMessage) => {
     if (!previousMessage) return true;
-    
+
     const currentDate = new Date(currentMessage.createdAt).toDateString();
     const previousDate = new Date(previousMessage.createdAt).toDateString();
-    
+
     return currentDate !== previousDate;
   };
 
   const formatDateSeparator = (date) => {
     const messageDate = new Date(date);
-    
+
     if (isToday(messageDate)) {
-      return 'Today';
+      return "Today";
     } else if (isYesterday(messageDate)) {
-      return 'Yesterday';
+      return "Yesterday";
     } else {
-      return format(messageDate, 'MMMM dd, yyyy');
+      return format(messageDate, "MMMM dd, yyyy");
     }
   };
 
   const isEmojiOnly = (text) => {
     // Remove all emojis and check if anything remains
-    const withoutEmojis = text.replace(/[\p{Emoji_Presentation}\p{Extended_Pictographic}]/gu, '');
+    const withoutEmojis = text.replace(
+      /[\p{Emoji_Presentation}\p{Extended_Pictographic}]/gu,
+      ""
+    );
     return withoutEmojis.trim().length === 0 && text.trim().length > 0;
   };
 
@@ -46,11 +49,13 @@ const MessageList = ({ messages, currentUserId }) => {
   const filteredMessages = messages.filter((message, index, arr) => {
     if (message.isTemp) {
       // Check if there's a real message with the same content and sender
-      const hasRealMessage = arr.some(msg => 
-        !msg.isTemp && 
-        msg.content === message.content && 
-        msg.sender._id === message.sender._id &&
-        Math.abs(new Date(msg.createdAt) - new Date(message.createdAt)) < 10000 // Within 10 seconds
+      const hasRealMessage = arr.some(
+        (msg) =>
+          !msg.isTemp &&
+          msg.content === message.content &&
+          msg.sender._id === message.sender._id &&
+          Math.abs(new Date(msg.createdAt) - new Date(message.createdAt)) <
+            10000 // Within 10 seconds
       );
       return !hasRealMessage;
     }
@@ -62,9 +67,15 @@ const MessageList = ({ messages, currentUserId }) => {
       {filteredMessages.map((message, index) => {
         const isOwnMessage = message.sender._id === currentUserId;
         const previousMessage = filteredMessages[index - 1];
-        const showDateSeparator = shouldShowDateSeparator(message, previousMessage);
-        const emojiOnly = message.messageType === 'text' && isEmojiOnly(message.content);
-        const isFileMessage = ['image', 'video', 'document', 'file'].includes(message.messageType);
+        const showDateSeparator = shouldShowDateSeparator(
+          message,
+          previousMessage
+        );
+        const emojiOnly =
+          message.messageType === "text" && isEmojiOnly(message.content);
+        const isFileMessage = ["image", "video", "document", "file"].includes(
+          message.messageType
+        );
 
         return (
           <div key={message._id}>
@@ -82,60 +93,88 @@ const MessageList = ({ messages, currentUserId }) => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3 }}
-              className={`flex ${isOwnMessage ? 'justify-end' : 'justify-start'} mb-1 sm:mb-2`}
+              className={`flex ${
+                isOwnMessage ? "justify-end" : "justify-start"
+              } mb-1 sm:mb-2`}
             >
-              <div className={`flex items-end space-x-1 sm:space-x-2 max-w-[280px] sm:max-w-xs lg:max-w-md ${isOwnMessage ? 'flex-row-reverse space-x-reverse' : ''} ${isOwnMessage ? 'ml-auto' : 'mr-auto'}`}>
+              <div
+                className={`flex items-end space-x-1 sm:space-x-2 max-w-[280px] sm:max-w-xs lg:max-w-md ${
+                  isOwnMessage ? "flex-row-reverse space-x-reverse" : ""
+                } ${isOwnMessage ? "ml-auto" : "mr-auto"}`}
+              >
                 {/* Avatar */}
                 {!isOwnMessage && (
                   <div className="w-6 h-6 sm:w-8 sm:h-8 bg-gradient-to-r from-rose-400 to-pink-500 rounded-full flex items-center justify-center text-white text-xs sm:text-sm font-semibold flex-shrink-0 shadow-sm">
                     {message.sender.avatar ? (
-                      <img 
-                        src={message.sender.avatar} 
+                      <img
+                        src={message.sender.avatar}
                         alt={message.sender.firstName}
                         className="w-full h-full rounded-full object-cover"
                       />
                     ) : (
-                      (message.sender?.firstName?.charAt(0) || message.sender?.email?.charAt(0) || 'U').toUpperCase()
+                      (
+                        message.sender?.firstName?.charAt(0) ||
+                        message.sender?.email?.charAt(0) ||
+                        "U"
+                      ).toUpperCase()
                     )}
                   </div>
                 )}
 
                 {/* Message Content */}
-                <div className={`relative ${
-                  isFileMessage || emojiOnly 
-                    ? 'bg-transparent p-1' 
-                    : `px-3 sm:px-4 py-2 sm:py-3 rounded-2xl shadow-sm ${
-                        isOwnMessage 
-                          ? 'bg-gradient-to-r from-rose-500 to-pink-600 text-white shadow-md' 
-                          : 'bg-white text-gray-900 border border-gray-200 shadow-sm'
-                      }`
-                } ${message.isTemp ? 'opacity-70' : ''}`}>
-                  
+                <div
+                  className={`relative ${
+                    isFileMessage || emojiOnly
+                      ? "bg-transparent p-1"
+                      : `px-3 sm:px-4 py-2 sm:py-3 rounded-2xl shadow-sm ${
+                          isOwnMessage
+                            ? "bg-gradient-to-r from-rose-500 to-pink-600 text-white shadow-md"
+                            : "bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border border-gray-200 dark:border-gray-700 shadow-sm"
+                        }`
+                  } ${message.isTemp ? "opacity-70" : ""}`}
+                >
                   {/* Temporary message indicator */}
                   {message.isTemp && (
                     <div className="absolute -top-1 -right-1 w-1.5 h-1.5 sm:w-2 sm:h-2 bg-amber-400 rounded-full animate-pulse"></div>
                   )}
 
                   {isFileMessage ? (
-                    <FileMessage message={message} isOwnMessage={isOwnMessage} />
+                    <FileMessage
+                      message={message}
+                      isOwnMessage={isOwnMessage}
+                    />
                   ) : (
-                    <p className={`${emojiOnly ? 'text-2xl sm:text-4xl' : 'text-xs sm:text-sm'} break-words`}>
+                    <p
+                      className={`${
+                        emojiOnly
+                          ? "text-2xl sm:text-4xl"
+                          : "text-xs sm:text-sm"
+                      } break-words`}
+                    >
                       {message.content}
                     </p>
                   )}
-                  
+
                   {!emojiOnly && !isFileMessage && (
-                    <p className={`text-xs mt-1 ${
-                      isOwnMessage ? 'text-rose-100' : 'text-gray-500'
-                    }`}>
+                    <p
+                      className={`text-xs mt-1 ${
+                        isOwnMessage
+                          ? "text-rose-100"
+                          : "text-gray-500 dark:text-gray-400"
+                      }`}
+                    >
                       {formatMessageTime(message.createdAt)}
                     </p>
                   )}
                 </div>
-                
+
                 {/* Time for emoji-only and file messages */}
                 {(emojiOnly || isFileMessage) && (
-                  <div className={`text-xs text-gray-500 ${isOwnMessage ? 'text-right' : 'text-left'} mt-1`}>
+                  <div
+                    className={`text-xs text-gray-500 dark:text-gray-400 ${
+                      isOwnMessage ? "text-right" : "text-left"
+                    } mt-1`}
+                  >
                     {formatMessageTime(message.createdAt)}
                   </div>
                 )}

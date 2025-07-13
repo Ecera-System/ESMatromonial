@@ -50,9 +50,9 @@ const EmojiPicker = ({ onEmojiSelect, isOpen, onToggle, position = 'top' }) => {
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.9 }}
-            className={`absolute z-50 ${
+            className={`absolute z-50 w-full sm:w-80 md:w-96 ${
               position === 'top' ? 'bottom-full mb-2' : 'top-full mt-2'
-            } right-0`}
+            } right-0 sm:left-auto sm:right-0`}
           >
             <div className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
               <div className="flex items-center justify-between p-3 border-b border-gray-200">
@@ -66,8 +66,8 @@ const EmojiPicker = ({ onEmojiSelect, isOpen, onToggle, position = 'top' }) => {
               </div>
               <EmojiPickerReact
                 onEmojiClick={handleEmojiClick}
-                width={320}
-                height={400}
+                width="100%"
+                height={300}
                 previewConfig={{ showPreview: false }}
                 searchPlaceHolder="Search emojis..."
                 skinTonesDisabled={true}

@@ -1,14 +1,29 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from '../../../contexts/Chat/AuthContext';
-import { addVisitor } from '../../../services/visitorService';
-import { sendRequest } from '../../../services/requestService';
-import { getAllUsers } from '../../../services/userService';
-import { Heart, MessageCircle, Briefcase, GraduationCap, MapPin, Star, Filter } from "lucide-react";
+import { useAuth } from "../../../contexts/Chat/AuthContext";
+import { addVisitor } from "../../../services/visitorService";
+import { sendRequest } from "../../../services/requestService";
+import { getAllUsers } from "../../../services/userService";
+import {
+  Heart,
+  MessageCircle,
+  Briefcase,
+  GraduationCap,
+  MapPin,
+  Star,
+  Filter,
+} from "lucide-react";
 import BackButton from "../../BackButton";
 
 // Profile Card Component
-function ProfileCard({ profile, index, onViewProfile, onSendInvite, inviteStatus, onMessage }) {
+function ProfileCard({
+  profile,
+  index,
+  onViewProfile,
+  onSendInvite,
+  inviteStatus,
+  onMessage,
+}) {
   const [isLiked, setIsLiked] = useState(false);
   const [isMessageSent, setIsMessageSent] = useState(false);
 
@@ -23,25 +38,25 @@ function ProfileCard({ profile, index, onViewProfile, onSendInvite, inviteStatus
 
   return (
     <div
-      className="bg-white rounded-3xl overflow-hidden shadow-2xl hover:shadow-3xl transition-all duration-500 hover:-translate-y-2 hover:scale-[1.02] group cursor-pointer"
+      className="bg-white dark:bg-gray-800 rounded-3xl overflow-hidden shadow-2xl hover:shadow-3xl transition-all duration-500 hover:-translate-y-2 hover:scale-[1.02] group cursor-pointer"
       onClick={() => onViewProfile(profile)}
     >
       {/* Profile Image */}
-      <div className="relative h-80 overflow-hidden flex items-center justify-center bg-gray-100">
+      <div className="relative h-80 overflow-hidden flex items-center justify-center bg-gray-100 dark:bg-gray-700">
         {profile.photos && profile.photos.length > 0 ? (
           <img
             src={profile.photos[0]}
-            alt={profile.firstName + ' ' + profile.lastName}
+            alt={profile.firstName + " " + profile.lastName}
             className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
           />
         ) : profile.avatar ? (
           <img
             src={profile.avatar}
-            alt={profile.firstName + ' ' + profile.lastName}
+            alt={profile.firstName + " " + profile.lastName}
             className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center text-5xl font-bold text-purple-700 bg-gradient-to-br from-purple-100 to-pink-100">
+          <div className="w-full h-full flex items-center justify-center text-5xl font-bold text-purple-700 bg-gradient-to-br from-purple-100 to-pink-100 dark:from-gray-600 dark:to-gray-500 dark:text-gray-300">
             {profile.firstName?.[0]}
             {profile.lastName?.[0]}
           </div>
@@ -59,53 +74,68 @@ function ProfileCard({ profile, index, onViewProfile, onSendInvite, inviteStatus
       <div className="p-6">
         {/* Header */}
         <div className="mb-4">
-          <h3 className="text-2xl font-bold text-gray-800 mb-2">{profile.firstName} {profile.lastName}</h3>
-          <div className="flex items-center text-gray-600 mb-3">
-            <span className="font-medium">{profile.age ? `${profile.age} years` : ''}</span>
-            {profile.age && <span className="mx-2">•</span>}
+          <h3 className="text-2xl font-bold text-gray-800 dark:text-white mb-2">
+            {profile.firstName} {profile.lastName}
+          </h3>
+          <div className="flex items-center text-gray-600 dark:text-gray-300 mb-3">
+            <span className="font-medium">
+              {profile.age ? `${profile.age} years` : ""}
+            </span>
+            {profile.age && <span className="mx-2"> • </span>}
             <MapPin className="w-4 h-4 mr-1" />
-            <span>{profile.city}{profile.state ? `, ${profile.state}` : ''}</span>
+            <span>
+              {profile.city}
+              {profile.state ? `, ${profile.state}` : ""}
+            </span>
           </div>
         </div>
 
         {/* Quote */}
         {profile.quote && (
-          <div className="bg-gradient-to-r from-pink-50 to-purple-50 p-4 rounded-xl mb-4 border-l-4 border-pink-400">
-            <p className="text-gray-700 italic text-sm leading-relaxed">{profile.quote}</p>
+          <div className="bg-gradient-to-r from-pink-50 to-purple-50 dark:from-gray-700 dark:to-gray-800 p-4 rounded-xl mb-4 border-l-4 border-pink-400 dark:border-purple-600">
+            <p className="text-gray-700 dark:text-gray-300 italic text-sm leading-relaxed">
+              {profile.quote}
+            </p>
           </div>
         )}
 
         {/* Details */}
         <div className="space-y-3 mb-4">
-          <div className="flex items-center p-3 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors duration-200">
+          <div className="flex items-center p-3 bg-gray-50 dark:bg-gray-700 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors duration-200">
             <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center mr-3">
               <Briefcase className="w-4 h-4 text-white" />
             </div>
-            <span className="text-gray-700 font-medium">{profile.occupation || profile.job}</span>
+            <span className="text-gray-700 dark:text-gray-300 font-medium">
+              {profile.occupation || profile.job}
+            </span>
           </div>
-          <div className="flex items-center p-3 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors duration-200">
+          <div className="flex items-center p-3 bg-gray-50 dark:bg-gray-700 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors duration-200">
             <div className="w-8 h-8 bg-gradient-to-r from-green-500 to-teal-600 rounded-full flex items-center justify-center mr-3">
               <GraduationCap className="w-4 h-4 text-white" />
             </div>
-            <span className="text-gray-700 font-medium">{profile.education}</span>
+            <span className="text-gray-700 dark:text-gray-300 font-medium">
+              {profile.education}
+            </span>
           </div>
         </div>
 
         {/* Interests */}
         {Array.isArray(profile.interests) && profile.interests.length > 0 && (
           <div className="mb-6">
-            <h4 className="font-semibold text-gray-800 mb-3 text-sm uppercase tracking-wide">Interests</h4>
+            <h4 className="font-semibold text-gray-800 dark:text-white mb-3 text-sm uppercase tracking-wide">
+              Interests
+            </h4>
             <div className="flex flex-wrap gap-2">
               {profile.interests.slice(0, 4).map((interest, idx) => (
                 <span
                   key={interest}
-                  className="bg-gradient-to-r from-pink-100 to-purple-100 text-gray-800 px-3 py-1 rounded-full text-xs font-medium hover:from-pink-200 hover:to-purple-200 transition-colors duration-200"
+                  className="bg-gradient-to-r from-pink-100 to-purple-100 dark:from-gray-600 dark:to-gray-700 text-gray-800 dark:text-gray-200 px-3 py-1 rounded-full text-xs font-medium hover:from-pink-200 hover:to-purple-200 dark:hover:from-gray-500 dark:hover:to-gray-600 transition-colors duration-200"
                 >
                   {interest}
                 </span>
               ))}
               {profile.interests.length > 4 && (
-                <span className="bg-gray-100 text-gray-600 px-3 py-1 rounded-full text-xs">
+                <span className="bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 px-3 py-1 rounded-full text-xs">
                   +{profile.interests.length - 4} more
                 </span>
               )}
@@ -127,17 +157,24 @@ function ProfileCard({ profile, index, onViewProfile, onSendInvite, inviteStatus
             Message
           </button>
           <button
-            onClick={e => { e.stopPropagation(); onSendInvite(profile); }}
-            disabled={inviteStatus === 'sent' || inviteStatus === 'loading'}
+            onClick={(e) => {
+              e.stopPropagation();
+              onSendInvite(profile);
+            }}
+            disabled={inviteStatus === "sent" || inviteStatus === "loading"}
             className={`flex-1 py-3 px-4 rounded-xl font-semibold text-sm transition-all duration-300 flex items-center justify-center gap-2 ${
-              inviteStatus === 'sent'
-                ? 'bg-gradient-to-r from-green-400 to-green-600 text-white opacity-70 cursor-not-allowed'
-                : inviteStatus === 'loading'
-                  ? 'bg-gradient-to-r from-gray-400 to-gray-600 text-white opacity-70 cursor-wait'
-                  : 'bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:shadow-lg hover:shadow-purple-500/30 hover:-translate-y-1'
+              inviteStatus === "sent"
+                ? "bg-gradient-to-r from-green-400 to-green-600 text-white opacity-70 cursor-not-allowed"
+                : inviteStatus === "loading"
+                ? "bg-gradient-to-r from-gray-400 to-gray-600 text-white opacity-70 cursor-wait"
+                : "bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:shadow-lg hover:shadow-purple-500/30 hover:-translate-y-1"
             }`}
           >
-            {inviteStatus === 'sent' ? 'Invitation Sent' : inviteStatus === 'loading' ? 'Sending...' : 'Send Invitation'}
+            {inviteStatus === "sent"
+              ? "Invitation Sent"
+              : inviteStatus === "loading"
+              ? "Sending..."
+              : "Send Invitation"}
           </button>
         </div>
       </div>
@@ -157,7 +194,7 @@ export default function MatrimonyFeed() {
   useEffect(() => {
     setLoading(true);
     getAllUsers()
-      .then(data => {
+      .then((data) => {
         setProfiles(Array.isArray(data) ? data : data.users || []);
       })
       .catch(() => setProfiles([]))
@@ -166,13 +203,24 @@ export default function MatrimonyFeed() {
 
   const filteredProfiles = profiles.filter((profile) => {
     if (!user) return true; // If not logged in, show all
-    return profile._id !== user._id && (activeFilter === "all" || profile.category === activeFilter);
+    return (
+      profile._id !== user._id &&
+      (activeFilter === "all" || profile.category === activeFilter)
+    );
   });
 
   const filters = [
     { key: "all", label: "All Profiles", count: profiles.length },
-    { key: "verified", label: "Verified", count: profiles.filter(p => p.verified).length },
-    { key: "nearby", label: "Nearby", count: profiles.filter(p => p.category === "nearby").length },
+    {
+      key: "verified",
+      label: "Verified",
+      count: profiles.filter((p) => p.verified).length,
+    },
+    {
+      key: "nearby",
+      label: "Nearby",
+      count: profiles.filter((p) => p.category === "nearby").length,
+    },
   ];
 
   const handleViewProfile = async (profile) => {
@@ -181,12 +229,12 @@ export default function MatrimonyFeed() {
 
   const handleSendInvite = async (profile) => {
     if (!user || !profile._id || user._id === profile._id) return;
-    setInviteMap(prev => ({ ...prev, [profile._id]: 'loading' }));
+    setInviteMap((prev) => ({ ...prev, [profile._id]: "loading" }));
     try {
       await sendRequest(profile._id);
-      setInviteMap(prev => ({ ...prev, [profile._id]: 'sent' }));
+      setInviteMap((prev) => ({ ...prev, [profile._id]: "sent" }));
     } catch (err) {
-      setInviteMap(prev => ({ ...prev, [profile._id]: 'idle' }));
+      setInviteMap((prev) => ({ ...prev, [profile._id]: "idle" }));
     }
   };
 
@@ -195,20 +243,21 @@ export default function MatrimonyFeed() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-indigo-50">
-      <div className="max-w-7xl mx-auto px-2 sm:px-4 md:px-6 py-4 md:py-8">
+    <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-indigo-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-700">
+      <div className="max-w-7xl mx-auto">
         <div className="mb-4 md:mb-6">
           <BackButton />
         </div>
       </div>
-      <main className="max-w-7xl mx-auto px-2 sm:px-4 md:px-6 py-4 md:py-8">
+      <main className="max-w-7xl mx-auto">
         {/* Hero Section */}
         <div className="text-center mb-8 md:mb-12">
-          <h1 className="text-3xl md:text-5xl lg:text-6xl font-black bg-gradient-to-r from-pink-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent mb-2 md:mb-4">
+          <h1 className="text-3xl md:text-5xl lg:text-6xl font-black bg-gradient-to-r from-pink-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent mb-2 md:mb-4 dark:from-blue-300 dark:via-purple-300 dark:to-pink-300">
             Find Your Perfect Match
           </h1>
-          <p className="text-base md:text-xl text-gray-600 max-w-2xl mx-auto mb-4 md:mb-8">
-            Discover meaningful connections with people who share your values, interests, and life goals
+          <p className="text-base md:text-xl text-gray-600 max-w-2xl mx-auto mb-4 md:mb-8 dark:text-gray-300">
+            Discover meaningful connections with people who share your values,
+            interests, and life goals
           </p>
           {/* Filter Buttons */}
           <div className="flex flex-wrap justify-center gap-2 md:gap-4 mb-6 md:mb-12">
@@ -219,15 +268,17 @@ export default function MatrimonyFeed() {
                 className={`px-4 md:px-6 py-2 md:py-3 rounded-full font-semibold transition-all duration-300 flex items-center gap-2 ${
                   activeFilter === filter.key
                     ? "bg-gradient-to-r from-pink-500 to-purple-600 text-white shadow-lg shadow-pink-500/30 transform -translate-y-1"
-                    : "bg-white text-gray-700 hover:bg-gray-50 shadow-md hover:shadow-lg hover:-translate-y-1"
+                    : "bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600 shadow-md hover:shadow-lg hover:-translate-y-1"
                 }`}
               >
                 {filter.label}
-                <span className={`px-2 py-1 rounded-full text-xs ${
-                  activeFilter === filter.key 
-                    ? "bg-white/20 text-white" 
-                    : "bg-gray-100 text-gray-600"
-                }`}>
+                <span
+                  className={`px-2 py-1 rounded-full text-xs ${
+                    activeFilter === filter.key
+                      ? "bg-white/20 text-white"
+                      : "bg-gray-100 dark:bg-gray-600 text-gray-600 dark:text-gray-300"
+                  }`}
+                >
                   {filter.count}
                 </span>
               </button>
@@ -236,21 +287,26 @@ export default function MatrimonyFeed() {
         </div>
         {/* Profiles Grid */}
         {loading ? (
-          <div className="text-center text-gray-400 text-lg">Loading profiles...</div>
+          <div className="text-center text-gray-400 dark:text-gray-300 text-lg">
+            Loading profiles...
+          </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-8">
             {filteredProfiles.map((profile, index) => (
               <div
                 key={profile._id}
                 className="opacity-0 animate-fade-in-up"
-                style={{ animationDelay: `${index * 100}ms`, animationFillMode: 'forwards' }}
+                style={{
+                  animationDelay: `${index * 100}ms`,
+                  animationFillMode: "forwards",
+                }}
               >
                 <ProfileCard
                   profile={profile}
                   index={index}
                   onViewProfile={handleViewProfile}
                   onSendInvite={handleSendInvite}
-                  inviteStatus={inviteMap[profile._id] || 'idle'}
+                  inviteStatus={inviteMap[profile._id] || "idle"}
                   onMessage={handleMessage}
                 />
               </div>
@@ -283,3 +339,4 @@ export default function MatrimonyFeed() {
     </div>
   );
 }
+

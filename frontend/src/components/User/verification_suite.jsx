@@ -20,18 +20,32 @@ export default function UserVerificationDashboard() {
   };
 
   const verificationSteps = [
-    { id: "email", label: "Email Verification", completed: verificationStatus.email },
-    { id: "phone", label: "Phone Number Verification", completed: verificationStatus.phone },
-    { id: "aadhar", label: "Aadhaar Verification", completed: verificationStatus.aadhar },
+    {
+      id: "email",
+      label: "Email Verification",
+      completed: verificationStatus.email,
+    },
+    {
+      id: "phone",
+      label: "Phone Number Verification",
+      completed: verificationStatus.phone,
+    },
+    {
+      id: "aadhar",
+      label: "Aadhaar Verification",
+      completed: verificationStatus.aadhar,
+    },
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-orange-50 to-white flex flex-col md:flex-row p-6">
+    <div className="min-h-screen bg-gradient-to-b from-orange-50 to-white dark:from-gray-900 dark:to-gray-800 flex flex-col md:flex-row p-4 sm:p-6 lg:p-8">
       <div className="absolute top-4 left-4 z-20">
         <BackButton />
       </div>
-      <aside className="hidden md:block w-1/4 pr-4 border-r border-gray-200 relative">
-        <h2 className="text-xl font-semibold mb-4">Verification Steps</h2>
+      <aside className="w-full md:w-1/4 md:pr-4 md:border-r md:border-gray-200 dark:border-gray-700 relative mb-6 md:mb-0">
+        <h2 className="text-xl sm:text-2xl font-semibold mb-4 text-gray-900 dark:text-white">
+          Verification Steps
+        </h2>
         <ul className="space-y-4">
           {verificationSteps.map(({ id, label, completed }) => (
             <li
@@ -40,8 +54,10 @@ export default function UserVerificationDashboard() {
               onClick={() => setStep(id === "aadhar" ? "aadhar-upload" : id)}
             >
               <span
-                className={`${
-                  step.startsWith(id) ? "text-orange-600 font-semibold underline" : "text-gray-700"
+                className={`text-base sm:text-lg ${
+                  step.startsWith(id)
+                    ? "text-orange-600 dark:text-orange-400 font-semibold underline"
+                    : "text-gray-700 dark:text-gray-300"
                 } hover:underline`}
               >
                 {label}
@@ -50,10 +66,10 @@ export default function UserVerificationDashboard() {
             </li>
           ))}
         </ul>
-        <div className="absolute bottom-6 right-6 w-full pr-4">
+        <div className="mt-6 md:absolute md:bottom-6 md:right-6 md:w-full md:pr-4">
           <button
             onClick={() => setStep("documents")}
-            className="mt-6 w-full py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow-md"
+            className="w-full py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow-md text-sm sm:text-base"
           >
             View Uploaded Documents
           </button>
@@ -61,16 +77,19 @@ export default function UserVerificationDashboard() {
       </aside>
 
       <main className="w-full md:w-3/4 flex items-center justify-center relative animate-slide-up">
-        <div className="bg-white/20 backdrop-blur-lg shadow-lg rounded-3xl p-10 w-full max-w-xl border border-white/30 transition-all duration-500 ease-in-out animate-fade-in">
+        <div className="bg-white/20 dark:bg-gray-900/20 backdrop-blur-lg shadow-lg rounded-3xl p-6 sm:p-10 w-full max-w-xl border border-white/30 dark:border-gray-700/30 transition-all duration-500 ease-in-out animate-fade-in">
           {step === "welcome" && (
             <div className="text-center space-y-4 animate-slide-up">
-              <h1 className="text-3xl font-bold text-gray-800">Welcome to the मन Verification Suite</h1>
-              <p className="text-gray-600">
-                Get verified to increase your profile credibility and improve match quality.
+              <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 dark:text-white">
+                Welcome to the मन Verification Suite
+              </h1>
+              <p className="text-gray-600 dark:text-gray-300 text-sm sm:text-base">
+                Get verified to increase your profile credibility and improve
+                match quality.
               </p>
               <button
                 onClick={() => setStep("email")}
-                className="mt-4 py-2 px-6 bg-orange-500 hover:bg-orange-600 text-white font-semibold rounded-lg shadow-md"
+                className="mt-4 py-2 px-6 bg-orange-500 hover:bg-orange-600 text-white font-semibold rounded-lg shadow-md text-sm sm:text-base"
               >
                 Start Verification
               </button>
@@ -79,10 +98,12 @@ export default function UserVerificationDashboard() {
 
           {step === "email" && (
             <div className="space-y-6 animate-fade-in">
-              <h1 className="text-2xl font-bold text-center text-gray-800">Email Verification</h1>
+              <h1 className="text-xl sm:text-2xl font-bold text-center text-gray-800 dark:text-white">
+                Email Verification
+              </h1>
               <input
                 type="email"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-sm sm:text-base bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
                 placeholder="Enter your email address"
               />
               <button
@@ -92,7 +113,7 @@ export default function UserVerificationDashboard() {
                   setToast("Email verified successfully");
                   setTimeout(() => setToast(""), 3000);
                 }}
-                className="w-full py-2 px-4 bg-orange-500 hover:bg-orange-600 text-white font-semibold rounded-lg shadow-md"
+                className="w-full py-2 px-4 bg-orange-500 hover:bg-orange-600 text-white font-semibold rounded-lg shadow-md text-sm sm:text-base"
               >
                 Send Verification Email
               </button>
@@ -101,11 +122,13 @@ export default function UserVerificationDashboard() {
 
           {step === "phone" && (
             <div className="space-y-6 animate-fade-in">
-              <h1 className="text-2xl font-bold text-center text-gray-800">Phone Number Verification</h1>
+              <h1 className="text-xl sm:text-2xl font-bold text-center text-gray-800 dark:text-white">
+                Phone Number Verification
+              </h1>
               <input
                 type="tel"
                 maxLength={10}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-sm sm:text-base bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
                 placeholder="Enter your phone number"
               />
               <button
@@ -115,7 +138,7 @@ export default function UserVerificationDashboard() {
                   setToast("Phone number verified successfully");
                   setTimeout(() => setToast(""), 3000);
                 }}
-                className="w-full py-2 px-4 bg-orange-500 hover:bg-orange-600 text-white font-semibold rounded-lg shadow-md"
+                className="w-full py-2 px-4 bg-orange-500 hover:bg-orange-600 text-white font-semibold rounded-lg shadow-md text-sm sm:text-base"
               >
                 Send OTP
               </button>
@@ -124,18 +147,20 @@ export default function UserVerificationDashboard() {
 
           {step === "aadhar-upload" && (
             <div className="space-y-6 animate-fade-in">
-              <h1 className="text-2xl font-bold text-center text-gray-800">Aadhaar Verification</h1>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <h1 className="text-xl sm:text-2xl font-bold text-center text-gray-800 dark:text-white">
+                Aadhaar Verification
+              </h1>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Upload Aadhaar (PDF or Image)
               </label>
               <input
                 type="file"
                 accept=".pdf, image/*"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-sm sm:text-base bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
               />
               <button
                 onClick={handleMockOCR}
-                className="w-full py-2 px-4 bg-orange-500 hover:bg-orange-600 text-white font-semibold rounded-lg shadow-md"
+                className="w-full py-2 px-4 bg-orange-500 hover:bg-orange-600 text-white font-semibold rounded-lg shadow-md text-sm sm:text-base"
               >
                 Scan & Continue
               </button>
@@ -144,23 +169,25 @@ export default function UserVerificationDashboard() {
 
           {step === "aadhar-mobile" && (
             <div className="space-y-6 animate-fade-in">
-              <h1 className="text-2xl font-bold text-center text-gray-800">Enter Mobile Linked to Aadhaar</h1>
+              <h1 className="text-xl sm:text-2xl font-bold text-center text-gray-800 dark:text-white">
+                Enter Mobile Linked to Aadhaar
+              </h1>
               <input
                 type="text"
                 value={mockAadharNumber}
                 readOnly
-                className="w-full px-4 py-2 bg-gray-100 border border-gray-300 rounded-lg focus:outline-none"
+                className="w-full px-4 py-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none text-sm sm:text-base text-gray-900 dark:text-white"
               />
               <input
                 type="tel"
                 maxLength={10}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-sm sm:text-base bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
                 placeholder="Enter your mobile number"
                 onChange={(e) => setManualPhone(e.target.value)}
               />
               <button
                 onClick={() => setStep("aadhar-otp")}
-                className="w-full py-2 px-4 bg-orange-500 hover:bg-orange-600 text-white font-semibold rounded-lg shadow-md"
+                className="w-full py-2 px-4 bg-orange-500 hover:bg-orange-600 text-white font-semibold rounded-lg shadow-md text-sm sm:text-base"
               >
                 Send OTP
               </button>
@@ -169,11 +196,13 @@ export default function UserVerificationDashboard() {
 
           {step === "aadhar-otp" && (
             <div className="space-y-6 animate-fade-in">
-              <h1 className="text-2xl font-bold text-center text-gray-800">OTP Verification</h1>
+              <h1 className="text-xl sm:text-2xl font-bold text-center text-gray-800 dark:text-white">
+                OTP Verification
+              </h1>
               <input
                 type="text"
                 maxLength={6}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-sm sm:text-base bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
                 placeholder={`Enter OTP sent to ${manualPhone}`}
               />
               <button
@@ -182,13 +211,16 @@ export default function UserVerificationDashboard() {
                   setToast("Aadhaar verified successfully");
                   setTimeout(() => setToast(""), 3000);
                 }}
-                className="w-full py-2 px-4 bg-green-500 hover:bg-green-600 text-white font-semibold rounded-lg shadow-md"
+                className="w-full py-2 px-4 bg-green-500 hover:bg-green-600 text-white font-semibold rounded-lg shadow-md text-sm sm:text-base"
               >
                 Verify
               </button>
-              <p className="text-sm text-center text-gray-500">
+              <p className="text-sm text-center text-gray-500 dark:text-gray-400">
                 Didn&apos;t get OTP?{" "}
-                <a href="#" className="text-orange-500 hover:underline">
+                <a
+                  href="#"
+                  className="text-orange-500 dark:text-orange-400 hover:underline"
+                >
                   Resend
                 </a>
               </p>
@@ -197,22 +229,27 @@ export default function UserVerificationDashboard() {
 
           {step === "documents" && (
             <div className="space-y-6 text-center animate-fade-in">
-              <h1 className="text-2xl font-bold text-gray-800">Uploaded Documents</h1>
-              <p className="text-gray-600">Your uploaded documents will appear here.</p>
-              <div className="bg-gray-100 py-4 px-6 rounded-lg text-sm text-gray-500">
+              <h1 className="text-xl sm:text-2xl font-bold text-gray-800 dark:text-white">
+                Uploaded Documents
+              </h1>
+              <p className="text-gray-600 dark:text-gray-300 text-sm sm:text-base">
+                Your uploaded documents will appear here.
+              </p>
+              <div className="bg-gray-100 dark:bg-gray-700 py-4 px-6 rounded-lg text-sm text-gray-500 dark:text-gray-400">
                 (Mock preview area for documents)
               </div>
               <button
                 onClick={() => setStep("welcome")}
-                className="mt-4 py-2 px-6 bg-gray-400 hover:bg-gray-500 text-white rounded-lg"
+                className="mt-4 py-2 px-6 bg-gray-400 hover:bg-gray-500 text-white rounded-lg text-sm sm:text-base"
               >
                 Back to Dashboard
               </button>
             </div>
           )}
 
-          <p className="text-sm text-gray-500 mt-6 text-center">
-            This information is securely processed for user safety. We do not store Aadhaar data.
+          <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-6 text-center">
+            This information is securely processed for user safety. We do not
+            store Aadhaar data.
           </p>
         </div>
 
@@ -222,20 +259,22 @@ export default function UserVerificationDashboard() {
           </div>
         )}
 
-        {verificationStatus.email && verificationStatus.phone && verificationStatus.aadhar && (
-          <div className="absolute top-4 right-4 flex items-center space-x-2 bg-green-100 border border-green-400 text-green-800 px-4 py-2 rounded-xl shadow-md animate-fade-in">
-            <CheckCircle className="w-5 h-5" />
-            <span>Profile Verified</span>
-          </div>
-        )}
+        {verificationStatus.email &&
+          verificationStatus.phone &&
+          verificationStatus.aadhar && (
+            <div className="absolute top-4 right-4 flex items-center space-x-2 bg-green-100 dark:bg-green-900 border border-green-400 text-green-800 dark:text-green-200 px-4 py-2 rounded-xl shadow-md animate-fade-in">
+              <CheckCircle className="w-5 h-5" />
+              <span>Profile Verified</span>
+            </div>
+          )}
 
         <button
           onClick={() => document.documentElement.classList.toggle("dark")}
-          className="absolute top-4 left-4 bg-gray-200 hover:bg-gray-300 text-sm px-3 py-1 rounded-md shadow-md"
+          className="absolute top-4 left-4 bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 text-sm px-3 py-1 rounded-md shadow-md text-gray-900 dark:text-gray-100"
         >
           Toggle Theme
         </button>
       </main>
     </div>
   );
-} 
+}

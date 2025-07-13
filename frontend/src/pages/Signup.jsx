@@ -152,7 +152,7 @@ const Signup = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-indigo-100 flex items-center justify-center px-4 py-8 relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-indigo-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-700 flex items-center justify-center px-4 sm:px-6 lg:px-8 py-8 relative overflow-hidden">
       {/* Animated Background Elements */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute -top-40 -right-32 w-80 h-80 bg-gradient-to-br from-purple-400 to-pink-600 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse"></div>
@@ -172,25 +172,25 @@ const Signup = () => {
               <div className="absolute inset-0 bg-gradient-to-r from-purple-500 via-pink-500 to-indigo-600 rounded-2xl blur-md opacity-30 -z-10"></div>
             </div>
           </div>
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-gray-900 via-purple-900 to-indigo-900 bg-clip-text text-transparent mb-3">
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-gray-900 via-purple-900 to-indigo-900 bg-clip-text text-transparent dark:from-white dark:via-gray-200 dark:to-gray-400 mb-3">
             Join HeartConnect
           </h1>
-          <p className="text-gray-600 text-lg font-medium mb-2">Create your account and find your perfect match</p>
+          <p className="text-gray-600 dark:text-gray-300 text-lg font-medium mb-2">Create your account and find your perfect match</p>
           <div className="flex items-center justify-center space-x-2">
             <Shield className="w-4 h-4 text-green-500" />
-            <span className="text-sm text-green-600 font-medium">Safe & Secure Platform</span>
+            <span className="text-sm text-green-600 dark:text-green-400 font-medium">Safe & Secure Platform</span>
           </div>
         </div>
 
         {/* Enhanced Signup Form */}
-        <div className="bg-white/80 backdrop-blur-lg rounded-3xl shadow-2xl p-8 border border-white/20 relative overflow-hidden">
+        <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg rounded-3xl shadow-2xl p-8 border border-white/20 dark:border-gray-700/20 relative overflow-hidden">
           {/* Subtle gradient overlay */}
-          <div className="absolute inset-0 bg-gradient-to-br from-white/50 to-purple-50/30 rounded-3xl"></div>
+          <div className="absolute inset-0 bg-gradient-to-br from-white/50 to-purple-50/30 dark:from-gray-700/50 dark:to-gray-800/30 rounded-3xl"></div>
           
           <form onSubmit={handleSubmit} className="space-y-5 relative z-10">
             {/* Enhanced First Name */}
             <div className="group">
-              <label htmlFor="firstName" className="block text-sm font-semibold text-gray-700 mb-2">
+              <label htmlFor="firstName" className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
                 First Name
               </label>
               <div className="relative">
@@ -204,8 +204,8 @@ const Signup = () => {
                   value={formData.firstName}
                   onChange={handleInputChange}
                   placeholder="Enter your first name"
-                  className={`w-full pl-12 pr-4 py-3 border rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-300 bg-white/70 backdrop-blur-sm shadow-sm hover:shadow-md font-medium ${
-                    errors.firstName ? 'border-red-300 focus:ring-red-500' : 'border-gray-200'
+                  className={`w-full pl-12 pr-4 py-3 border rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-300 bg-white/70 dark:bg-gray-700/70 backdrop-blur-sm shadow-sm hover:shadow-md font-medium text-gray-900 dark:text-white ${
+                    errors.firstName ? 'border-red-300 focus:ring-red-500' : 'border-gray-200 dark:border-gray-600'
                   }`}
                   required
                 />
@@ -217,7 +217,7 @@ const Signup = () => {
 
             {/* Enhanced Last Name */}
             <div className="group">
-              <label htmlFor="lastName" className="block text-sm font-semibold text-gray-700 mb-2">
+              <label htmlFor="lastName" className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
                 Last Name
               </label>
               <div className="relative">
@@ -231,8 +231,8 @@ const Signup = () => {
                   value={formData.lastName}
                   onChange={handleInputChange}
                   placeholder="Enter your last name"
-                  className={`w-full pl-12 pr-4 py-3 border rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-300 bg-white/70 backdrop-blur-sm shadow-sm hover:shadow-md font-medium ${
-                    errors.lastName ? 'border-red-300 focus:ring-red-500' : 'border-gray-200'
+                  className={`w-full pl-12 pr-4 py-3 border rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-300 bg-white/70 dark:bg-gray-700/70 backdrop-blur-sm shadow-sm hover:shadow-md font-medium text-gray-900 dark:text-white ${
+                    errors.lastName ? 'border-red-300 focus:ring-red-500' : 'border-gray-200 dark:border-gray-600'
                   }`}
                   required
                 />
@@ -244,7 +244,7 @@ const Signup = () => {
 
             {/* Enhanced Email */}
             <div className="group">
-              <label htmlFor="email" className="block text-sm font-semibold text-gray-700 mb-2">
+              <label htmlFor="email" className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
                 Email Address
               </label>
               <div className="relative">
@@ -258,8 +258,8 @@ const Signup = () => {
                   value={formData.email}
                   onChange={handleInputChange}
                   placeholder="Enter your email"
-                  className={`w-full pl-12 pr-4 py-3 border rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-300 bg-white/70 backdrop-blur-sm shadow-sm hover:shadow-md font-medium ${
-                    errors.email ? 'border-red-300 focus:ring-red-500' : 'border-gray-200'
+                  className={`w-full pl-12 pr-4 py-3 border rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-300 bg-white/70 dark:bg-gray-700/70 backdrop-blur-sm shadow-sm hover:shadow-md font-medium text-gray-900 dark:text-white ${
+                    errors.email ? 'border-red-300 focus:ring-red-500' : 'border-gray-200 dark:border-gray-600'
                   }`}
                   required
                 />
@@ -271,7 +271,7 @@ const Signup = () => {
 
             {/* Enhanced Phone */}
             <div className="group">
-              <label htmlFor="phone" className="block text-sm font-semibold text-gray-700 mb-2">
+              <label htmlFor="phone" className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
                 Phone Number
               </label>
               <div className="relative">
@@ -285,8 +285,8 @@ const Signup = () => {
                   value={formData.phone}
                   onChange={handleInputChange}
                   placeholder="Enter your phone number"
-                  className={`w-full pl-12 pr-4 py-3 border rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-300 bg-white/70 backdrop-blur-sm shadow-sm hover:shadow-md font-medium ${
-                    errors.phone ? 'border-red-300 focus:ring-red-500' : 'border-gray-200'
+                  className={`w-full pl-12 pr-4 py-3 border rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-300 bg-white/70 dark:bg-gray-700/70 backdrop-blur-sm shadow-sm hover:shadow-md font-medium text-gray-900 dark:text-white ${
+                    errors.phone ? 'border-red-300 focus:ring-red-500' : 'border-gray-200 dark:border-gray-600'
                   }`}
                   required
                 />
@@ -298,7 +298,7 @@ const Signup = () => {
 
             {/* Enhanced Password */}
             <div className="group">
-              <label htmlFor="password" className="block text-sm font-semibold text-gray-700 mb-2">
+              <label htmlFor="password" className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
                 Password
               </label>
               <div className="relative">
@@ -312,15 +312,15 @@ const Signup = () => {
                   value={formData.password}
                   onChange={handleInputChange}
                   placeholder="Create a password"
-                  className={`w-full pl-12 pr-14 py-3 border rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-300 bg-white/70 backdrop-blur-sm shadow-sm hover:shadow-md font-medium ${
-                    errors.password ? 'border-red-300 focus:ring-red-500' : 'border-gray-200'
+                  className={`w-full pl-12 pr-14 py-3 border rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-300 bg-white/70 dark:bg-gray-700/70 backdrop-blur-sm shadow-sm hover:shadow-md font-medium text-gray-900 dark:text-white ${
+                    errors.password ? 'border-red-300 focus:ring-red-500' : 'border-gray-200 dark:border-gray-600'
                   }`}
                   required
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 pr-4 flex items-center hover:bg-gray-50 rounded-r-xl transition-colors"
+                  className="absolute inset-y-0 right-0 pr-4 flex items-center hover:bg-gray-50 dark:hover:bg-gray-700 rounded-r-xl transition-colors"
                 >
                   {showPassword ? (
                     <EyeOff className="h-5 w-5 text-gray-400 hover:text-gray-600" />
@@ -335,7 +335,7 @@ const Signup = () => {
             </div>
 
             {/* Enhanced Terms Checkbox */}
-            <div className="flex items-start space-x-3 p-4 bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl border border-purple-100">
+            <div className="flex items-start space-x-3 p-4 bg-gradient-to-r from-purple-50 to-pink-50 dark:from-gray-700 dark:to-gray-800 rounded-xl border border-purple-100 dark:border-gray-600">
               <div className="flex items-center h-5 mt-0.5">
                 <input
                   id="terms"
@@ -343,7 +343,7 @@ const Signup = () => {
                   name="terms"
                   checked={formData.terms}
                   onChange={handleInputChange}
-                  className={`h-5 w-5 text-purple-600 focus:ring-purple-500 border-gray-300 rounded transition-colors ${
+                  className={`h-5 w-5 text-purple-600 focus:ring-purple-500 border-gray-300 dark:border-gray-500 rounded transition-colors ${
                     errors.terms ? 'border-red-300' : ''
                   }`}
                 />
@@ -352,7 +352,7 @@ const Signup = () => {
                 )}
               </div>
               <div className="text-sm">
-                <label htmlFor="terms" className="text-gray-700 font-medium">
+                <label htmlFor="terms" className="text-gray-700 dark:text-gray-300 font-medium">
                   I agree to the{' '}
                   <button type="button" className="text-purple-600 hover:text-purple-500 font-semibold hover:underline">
                     Terms & Conditions
@@ -370,8 +370,8 @@ const Signup = () => {
 
             {/* Enhanced General Error */}
             {errors.general && (
-              <div className="bg-red-50 border border-red-200 rounded-xl p-4 backdrop-blur-sm">
-                <p className="text-red-800 text-sm font-medium">{errors.general}</p>
+              <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-500/30 rounded-xl p-4 backdrop-blur-sm">
+                <p className="text-red-800 dark:text-red-300 text-sm font-medium">{errors.general}</p>
               </div>
             )}
 
@@ -400,10 +400,10 @@ const Signup = () => {
           <div className="mt-8">
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-200" />
+                <div className="w-full border-t border-gray-200 dark:border-gray-600" />
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-4 bg-white text-gray-500 font-medium rounded-full">Or sign up with</span>
+                <span className="px-4 bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400 font-medium rounded-full">Or sign up with</span>
               </div>
             </div>
           </div>
@@ -413,7 +413,7 @@ const Signup = () => {
             <button
               type="button"
               onClick={handleGoogleSignup}
-              className="w-full inline-flex  ml-[110px] justify-center py-3 px-4 border border-gray-200 rounded-xl shadow-sm bg-white/70 backdrop-blur-sm text-sm font-semibold text-gray-700 hover:bg-white hover:shadow-md transition-all duration-300 hover:scale-105 active:scale-95"
+              className="w-full inline-flex  ml-[110px] justify-center py-3 px-4 border border-gray-200 dark:border-gray-600 rounded-xl shadow-sm bg-white/70 dark:bg-gray-700/70 backdrop-blur-sm text-sm font-semibold text-gray-700 dark:text-gray-300 hover:bg-white dark:hover:bg-gray-700 hover:shadow-md transition-all duration-300 hover:scale-105 active:scale-95"
             >
               <svg className="w-6 h-6" viewBox="0 0 24 24">
                 <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -434,7 +434,7 @@ const Signup = () => {
 
           {/* Enhanced Login Link */}
           <div className="mt-8 text-center">
-  <p className="text-sm text-gray-600 font-medium">
+  <p className="text-sm text-gray-600 dark:text-gray-300 font-medium">
   Have an account?{' '}
     <Link
       to="/login"

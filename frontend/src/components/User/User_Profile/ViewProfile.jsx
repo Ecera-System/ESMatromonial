@@ -20,8 +20,9 @@ import {
 import BackButton from '../../BackButton';
 import { useAuth } from '../../../contexts/Chat/AuthContext';
 import axios from 'axios';
+import { addVisitor } from '../../../services/visitorService';
 
-const ViewProfile = ({ onBackToCreate, isDarkMode }) => {
+const ViewProfile = ({ onEdit, isDarkMode }) => {
   const { user } = useAuth();
   const [profileData, setProfileData] = React.useState(null);
   const [loading, setLoading] = React.useState(true);
@@ -41,8 +42,18 @@ const ViewProfile = ({ onBackToCreate, isDarkMode }) => {
         setLoading(false);
       }
     };
-    if (user && user._id) fetchProfile();
+    if (user && user._id) {
+      fetchProfile();
+    }
   }, [user]);
+
+  React.useEffect(() => {
+    if (user && profileData && user._id !== profileData._id) {
+      addVisitor({ visitedUserId: profileData._id, visitorUserId: user._id })
+        .then(() => console.log("Visitor added successfully"))
+        .catch((err) => console.error("Error adding visitor:", err));
+    }
+  }, [user, profileData]);
 
   const calculateAge = (dateOfBirth) => {
     if (!dateOfBirth) return '';
@@ -81,20 +92,14 @@ const ViewProfile = ({ onBackToCreate, isDarkMode }) => {
   if (!profileData) return null;
 
   return (
-    <div className="min-h-screen bg-white dark:bg-black py-8 px-4 transition-colors duration-300">
+    <div className="min-h-screen bg-gray-100 dark:bg-gray-900 py-8 px-4 sm:px-6 lg:px-8 transition-colors duration-300">
       <div className="max-w-6xl mx-auto">
         <div className="mb-6">
           <BackButton />
         </div>
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <button
-            onClick={onBackToCreate}
-            className="flex items-center space-x-2 px-4 py-2 bg-gray-600 dark:bg-gray-400 text-white dark:text-black rounded-full font-semibold hover:bg-gray-700 dark:hover:bg-gray-300 transition-all"
-          >
-            <ArrowLeft className="w-5 h-5" />
-            <span>Back to Edit</span>
-          </button>
+        <div className="flex flex-col sm:flex-row items-center justify-between mb-8">
+          
           
           <div className="text-center">
             <h1 className="text-3xl lg:text-4xl font-bold text-black dark:text-white mb-2">
@@ -107,8 +112,8 @@ const ViewProfile = ({ onBackToCreate, isDarkMode }) => {
           </div>
           
           <button
-            onClick={onBackToCreate}
-            className="flex items-center space-x-2 px-4 py-2 bg-black dark:bg-white text-white dark:text-black rounded-full font-semibold hover:bg-gray-800 dark:hover:bg-gray-200 transition-all"
+            onClick={onEdit}
+            className="flex items-center space-x-2 px-4 py-2 bg-black dark:bg-white text-white dark:text-black rounded-full font-semibold hover:bg-gray-800 dark:hover:bg-gray-200 transition-all mt-4 sm:mt-0"
           >
             <Edit className="w-5 h-5" />
             <span>Edit Profile</span>
@@ -121,7 +126,7 @@ const ViewProfile = ({ onBackToCreate, isDarkMode }) => {
           <div className="lg:col-span-1">
             <InfoCard title="Photos" icon={Camera}>
               {profileData.photos.length > 0 ? (
-                <div className="grid grid-cols-1 gap-4">
+                <div className="grid grid-cols-2 sm:grid-cols-1 gap-4">
                   {profileData.photos.map((photo, index) => (
                     <img
                       key={index}
@@ -225,9 +230,9 @@ const ViewProfile = ({ onBackToCreate, isDarkMode }) => {
         </div>
 
         {/* Action Buttons */}
-        <div className="flex justify-center mt-8 space-x-4">
+        <div className="flex flex-col sm:flex-row justify-center mt-8 space-y-4 sm:space-y-0 sm:space-x-4">
           <button
-            onClick={onBackToCreate}
+            onClick={onEdit}
             className="px-8 py-3 bg-gray-600 dark:bg-gray-400 text-white dark:text-black rounded-full font-semibold hover:bg-gray-700 dark:hover:bg-gray-300 transition-all shadow-lg hover:shadow-xl"
           >
             Edit Profile

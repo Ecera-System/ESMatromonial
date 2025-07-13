@@ -19,7 +19,7 @@ import { useSocket } from "../../contexts/Chat/SocketContext";
 import CallScreen from "../Call/CallScreen";
 import IncomingCallModal from "../Call/IncomingCallModal";
 import CallingModal from "../Call/CallingModal";
-import VideoCall from '../Call/VideoCall';
+import VideoCall from "../Call/VideoCall";
 
 import MessageList from "../Chat/MessageList";
 import TypingIndicator from "../Chat/TypingIndicator";
@@ -32,7 +32,13 @@ const ICE_SERVERS = {
   iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
 };
 
-const ChatWindow = ({ selectedChat, onMessageSent, onlineUsers = [], mobileBackButton, prefillMessage }) => {
+const ChatWindow = ({
+  selectedChat,
+  onMessageSent,
+  onlineUsers = [],
+  mobileBackButton,
+  prefillMessage,
+}) => {
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
   const [loading, setLoading] = useState(false);
@@ -62,7 +68,7 @@ const ChatWindow = ({ selectedChat, onMessageSent, onlineUsers = [], mobileBackB
   const hasSetRemoteAnswer = useRef(false);
   const [videoCallOpen, setVideoCallOpen] = useState(false);
   const [incomingCallData, setIncomingCallData] = useState(null);
-  const [videoCallType, setVideoCallType] = useState('video');
+  const [videoCallType, setVideoCallType] = useState("video");
 
   // Handler: When a call is incoming
   const handleIncomingCall = ({ caller, callType }) => {
@@ -110,28 +116,28 @@ const ChatWindow = ({ selectedChat, onMessageSent, onlineUsers = [], mobileBackB
   useEffect(() => {
     if (!socket) return;
     const handleIncomingCall = (data) => {
-      console.log('[ChatWindow] Received callToUser event:', data);
-      alert('Incoming call event received! Check console for details.');
+      console.log("[ChatWindow] Received callToUser event:", data);
+      alert("Incoming call event received! Check console for details.");
       setIncomingCallData(data);
       setVideoCallOpen(true);
-      setVideoCallType(data.callType || 'video');
+      setVideoCallType(data.callType || "video");
       setTimeout(() => {
-        console.log('[ChatWindow] State after incoming call:', {
+        console.log("[ChatWindow] State after incoming call:", {
           incomingCallData: data,
           videoCallOpen: true,
-          videoCallType: data.callType || 'video',
+          videoCallType: data.callType || "video",
         });
       }, 100);
     };
-    socket.on('callToUser', handleIncomingCall);
+    socket.on("callToUser", handleIncomingCall);
     return () => {
-      socket.off('callToUser', handleIncomingCall);
+      socket.off("callToUser", handleIncomingCall);
     };
   }, [socket]);
 
   // Handler to start a call
-  const handleStartCall = (type = 'video') => {
-    console.log('[ChatWindow] handleStartCall called with type:', type);
+  const handleStartCall = (type = "video") => {
+    console.log("[ChatWindow] handleStartCall called with type:", type);
     setVideoCallType(type);
     setVideoCallOpen(true);
   };
@@ -452,22 +458,25 @@ const ChatWindow = ({ selectedChat, onMessageSent, onlineUsers = [], mobileBackB
 
   const fetchMessages = async () => {
     if (!selectedChat) return;
-    
+
     setLoading(true);
     try {
-      const token = localStorage.getItem('token');
-      console.log('ChatWindow: Fetching messages with token:', !!token);
-      
-      const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/v1/messages/${selectedChat._id}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
+      const token = localStorage.getItem("token");
+      console.log("ChatWindow: Fetching messages with token:", !!token);
+
+      const response = await axios.get(
+        `${import.meta.env.VITE_API_URL}/api/v1/messages/${selectedChat._id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         }
-      });
+      );
       setMessages(response.data);
     } catch (error) {
-      console.error('Error fetching messages:', error);
+      console.error("Error fetching messages:", error);
       if (error.response?.status === 401) {
-        console.error('Auth error in ChatWindow');
+        console.error("Auth error in ChatWindow");
       }
     } finally {
       setLoading(false);
@@ -480,8 +489,11 @@ const ChatWindow = ({ selectedChat, onMessageSent, onlineUsers = [], mobileBackB
   const handleNewMessage = (message) => {
     if (message.chat === selectedChat?._id) {
       // Remove temporary message if it exists and add the real message
-      setMessages(prev => {
-        const filteredMessages = prev.filter(msg => !msg._id.toString().startsWith(Date.now().toString().slice(0, -3)));
+      setMessages((prev) => {
+        const filteredMessages = prev.filter(
+          (msg) =>
+            !msg._id.toString().startsWith(Date.now().toString().slice(0, -3))
+        );
         return [...filteredMessages, message];
       });
     }
@@ -492,7 +504,10 @@ const ChatWindow = ({ selectedChat, onMessageSent, onlineUsers = [], mobileBackB
     // Only show typing for current chat
     if (userId !== user._id && chatId === selectedChat?._id) {
       console.log(`👀 ${userName} is typing in current chat`);
-      setTypingUsers(prev => [...prev.filter(u => u.id !== userId), { id: userId, name: userName }]);
+      setTypingUsers((prev) => [
+        ...prev.filter((u) => u.id !== userId),
+        { id: userId, name: userName },
+      ]);
     }
   };
 
@@ -500,7 +515,7 @@ const ChatWindow = ({ selectedChat, onMessageSent, onlineUsers = [], mobileBackB
     // Only remove typing for current chat
     if (chatId === selectedChat?._id) {
       console.log(`✋ User stopped typing in current chat`);
-      setTypingUsers(prev => prev.filter(u => u.id !== userId));
+      setTypingUsers((prev) => prev.filter((u) => u.id !== userId));
     }
   };
 
@@ -510,18 +525,18 @@ const ChatWindow = ({ selectedChat, onMessageSent, onlineUsers = [], mobileBackB
 
   const handleSendMessage = async (e) => {
     e.preventDefault();
-    
+
     const messageText = newMessage.trim();
     const hasFiles = uploadedFiles.length > 0;
-    
+
     if (!messageText && !hasFiles) return;
 
     if (hasFiles) {
       // Send each uploaded file with optional text
-      uploadedFiles.forEach(fileData => {
+      uploadedFiles.forEach((fileData) => {
         handleSendFileWithText(fileData, messageText);
       });
-      setNewMessage('');
+      setNewMessage("");
     } else if (messageText) {
       // Send text message only
       if (!selectedChat || !socket) return;
@@ -529,24 +544,24 @@ const ChatWindow = ({ selectedChat, onMessageSent, onlineUsers = [], mobileBackB
       const messageData = {
         chatId: selectedChat._id,
         content: messageText,
-        messageType: 'text'
+        messageType: "text",
       };
 
       // Create temporary message
       const tempMessage = {
         _id: `temp_${Date.now()}`,
         content: messageText,
-        messageType: 'text',
-        sender: { 
-          _id: user._id, 
-          name: `${user.firstName} ${user.lastName}`, 
-          avatar: user.avatar 
+        messageType: "text",
+        sender: {
+          _id: user._id,
+          name: `${user.firstName} ${user.lastName}`,
+          avatar: user.avatar,
         },
         createdAt: new Date(),
-        isTemp: true
+        isTemp: true,
       };
 
-      setMessages(prev => [...prev, tempMessage]);
+      setMessages((prev) => [...prev, tempMessage]);
 
       // Send via socket
       socket.emit("send-message", messageData);
@@ -555,16 +570,16 @@ const ChatWindow = ({ selectedChat, onMessageSent, onlineUsers = [], mobileBackB
       onMessageSent({
         chat: selectedChat._id,
         content: messageText,
-        messageType: 'text',
-        sender: { 
-          _id: user._id, 
-          name: `${user.firstName} ${user.lastName}`, 
-          avatar: user.avatar 
+        messageType: "text",
+        sender: {
+          _id: user._id,
+          name: `${user.firstName} ${user.lastName}`,
+          avatar: user.avatar,
         },
-        createdAt: new Date()
+        createdAt: new Date(),
       });
 
-      setNewMessage('');
+      setNewMessage("");
     }
   };
 
@@ -594,16 +609,17 @@ const ChatWindow = ({ selectedChat, onMessageSent, onlineUsers = [], mobileBackB
     if (input) {
       const start = input.selectionStart;
       const end = input.selectionEnd;
-      const newValue = newMessage.slice(0, start) + emoji + newMessage.slice(end);
+      const newValue =
+        newMessage.slice(0, start) + emoji + newMessage.slice(end);
       setNewMessage(newValue);
-      
+
       // Set cursor position after emoji
       setTimeout(() => {
         input.setSelectionRange(start + emoji.length, start + emoji.length);
         input.focus();
       }, 0);
     } else {
-      setNewMessage(prev => prev + emoji);
+      setNewMessage((prev) => prev + emoji);
     }
   };
 
@@ -614,7 +630,7 @@ const ChatWindow = ({ selectedChat, onMessageSent, onlineUsers = [], mobileBackB
       chatId: selectedChat._id,
       content: fileData.content,
       messageType: fileData.messageType,
-      file: fileData.file
+      file: fileData.file,
     };
 
     // Create temporary message
@@ -623,16 +639,16 @@ const ChatWindow = ({ selectedChat, onMessageSent, onlineUsers = [], mobileBackB
       content: fileData.content,
       messageType: fileData.messageType,
       file: fileData.file,
-      sender: { 
-        _id: user._id, 
-        name: `${user.firstName} ${user.lastName}`, 
-        avatar: user.avatar 
+      sender: {
+        _id: user._id,
+        name: `${user.firstName} ${user.lastName}`,
+        avatar: user.avatar,
       },
       createdAt: new Date(),
-      isTemp: true
+      isTemp: true,
     };
 
-    setMessages(prev => [...prev, tempMessage]);
+    setMessages((prev) => [...prev, tempMessage]);
 
     // Send via socket
     socket.emit("send-message", messageData);
@@ -643,27 +659,27 @@ const ChatWindow = ({ selectedChat, onMessageSent, onlineUsers = [], mobileBackB
       content: fileData.content,
       messageType: fileData.messageType,
       file: fileData.file,
-      sender: { 
-        _id: user._id, 
-        name: `${user.firstName} ${user.lastName}`, 
-        avatar: user.avatar 
+      sender: {
+        _id: user._id,
+        name: `${user.firstName} ${user.lastName}`,
+        avatar: user.avatar,
       },
-      createdAt: new Date()
+      createdAt: new Date(),
     });
   };
 
   const handleUploadedFile = (uploadedFile) => {
-    setUploadedFiles(prev => [...prev, uploadedFile]);
+    setUploadedFiles((prev) => [...prev, uploadedFile]);
   };
 
-  const handleSendFileWithText = (fileData, text = '') => {
+  const handleSendFileWithText = (fileData, text = "") => {
     if (!selectedChat || !socket) return;
 
     const messageData = {
       chatId: selectedChat._id,
       content: text || fileData.content,
       messageType: fileData.messageType,
-      file: fileData.file
+      file: fileData.file,
     };
 
     // Create temporary message
@@ -672,16 +688,16 @@ const ChatWindow = ({ selectedChat, onMessageSent, onlineUsers = [], mobileBackB
       content: text || fileData.content,
       messageType: fileData.messageType,
       file: fileData.file,
-      sender: { 
-        _id: user._id, 
-        name: `${user.firstName} ${user.lastName}`, 
-        avatar: user.avatar 
+      sender: {
+        _id: user._id,
+        name: `${user.firstName} ${user.lastName}`,
+        avatar: user.avatar,
       },
       createdAt: new Date(),
-      isTemp: true
+      isTemp: true,
     };
 
-    setMessages(prev => [...prev, tempMessage]);
+    setMessages((prev) => [...prev, tempMessage]);
 
     // Send via socket
     socket.emit("send-message", messageData);
@@ -692,20 +708,20 @@ const ChatWindow = ({ selectedChat, onMessageSent, onlineUsers = [], mobileBackB
       content: text || fileData.content,
       messageType: fileData.messageType,
       file: fileData.file,
-      sender: { 
-        _id: user._id, 
-        name: `${user.firstName} ${user.lastName}`, 
-        avatar: user.avatar 
+      sender: {
+        _id: user._id,
+        name: `${user.firstName} ${user.lastName}`,
+        avatar: user.avatar,
       },
-      createdAt: new Date()
+      createdAt: new Date(),
     });
 
     // Remove from uploaded files
-    setUploadedFiles(prev => prev.filter(f => f.id !== fileData.id));
+    setUploadedFiles((prev) => prev.filter((f) => f.id !== fileData.id));
   };
 
   const handleRemoveUploadedFile = (fileId) => {
-    setUploadedFiles(prev => prev.filter(f => f.id !== fileId));
+    setUploadedFiles((prev) => prev.filter((f) => f.id !== fileId));
   };
 
   useEffect(() => {
@@ -733,11 +749,14 @@ const ChatWindow = ({ selectedChat, onMessageSent, onlineUsers = [], mobileBackB
             Welcome to Chat
           </h3>
           <p className="text-base sm:text-lg text-gray-600 mb-6 sm:mb-8 leading-relaxed px-4">
-            Select a conversation from the sidebar to start chatting, or create a new conversation to connect with someone special.
+            Select a conversation from the sidebar to start chatting, or create
+            a new conversation to connect with someone special.
           </p>
           <div className="flex items-center justify-center space-x-2 text-rose-500">
             <Heart className="w-4 h-4 sm:w-5 sm:h-5" />
-            <span className="text-xs sm:text-sm font-medium">Where connections begin</span>
+            <span className="text-xs sm:text-sm font-medium">
+              Where connections begin
+            </span>
             <Heart className="w-4 h-4 sm:w-5 sm:h-5" />
           </div>
         </div>
@@ -745,41 +764,55 @@ const ChatWindow = ({ selectedChat, onMessageSent, onlineUsers = [], mobileBackB
     );
   }
 
-  const otherUser = selectedChat?.participants.find(p => p._id !== user._id);
-  const isOtherUserOnline = otherUser ? onlineUsers.includes(otherUser._id) : false;
+  const otherUser = selectedChat?.participants.find((p) => p._id !== user._id);
+  const isOtherUserOnline = otherUser
+    ? onlineUsers.includes(otherUser._id)
+    : false;
 
   return (
-    <div className="h-full flex flex-col bg-white">
+    <div className="h-full flex flex-col bg-white dark:bg-gray-900">
       {/* Chat Header */}
       {selectedChat && (
-        <div className="p-3 sm:p-6 border-b border-gray-200 bg-white">
+        <div className="p-3 sm:p-4 border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2 sm:space-x-4 min-w-0 flex-1">
               {/* Back button for mobile only */}
               {mobileBackButton && (
                 <button
                   onClick={mobileBackButton}
-                  className="lg:hidden p-2 mr-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors"
+                  className="lg:hidden p-2 mr-2 text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
                 >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M15 19l-7-7 7-7"
+                    />
                   </svg>
                 </button>
               )}
               <div className="relative flex-shrink-0">
                 <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-r from-rose-400 to-pink-500 rounded-full flex items-center justify-center text-white font-bold shadow-lg text-sm sm:text-base">
                   {otherUser?.avatar ? (
-                    <img 
-                      src={otherUser.avatar} 
+                    <img
+                      src={otherUser.avatar}
                       alt={`${otherUser.firstName} ${otherUser.lastName}`}
                       className="w-full h-full rounded-full object-cover"
                     />
                   ) : (
-                    `${otherUser?.firstName?.charAt(0) || ''}${otherUser?.lastName?.charAt(0) || ''}`.toUpperCase()
+                    `${otherUser?.firstName?.charAt(0) || ""}${
+                      otherUser?.lastName?.charAt(0) || ""
+                    }`.toUpperCase()
                   )}
                 </div>
                 {isOtherUserOnline && (
-                  <div className="absolute -bottom-1 -right-1 w-3 h-3 sm:w-4 sm:h-4 bg-emerald-500 rounded-full border-2 border-white"></div>
+                  <div className="absolute -bottom-1 -right-1 w-3 h-3 sm:w-4 sm:h-4 bg-emerald-500 rounded-full border-2 border-white dark:border-gray-900"></div>
                 )}
               </div>
               <div className="min-w-0 flex-1">
@@ -790,12 +823,16 @@ const ChatWindow = ({ selectedChat, onMessageSent, onlineUsers = [], mobileBackB
                   {isOtherUserOnline ? (
                     <>
                       <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
-                      <p className="text-xs sm:text-sm text-emerald-600 font-medium">Active now</p>
+                      <p className="text-xs sm:text-sm text-emerald-600 font-medium">
+                        Active now
+                      </p>
                     </>
                   ) : (
                     <>
                       <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
-                      <p className="text-xs sm:text-sm text-gray-500">Offline</p>
+                      <p className="text-xs sm:text-sm text-gray-500">
+                        Offline
+                      </p>
                     </>
                   )}
                 </div>
@@ -837,11 +874,11 @@ const ChatWindow = ({ selectedChat, onMessageSent, onlineUsers = [], mobileBackB
         {/* Custom CSS for hiding scrollbar */}
         <style jsx>{`
           .scrollbar-hide {
-            -ms-overflow-style: none;  /* IE and Edge */
-            scrollbar-width: none;  /* Firefox */
+            -ms-overflow-style: none; /* IE and Edge */
+            scrollbar-width: none; /* Firefox */
           }
           .scrollbar-hide::-webkit-scrollbar {
-            display: none;  /* Chrome, Safari and Opera */
+            display: none; /* Chrome, Safari and Opera */
           }
         `}</style>
 
@@ -862,12 +899,14 @@ const ChatWindow = ({ selectedChat, onMessageSent, onlineUsers = [], mobileBackB
       </div>
 
       {/* Message Input */}
-      <div className="p-3 sm:p-6 bg-white border-t border-gray-200">
+      <div className="p-3 sm:p-4 bg-white border-t border-gray-200">
         {/* File Previews */}
         {uploadedFiles.length > 0 && (
           <div className="mb-3 sm:mb-4 p-2 sm:p-3 bg-gray-50 rounded-lg border border-gray-200">
             <div className="flex items-center justify-between mb-2">
-              <h4 className="text-xs sm:text-sm font-medium text-gray-700">Files to send:</h4>
+              <h4 className="text-xs sm:text-sm font-medium text-gray-700">
+                Files to send:
+              </h4>
               <button
                 onClick={() => setUploadedFiles([])}
                 className="text-xs text-gray-500 hover:text-gray-700"
@@ -877,14 +916,25 @@ const ChatWindow = ({ selectedChat, onMessageSent, onlineUsers = [], mobileBackB
             </div>
             <div className="space-y-2">
               {uploadedFiles.map((file) => (
-                <div key={file.id} className="flex items-center justify-between p-2 bg-white rounded border">
+                <div
+                  key={file.id}
+                  className="flex items-center justify-between p-2 bg-white rounded border"
+                >
                   <div className="flex items-center space-x-2 flex-1 min-w-0">
                     <div className="flex-shrink-0">
-                      {file.messageType === 'image' && <Image className="w-3 h-3 sm:w-4 sm:h-4 text-emerald-600" />}
-                      {file.messageType === 'video' && <Video className="w-3 h-3 sm:w-4 sm:h-4 text-rose-600" />}
-                      {file.messageType === 'document' && <FileText className="w-3 h-3 sm:w-4 sm:h-4 text-blue-600" />}
+                      {file.messageType === "image" && (
+                        <Image className="w-3 h-3 sm:w-4 sm:h-4 text-emerald-600" />
+                      )}
+                      {file.messageType === "video" && (
+                        <Video className="w-3 h-3 sm:w-4 sm:h-4 text-rose-600" />
+                      )}
+                      {file.messageType === "document" && (
+                        <FileText className="w-3 h-3 sm:w-4 sm:h-4 text-blue-600" />
+                      )}
                     </div>
-                    <span className="text-xs sm:text-sm text-gray-700 truncate">{file.content}</span>
+                    <span className="text-xs sm:text-sm text-gray-700 truncate">
+                      {file.content}
+                    </span>
                   </div>
                   <button
                     onClick={() => handleRemoveUploadedFile(file.id)}
@@ -899,7 +949,10 @@ const ChatWindow = ({ selectedChat, onMessageSent, onlineUsers = [], mobileBackB
           </div>
         )}
 
-        <form onSubmit={handleSendMessage} className="flex items-end space-x-2 sm:space-x-4">
+        <form
+          onSubmit={handleSendMessage}
+          className="flex items-end space-x-2 sm:space-x-4"
+        >
           <div className="flex-1 relative">
             <div className="flex items-end bg-gray-50 rounded-2xl border-2 border-gray-200 focus-within:border-rose-500 focus-within:bg-white transition-all duration-200">
               <input
@@ -907,7 +960,11 @@ const ChatWindow = ({ selectedChat, onMessageSent, onlineUsers = [], mobileBackB
                 type="text"
                 value={newMessage}
                 onChange={(e) => handleTyping(e.target.value)}
-                placeholder={uploadedFiles.length > 0 ? "Add a message (optional)..." : "Type your message..."}
+                placeholder={
+                  uploadedFiles.length > 0
+                    ? "Add a message (optional)..."
+                    : "Type your message..."
+                }
                 className="flex-1 px-4 sm:px-6 py-3 sm:py-4 bg-transparent outline-none rounded-2xl text-gray-800 placeholder-gray-500 text-sm sm:text-base"
                 onKeyDown={(e) => {
                   if (e.key === "Enter" && !e.shiftKey) {
@@ -932,7 +989,7 @@ const ChatWindow = ({ selectedChat, onMessageSent, onlineUsers = [], mobileBackB
               </div>
             </div>
           </div>
-          
+
           <motion.button
             type="submit"
             disabled={!newMessage.trim() && uploadedFiles.length === 0}
@@ -980,7 +1037,7 @@ const ChatWindow = ({ selectedChat, onMessageSent, onlineUsers = [], mobileBackB
         <VideoCall
           isOpen={videoCallOpen}
           onClose={() => {
-            console.log('[ChatWindow] Closing VideoCall modal');
+            console.log("[ChatWindow] Closing VideoCall modal");
             setVideoCallOpen(false);
             setIncomingCallData(null);
           }}
@@ -988,7 +1045,7 @@ const ChatWindow = ({ selectedChat, onMessageSent, onlineUsers = [], mobileBackB
           incomingCall={incomingCallData}
           callType={videoCallType}
           onCallStatus={(status) => {
-            console.log('[ChatWindow] VideoCall status:', status);
+            console.log("[ChatWindow] VideoCall status:", status);
           }}
         />
       )}

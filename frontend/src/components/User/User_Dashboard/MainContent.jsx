@@ -1,19 +1,19 @@
-import React, { useState } from 'react';
-import RecentVisitors from './RecentVisitors';
-import DailyRecommendations from './DailyRecommendations';
-import RequestsSection from './RequestsSection';
-import ProfileCompletion from './ProfileCompletion';
+import React, { useState } from "react";
+import RecentVisitors from "./RecentVisitors";
+import DailyRecommendations from "./DailyRecommendations";
+import RequestsSection from "./RequestsSection";
+import ProfileCompletion from "./ProfileCompletion";
 
 function MainContent() {
   return (
-   <main className="flex flex-col gap-4 lg:gap-8 w-full max-w-7xl mx-auto">
-     <RecentVisitors />
-     <DailyRecommendations />
-     <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 lg:gap-8 w-full">
-       <RequestsSection />
-       <ProfileCompletion />
-     </div>
-   </main>
+    <main className="flex-1 h-full min-h-0 flex flex-col gap-3 w-full max-w-7xl mx-auto bg-white dark:bg-gray-900 rounded-xl shadow-md dark:shadow-lg">
+      <RecentVisitors />
+      <DailyRecommendations />
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 lg:gap-8 w-full">
+        <RequestsSection />
+        <ProfileCompletion />
+      </div>
+    </main>
   );
 }
 
@@ -35,8 +35,8 @@ function UserDashboard() {
       )}
       {/* Main content */}
       <div
-        className={`flex-1 overflow-y-auto p-4 lg:p-6 bg-white w-full lg:w-auto transition-all duration-300 custom-scrollbar
-          ${sidebarOpen ? 'filter blur-sm lg:blur-none' : ''}
+        className={`flex-1 overflow-y-auto p-4 lg:p-6 bg-white dark:bg-gray-900 w-full lg:w-auto transition-all duration-300 custom-scrollbar
+          ${sidebarOpen ? "filter blur-sm lg:blur-none" : ""}
         `}
       >
         <MainContent />
