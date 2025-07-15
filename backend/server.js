@@ -47,7 +47,7 @@ app.use(checkSubscriptionAndTrial);
 // Serve static files
 app.use(express.static(path.join(__dirname, "public")));
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT;
 app.use(passport.initialize());
 // Socket.IO setup
 const server = http.createServer(app);
