@@ -3,15 +3,29 @@ import RecentVisitors from "./RecentVisitors";
 import DailyRecommendations from "./DailyRecommendations";
 import RequestsSection from "./RequestsSection";
 import ProfileCompletion from "./ProfileCompletion";
+import LatestNotifications from "./LatestNotifications";
 
 function MainContent() {
   return (
     <main className="flex-1 h-full min-h-0 flex flex-col gap-3 w-full max-w-7xl mx-auto bg-white dark:bg-gray-900 rounded-xl shadow-md dark:shadow-lg">
-      <RecentVisitors />
-      <DailyRecommendations />
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 lg:gap-8 w-full">
-        <RequestsSection />
-        <ProfileCompletion />
+        <div>
+          <RecentVisitors />
+        </div>
+        <div>
+          <LatestNotifications />
+        </div>
+      </div>
+
+      <DailyRecommendations />
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 w-full">
+        <div className="lg:col-span-2">
+          <RequestsSection />
+        </div>
+        <div className="space-y-4">
+          <ProfileCompletion />
+        </div>
       </div>
     </main>
   );

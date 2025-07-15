@@ -8,7 +8,8 @@ import {
   likeRecommendation,
   updateUser, // Add this import
   uploadPhoto,
-  uploadDocuments
+  uploadDocuments,
+  searchUsers,
 } from "../controllers/userController.js";
 import { uploadFile } from "../config/cloudinary.js";
 import express from "express";
@@ -22,12 +23,25 @@ userRouter.get(
   getDailyRecommendation
 );
 userRouter.get("/profile-completion/:id", getProfileCompletion);
+userRouter.get("/search", authenticate, searchUsers);
 userRouter.get("/:id", getUserById);
 userRouter.get("/", getAllUsers);
 userRouter.put("/:id", authenticate, requireUser, updateUser);
 userRouter.post("/skip", authenticate, requireUser, skipRecommendation);
 userRouter.post("/like", authenticate, requireUser, likeRecommendation);
-userRouter.post("/upload-photo", authenticate, requireUser, uploadFile.single('photo'), uploadPhoto);
-userRouter.post("/upload-docs", authenticate, requireUser, uploadFile.array('docs', 5), uploadDocuments);
+userRouter.post(
+  "/upload-photo",
+  authenticate,
+  requireUser,
+  uploadFile.single("photo"),
+  uploadPhoto
+);
+userRouter.post(
+  "/upload-docs",
+  authenticate,
+  requireUser,
+  uploadFile.array("docs", 5),
+  uploadDocuments
+);
 
 export default userRouter;

@@ -1,7 +1,10 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { getAllUsers } from "../services/userService";
-import { sendRequest } from "../services/requestService";
+import { sendRequest, getUserRequests } from "../services/requestService";
+import { addVisitor } from "../services/visitorService";
+import { useRequest } from "../hooks/useRequest";
+
 import { useAuth } from "../contexts/Chat/AuthContext";
 import {
   MessageCircle,
@@ -21,6 +24,7 @@ import {
   Music,
   BookOpen,
 } from "lucide-react";
+import { Toaster, toast } from "react-hot-toast";
 
 export default function UserProfilePage({ isDarkMode }) {
   const { userId } = useParams();
@@ -30,28 +34,84 @@ export default function UserProfilePage({ isDarkMode }) {
   const [loading, setLoading] = useState(true);
   const [inviteStatus, setInviteStatus] = useState("idle");
   const [activeTab, setActiveTab] = useState("about");
+  const [showModal, setShowModal] = useState(false);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   useEffect(() => {
-    setLoading(true);
-    getAllUsers()
-      .then((data) => {
-        const users = Array.isArray(data) ? data : data.users || [];
-        setProfile(users.find((u) => u._id === userId) || null);
-      })
-      .catch(() => setProfile(null))
-      .finally(() => setLoading(false));
-  }, [userId]);
+    const fetchProfileAndRequests = async () => {
+      setLoading(true);
+      try {
+        const allUsersData = await getAllUsers();
+        const users = Array.isArray(allUsersData)
+          ? allUsersData
+          : allUsersData.users || [];
+        const currentProfile = users.find((u) => u._id === userId) || null;
+        setProfile(currentProfile);
+
+        if (user && user._id && currentProfile) {
+          // Add visitor entry
+          if (user._id !== currentProfile._id) {
+            console.log("Calling addVisitor with:", { visitedUserId: currentProfile._id, visitorUserId: user._id });
+            try {
+              await addVisitor({ visitedUserId: currentProfile._id, visitorUserId: user._id });
+              console.log("addVisitor call successful.");
+            } catch (visitorError) {
+              console.error("Error adding visitor:", visitorError);
+            }
+          }
+
+          const userRequests = await getUserRequests();
+
+          // Check if a request has been sent by the current user to this profile
+          const sentRequest = userRequests.sent.find(
+            (req) => req.receiver._id === currentProfile._id
+          );
+          if (sentRequest) {
+            setInviteStatus(sentRequest.status); // 'pending', 'accepted', 'rejected'
+          } else {
+            // Check if a request has been received by the current user from this profile
+            const receivedRequest = userRequests.received.find(
+              (req) => req.sender._id === currentProfile._id
+            );
+            if (receivedRequest) {
+              setInviteStatus(
+                receivedRequest.status === "pending"
+                  ? "received"
+                  : receivedRequest.status
+              ); // 'pending', 'accepted', 'rejected'
+            } else {
+              setInviteStatus("idle"); // No request exists
+            }
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching profile or requests:", error);
+        setProfile(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProfileAndRequests();
+  }, [userId, user]);
+
+  // ... (rest of the imports)
+
+  // export default function UserProfilePage({ isDarkMode }) {
+  // ... (state declarations)
+  const { sendRequest: sendInvite, loading: requestLoading } = useRequest();
+
+  // ... (useEffect)
 
   const handleSendInvite = async () => {
     if (!user || !profile?._id || user._id === profile._id) return;
-    setInviteStatus("loading");
-    try {
-      await sendRequest(profile._id);
+    const success = await sendInvite(profile._id);
+    if (success) {
       setInviteStatus("sent");
-    } catch {
-      setInviteStatus("idle");
     }
   };
+
+  // ... (rest of the component)
 
   const handleMessage = () => {
     navigate(`/chat/${profile._id}`);
@@ -141,6 +201,27 @@ export default function UserProfilePage({ isDarkMode }) {
     return interestIcons.default;
   };
 
+  const openModal = (index) => {
+    setCurrentImageIndex(index);
+    setShowModal(true);
+  };
+
+  const closeModal = () => {
+    setShowModal(false);
+  };
+
+  const goToNext = () => {
+    setCurrentImageIndex((prevIndex) =>
+      prevIndex === profile.photos.length - 1 ? 0 : prevIndex + 1
+    );
+  };
+
+  const goToPrevious = () => {
+    setCurrentImageIndex((prevIndex) =>
+      prevIndex === 0 ? profile.photos.length - 1 : prevIndex - 1
+    );
+  };
+
   return (
     <div
       className={`min-h-screen ${
@@ -149,6 +230,7 @@ export default function UserProfilePage({ isDarkMode }) {
           : "bg-gradient-to-br from-gray-50 to-gray-100"
       } py-8 px-4 sm:px-6 lg:px-8`}
     >
+      <Toaster position="top-center" reverseOrder={false} />
       {/* Floating decorative elements */}
       <div className="fixed top-20 left-10 w-32 h-32 rounded-full bg-purple-100 dark:bg-purple-900 opacity-20 blur-xl -z-10"></div>
       <div className="fixed bottom-40 right-20 w-48 h-48 rounded-full bg-pink-100 dark:bg-pink-900 opacity-20 blur-xl -z-10"></div>
@@ -160,7 +242,11 @@ export default function UserProfilePage({ isDarkMode }) {
             className="h-48 md:h-64 w-full bg-gradient-to-r from-purple-500 to-pink-500"
             style={{
               backgroundImage:
-                profile.coverPhoto && `url(${profile.coverPhoto})`,
+                profile.photos && profile.photos.length > 1
+                  ? `url(${profile.photos[1]})`
+                  : profile.photos && profile.photos.length > 0
+                  ? `url(${profile.photos[0]})`
+                  : `linear-gradient(to right, var(--tw-gradient-stops))`, // Fallback to gradient
               backgroundSize: "cover",
               backgroundPosition: "center",
             }}
@@ -171,9 +257,9 @@ export default function UserProfilePage({ isDarkMode }) {
           {/* Profile picture */}
           <div className="absolute -bottom-16 mb-[100px] left-1/2 transform -translate-x-1/2">
             <div className="relative group">
-              {profile.avatar ? (
+              {profile.photos && profile.photos.length > 0 ? (
                 <img
-                  src={profile.avatar}
+                  src={profile.photos[0]}
                   alt={profile.firstName}
                   className="w-32 h-32 md:w-40 md:h-40 rounded-full object-cover border-4 border-white shadow-xl transition-transform duration-300 group-hover:scale-105"
                 />
@@ -214,18 +300,26 @@ export default function UserProfilePage({ isDarkMode }) {
             <div className="flex flex-col sm:flex-row justify-center gap-4 mb-8">
               <button
                 onClick={handleSendInvite}
-                disabled={inviteStatus === "sent" || inviteStatus === "loading"}
+                disabled={inviteStatus !== "idle" || inviteStatus === "loading"}
                 className={`px-6 py-2 rounded-full font-medium flex items-center justify-center gap-2 transition-all w-full sm:w-auto ${
-                  inviteStatus === "sent"
-                    ? "bg-green-500 text-white opacity-80 cursor-not-allowed"
+                  inviteStatus === "accepted"
+                    ? "bg-green-500 text-white cursor-not-allowed"
+                    : inviteStatus === "rejected"
+                    ? "bg-red-500 text-white cursor-not-allowed"
+                    : inviteStatus === "pending" || inviteStatus === "received"
+                    ? "bg-yellow-500 text-white cursor-not-allowed"
                     : inviteStatus === "loading"
                     ? "bg-gray-500 text-white opacity-80 cursor-wait"
                     : "bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:shadow-lg hover:-translate-y-0.5"
                 }`}
               >
                 <Heart className="w-5 h-5" />
-                {inviteStatus === "sent"
-                  ? "Connected"
+                {inviteStatus === "pending"
+                  ? "Request Pending"
+                  : inviteStatus === "accepted"
+                  ? "Request Accepted"
+                  : inviteStatus === "rejected"
+                  ? "Request Rejected"
                   : inviteStatus === "loading"
                   ? "Sending..."
                   : "Connect"}
@@ -318,7 +412,7 @@ export default function UserProfilePage({ isDarkMode }) {
                           </div>
                         </div>
                       </div>
-                      <div className="flex items-start">
+                      {/* <div className="flex items-start">
                         <Smartphone className="w-5 h-5 mr-3 text-gray-400 dark:text-gray-500 mt-0.5" />
                         <div>
                           <div className="text-sm text-gray-500 dark:text-gray-400">
@@ -328,7 +422,7 @@ export default function UserProfilePage({ isDarkMode }) {
                             {profile.phone || "Not specified"}
                           </div>
                         </div>
-                      </div>
+                      </div> */}
                     </div>
                   </div>
                 </div>
@@ -499,7 +593,8 @@ export default function UserProfilePage({ isDarkMode }) {
                     {profile.photos.map((photo, idx) => (
                       <div
                         key={idx}
-                        className="aspect-square bg-gray-200 dark:bg-gray-600 rounded-lg overflow-hidden hover:shadow-lg transition-all group"
+                        className="aspect-square bg-gray-200 dark:bg-gray-600 rounded-lg overflow-hidden hover:shadow-lg transition-all group cursor-pointer"
+                        onClick={() => openModal(idx)}
                       >
                         <img
                           src={photo}
@@ -526,6 +621,46 @@ export default function UserProfilePage({ isDarkMode }) {
           </div>
         </div>
       </div>
+      {/* Image Modal */}
+      {showModal && profile.photos && profile.photos.length > 0 && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-80"
+          onClick={closeModal}
+        >
+          <div
+            className="relative max-w-3xl max-h-full mx-auto p-4"
+            onClick={(e) => e.stopPropagation()} // Prevent closing when clicking on the image
+          >
+            <button
+              className="absolute top-2 right-2 text-white text-3xl font-bold p-2"
+              onClick={closeModal}
+            >
+              &times;
+            </button>
+            <img
+              src={profile.photos[currentImageIndex]}
+              alt={`Enlarged photo ${currentImageIndex + 1}`}
+              className="max-w-full max-h-[80vh] object-contain mx-auto"
+            />
+            {profile.photos.length > 1 && (
+              <>
+                <button
+                  className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-gray-800 bg-opacity-50 text-white p-3 rounded-full hover:bg-opacity-75 transition-all"
+                  onClick={goToPrevious}
+                >
+                  &#10094;
+                </button>
+                <button
+                  className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-gray-800 bg-opacity-50 text-white p-3 rounded-full hover:bg-opacity-75 transition-all"
+                  onClick={goToNext}
+                >
+                  &#10095;
+                </button>
+              </>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

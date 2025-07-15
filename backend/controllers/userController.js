@@ -8,6 +8,7 @@ import { getDailyRecommendations } from "../services/matchService.js";
 import { getTodayRecommendation } from "../services/schedulerService.js";
 import User from "../models/User.js";
 import logger from "../utils/logger.js";
+import { createNotification } from "../services/notificationService.js";
 
 // Get all users (with filters)
 export const getAllUsers = async (req, res) => {
@@ -122,8 +123,36 @@ export const getSuggestions = async (req, res) => {
 
 // Search users with filters (stub)
 export const searchUsers = async (req, res) => {
-  logger.info("User search requested with filters", req.body);
-  res.json([]);
+  try {
+    if (!req.user) {
+      return res.status(401).json({ message: "Authentication required for search." });
+    }
+    const { q } = req.query;
+    if (!q) {
+      return res.status(400).json({ message: "Search query 'q' is required." });
+    }
+
+    const searchRegex = new RegExp(q, 'i'); // Case-insensitive search
+
+    const users = await User.find({
+      $or: [
+        { firstName: searchRegex },
+        { lastName: searchRegex },
+        { city: searchRegex },
+        { state: searchRegex },
+        { occupation: searchRegex },
+        { education: searchRegex },
+        { interests: searchRegex },
+      ],
+    }, 'firstName lastName city state occupation education photos') // Select relevant fields
+      .limit(20); // Limit results for suggestions
+
+    logger.info(`User search for '${q}' returned ${users.length} results.`);
+    res.json(users);
+  } catch (err) {
+    logger.error(`Error during user search for '${req.query.q}': ${err.message}`);
+    res.status(500).json({ error: "Server error during search" });
+  }
 };
 
 // Calculate profile completion percentage
@@ -244,42 +273,50 @@ export const getDailyRecommendation = async (req, res) => {
     // First try to get today's pre-generated recommendation
     let todayRecommendation = await getTodayRecommendation(userId);
 
-    if (!todayRecommendation) {
-      logger.info(
-        `No pre-generated recommendation found for user ${userId}, generating on-demand`
-      );
-
-      // Fallback to on-demand generation
-      const recommendations = await getDailyRecommendations(userId, 1);
-
-      if (!recommendations.length) {
-        logger.warn(`No recommendations found for user: ${userId}`);
-        return res.status(404).json({
-          message: "No recommendations found. Try adjusting your preferences.",
-          suggestion: "Complete your profile for better matches",
-        });
-      }
-
-      // Return the on-demand recommendation
-      logger.info(
-        `Successfully generated on-demand recommendation for user ${userId}`
-      );
+    if (todayRecommendation) {
+      // Populate the recommendedUserId to get user details including avatar
+      await todayRecommendation.populate('recommendedUserId', 'firstName lastName photos dateOfBirth occupation city country');
+      logger.info(`Successfully retrieved pre-generated recommendation for user ${userId}`);
+      // Mark as viewed
+      await todayRecommendation.updateOne({ isViewed: true });
       return res.json({
-        recommendation: recommendations[0],
-        matchPercentage: calculateMatchPercentage(recommendations[0].matchScore),
-        isOnDemand: true,
+        recommendation: todayRecommendation,
+        matchPercentage: todayRecommendation.matchPercentage,
+        isOnDemand: false,
+        recommendationId: todayRecommendation._id,
       });
     }
 
-    // Mark as viewed
-    await todayRecommendation.updateOne({ isViewed: true });
+    logger.info(
+      `No pre-generated recommendation found for user ${userId}, generating on-demand`
+    );
 
-    logger.info(`Successfully retrieved pre-generated recommendation for user ${userId}`);
-    res.json({
-      recommendation: todayRecommendation.recommendedUserId,
-      matchPercentage: todayRecommendation.matchPercentage,
-      isOnDemand: false,
-      recommendationId: todayRecommendation._id,
+    // Fallback to on-demand generation
+    const recommendations = await getDailyRecommendations(userId, 1);
+
+    if (!recommendations.length) {
+      logger.warn(`No recommendations found for user: ${userId}`);
+      return res.status(404).json({
+        message: "No recommendations found. Try adjusting your preferences.",
+        suggestion: "Complete your profile for better matches",
+      });
+    }
+
+    // Return the on-demand recommendation
+    logger.info(
+      `Successfully generated on-demand recommendation for user ${userId}`
+    );
+    
+    const onDemandRecommendation = {
+      recommendedUserId: recommendations[0],
+      matchScore: recommendations[0].matchScore,
+      matchPercentage: calculateMatchPercentage(recommendations[0].matchScore),
+      isOnDemand: true,
+    };
+    return res.json({
+      recommendation: onDemandRecommendation,
+      matchPercentage: onDemandRecommendation.matchPercentage,
+      isOnDemand: true,
     });
   } catch (err) {
     logger.error(
@@ -335,7 +372,18 @@ export const likeRecommendation = async (req, res) => {
     }
 
     // Here you could add logic to send a connection request
-    // For now, we'll just log the like action
+    // Create a notification for the recommended user
+    const likingUser = await User.findById(userId);
+    if (likingUser) {
+      await createNotification({
+        user: recommendedUserId,
+        type: 'new_interest',
+        title: 'New Interest!',
+        message: `${likingUser.firstName} has shown interest in your profile!`, // Use liking user's name
+        link: `/profile/${userId}`, // Link to the liking user's profile
+      });
+      logger.info(`Notification created for ${recommendedUserId} about interest from ${userId}`);
+    }
 
     logger.info(`User ${userId} liked recommendation ${recommendedUserId}`);
     res.json({ message: "Recommendation liked successfully" });

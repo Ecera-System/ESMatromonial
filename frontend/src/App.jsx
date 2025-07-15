@@ -24,6 +24,7 @@ import UserVerificationDashboard from "./components/User/verification_suite";
 import Profile from "./components/User/Profile";
 import ScrollToTop from "./components/ScrollToTop";
 import ProtectedRoute from "./components/ProtectedRoute";
+import NotificationsPage from "./pages/NotificationsPage";
 import "./App.css";
 import UserProfilePage from "./pages/UserProfilePage";
 
@@ -53,6 +54,7 @@ function App() {
                   <Route index element={<MainContent />} />
                 </Route>
                 <Route path="profile" element={<Profile />} />
+                <Route path="notifications" element={<NotificationsPage />} />
                 <Route
                   path="verification"
                   element={<UserVerificationDashboard />}

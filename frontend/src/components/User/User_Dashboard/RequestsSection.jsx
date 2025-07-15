@@ -2,10 +2,12 @@ import React, { useEffect, useState } from "react";
 import {
   getUserRequests,
   respondToRequest,
+  cancelRequest,
 } from "../../../services/requestService";
 import { useAuth } from "../../../contexts/Chat/AuthContext";
-import { Check, X, User, Clock, Send, Heart } from "lucide-react";
+import { Check, X, User, Clock, Send, Heart, Ban } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-hot-toast";
 
 function RequestsSection() {
   const { user } = useAuth();
@@ -18,6 +20,7 @@ function RequestsSection() {
   });
   const [loading, setLoading] = useState(true);
   const [responding, setResponding] = useState({});
+  const [cancelling, setCancelling] = useState({});
 
   const fetchRequests = () => {
     setLoading(true);
@@ -42,11 +45,27 @@ function RequestsSection() {
     setResponding((prev) => ({ ...prev, [requestId]: action }));
     try {
       await respondToRequest(requestId, action);
+      toast.success(`Request ${action}ed successfully!`);
       fetchRequests();
     } catch (err) {
       console.error(err);
+      toast.error("Failed to respond to request.");
     } finally {
       setResponding((prev) => ({ ...prev, [requestId]: null }));
+    }
+  };
+
+  const handleCancelRequest = async (requestId) => {
+    setCancelling((prev) => ({ ...prev, [requestId]: true }));
+    try {
+      await cancelRequest(requestId);
+      toast.success("Request cancelled successfully!");
+      fetchRequests();
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to cancel request.");
+    } finally {
+      setCancelling((prev) => ({ ...prev, [requestId]: false }));
     }
   };
 
@@ -214,7 +233,23 @@ function RequestsSection() {
                         </button>
                       )}
 
-                      {activeTab === "Sent" && (
+                      {activeTab === "Sent" && req.status === "pending" && (
+                        <button
+                          onClick={() => handleCancelRequest(req._id)}
+                          disabled={cancelling[req._id]}
+                          className="inline-flex items-center justify-center w-full sm:w-auto px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50"
+                        >
+                          {cancelling[req._id] ? (
+                            "Cancelling..."
+                          ) : (
+                            <>
+                              <Ban className="w-4 h-4 mr-2" /> Cancel
+                            </>
+                          )}
+                        </button>
+                      )}
+
+                      {activeTab === "Sent" && req.status !== "pending" && (
                         <span className="text-sm text-gray-500">
                           Sent {new Date(req.createdAt).toLocaleDateString()}
                         </span>

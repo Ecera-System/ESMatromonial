@@ -1,20 +1,61 @@
-import React, { useEffect, useRef, useState } from 'react';
-import Peer from 'simple-peer';
-import { useSocket } from '../../contexts/Chat/SocketContext';
-import { useAuth } from '../../contexts/Chat/AuthContext';
-import IncomingCallModal from './IncomingCallModal';
-import { Mic, MicOff, Video, VideoOff, Phone, PhoneOff, User } from 'lucide-react';
+import React, { useEffect, useRef, useState } from "react";
+import Peer from "simple-peer";
+import { useSocket } from "../../contexts/Chat/SocketContext";
+import { useAuth } from "../../contexts/Chat/AuthContext";
+import IncomingCallModal from "./IncomingCallModal";
+import {
+  Mic,
+  MicOff,
+  Video,
+  VideoOff,
+  Phone,
+  PhoneOff,
+  User,
+} from "lucide-react";
 
 const VideoCall = ({
   isOpen,
   onClose,
   callee,
   incomingCall,
-  callType = 'video',
+  callType = "video",
   onCallStatus,
 }) => {
   const { socket } = useSocket();
   const { user } = useAuth();
+
+  const canMakeCall =
+    user &&
+    (user.trial?.isActive ||
+      (user.subscription?.isActive &&
+        user.subscription?.planName === "Elite VIP") ||
+      (user.subscription?.isActive &&
+        user.subscription?.planName === "Premium" &&
+        callType === "voice"));
+
+  console.log("VideoCall: User object", user);
+  console.log("VideoCall: User subscription", user?.subscription);
+  console.log("VideoCall: User trial", user?.trial);
+
+  const getCallRestrictionMessage = () => {
+    if (!user) return "Please log in to make calls.";
+    if (user.trial?.isActive) return ""; // Trial users have full access
+    if (!user.subscription?.isActive)
+      return "Subscribe to a premium plan to make calls.";
+
+    if (user.subscription?.planName === "Premium") {
+      if (callType === "video") {
+        return "Video calls require the Elite VIP.";
+      } else if (callType === "voice") {
+        return ""; // Voice calls allowed for 499 Plan
+      }
+    } else if (user.subscription?.planName === "Elite VIP") {
+      return ""; // All calls allowed for 999 Plan
+    }
+    return "Your current plan does not support this call type.";
+  };
+
+  const callRestrictionMessage = getCallRestrictionMessage();
   const [stream, setStream] = useState(null);
   const [remoteStream, setRemoteStream] = useState(null);
   const [callAccepted, setCallAccepted] = useState(false);
@@ -27,7 +68,7 @@ const VideoCall = ({
   const remoteVideo = useRef(null);
   const peerRef = useRef(null);
   const [hadRemoteStream, setHadRemoteStream] = useState(false);
-  const [callStatus, setCallStatus] = useState('Connecting...');
+  const [callStatus, setCallStatus] = useState("Connecting...");
   const [isMinimized, setIsMinimized] = useState(false);
 
   // All useEffect hooks go here, at the top level:
@@ -48,13 +89,13 @@ const VideoCall = ({
         setStream(null);
       }
       setRemoteStream(null);
-      setCallStatus('Connecting...');
+      setCallStatus("Connecting...");
       setIsCalling(false);
       setHadRemoteStream(false);
       setCallPeerId(null);
       setIsMicOn(true);
       setIsCamOn(true);
-      console.log('[VideoCall] State reset for new call');
+      console.log("[VideoCall] State reset for new call");
     }
   }, [isOpen, callAccepted, callRejected]);
 
@@ -64,65 +105,76 @@ const VideoCall = ({
 
   useEffect(() => {
     if (callAccepted && hadRemoteStream && !remoteStream && isOpen) {
-      console.log('[VideoCall] useEffect: callAccepted, hadRemoteStream, and remoteStream is now null, closing modal');
+      console.log(
+        "[VideoCall] useEffect: callAccepted, hadRemoteStream, and remoteStream is now null, closing modal"
+      );
       if (onClose) onClose();
     }
   }, [callAccepted, hadRemoteStream, remoteStream, isOpen, onClose]);
 
   useEffect(() => {
-    console.log('[VideoCall] Mounted. isOpen:', isOpen, 'user:', user?._id, 'callee:', callee?._id, 'incomingCall:', incomingCall);
+    console.log(
+      "[VideoCall] Mounted. isOpen:",
+      isOpen,
+      "user:",
+      user?._id,
+      "callee:",
+      callee?._id,
+      "incomingCall:",
+      incomingCall
+    );
     if (!socket) return;
-    socket.on('callToUser', (data) => {
-      console.log('[VideoCall] Received callToUser event:', data);
-      onCallStatus && onCallStatus('Incoming call...');
+    socket.on("callToUser", (data) => {
+      console.log("[VideoCall] Received callToUser event:", data);
+      onCallStatus && onCallStatus("Incoming call...");
       setCallPeerId(data.from);
     });
-    socket.on('callAccepted', (data) => {
-      console.log('[VideoCall] Received callAccepted event:', data);
+    socket.on("callAccepted", (data) => {
+      console.log("[VideoCall] Received callAccepted event:", data);
       setCallAccepted(true);
       setCallPeerId(data.from);
       if (peerRef.current) {
         peerRef.current.signal(data.signal);
       }
     });
-    socket.on('callRejected', () => {
-      console.log('[VideoCall] Received callRejected event');
+    socket.on("callRejected", () => {
+      console.log("[VideoCall] Received callRejected event");
       setCallRejected(true);
-      onCallStatus && onCallStatus('Call rejected');
+      onCallStatus && onCallStatus("Call rejected");
       if (onClose) {
-        console.log('[VideoCall] Calling onClose from callRejected event');
+        console.log("[VideoCall] Calling onClose from callRejected event");
         onClose();
       }
       endCall();
     });
-    socket.on('callEnded', () => {
-      console.log('[VideoCall] Received callEnded event');
-      onCallStatus && onCallStatus('Call ended');
+    socket.on("callEnded", () => {
+      console.log("[VideoCall] Received callEnded event");
+      onCallStatus && onCallStatus("Call ended");
       cleanupCall();
     });
-    socket.on('userUnavailable', (data) => {
-      console.log('[VideoCall] Received userUnavailable event:', data);
+    socket.on("userUnavailable", (data) => {
+      console.log("[VideoCall] Received userUnavailable event:", data);
       onCallStatus && onCallStatus(data.message);
       if (onClose) {
-        console.log('[VideoCall] Calling onClose from userUnavailable event');
+        console.log("[VideoCall] Calling onClose from userUnavailable event");
         onClose();
       }
     });
-    socket.on('userBusy', (data) => {
-      console.log('[VideoCall] Received userBusy event:', data);
+    socket.on("userBusy", (data) => {
+      console.log("[VideoCall] Received userBusy event:", data);
       onCallStatus && onCallStatus(data.message);
       if (onClose) {
-        console.log('[VideoCall] Calling onClose from userBusy event');
+        console.log("[VideoCall] Calling onClose from userBusy event");
         onClose();
       }
     });
     return () => {
-      socket.off('callToUser');
-      socket.off('callAccepted');
-      socket.off('callRejected');
-      socket.off('callEnded');
-      socket.off('userUnavailable');
-      socket.off('userBusy');
+      socket.off("callToUser");
+      socket.off("callAccepted");
+      socket.off("callRejected");
+      socket.off("callEnded");
+      socket.off("userUnavailable");
+      socket.off("userBusy");
     };
   }, [socket]);
 
@@ -130,24 +182,25 @@ const VideoCall = ({
     if (!socket) return;
     const handleWebRTCSignal = (data) => {
       if (data.signal && peerRef.current) {
-        const type = data.signal.type || (data.signal.candidate ? 'candidate' : 'unknown');
-        console.log('[VideoCall] Received webrtc-signal:', type, data.signal);
+        const type =
+          data.signal.type || (data.signal.candidate ? "candidate" : "unknown");
+        console.log("[VideoCall] Received webrtc-signal:", type, data.signal);
         peerRef.current.signal(data.signal);
       }
     };
-    socket.on('webrtc-signal', handleWebRTCSignal);
+    socket.on("webrtc-signal", handleWebRTCSignal);
     return () => {
-      socket.off('webrtc-signal', handleWebRTCSignal);
+      socket.off("webrtc-signal", handleWebRTCSignal);
     };
   }, [socket]);
 
   // Ensure remote video element gets the stream
   useEffect(() => {
     if (remoteVideo.current && remoteStream) {
-      console.log('[VideoCall] Setting remote video srcObject');
+      console.log("[VideoCall] Setting remote video srcObject");
       remoteVideo.current.srcObject = remoteStream;
-      remoteVideo.current.play().catch(err => {
-        console.error('[VideoCall] Error playing remote video:', err);
+      remoteVideo.current.play().catch((err) => {
+        console.error("[VideoCall] Error playing remote video:", err);
       });
     }
   }, [remoteStream]);
@@ -161,7 +214,12 @@ const VideoCall = ({
 
   // Start a call (as caller)
   const startCall = async () => {
-    console.log('[VideoCall] startCall called by', user?._id, 'to', callee?._id);
+    console.log(
+      "[VideoCall] startCall called by",
+      user?._id,
+      "to",
+      callee?._id
+    );
     // Always destroy any existing peer before starting a new call
     if (peerRef.current) {
       peerRef.current.destroy();
@@ -170,7 +228,7 @@ const VideoCall = ({
     setIsCalling(true);
     try {
       const mediaStream = await navigator.mediaDevices.getUserMedia({
-        video: callType === 'video',
+        video: callType === "video",
         audio: true,
       });
       setStream(mediaStream);
@@ -183,41 +241,41 @@ const VideoCall = ({
         trickle: true, // Enable trickle ICE
         stream: mediaStream,
       });
-      peer.on('signal', (signalData) => {
+      peer.on("signal", (signalData) => {
         if (!offerSent) {
           // Only send the first offer as callToUser
-          socket.emit('callToUser', {
+          socket.emit("callToUser", {
             callToUserId: callee._id,
             from: user._id,
             name: user.firstName || user.username,
             email: user.email,
             profilepic: user.avatar,
-            signalData: signalData // <-- send the offer here!
+            signalData: signalData, // <-- send the offer here!
           });
           offerSent = true;
         } else {
           // For subsequent signals (ICE), use webrtc-signal
-          socket.emit('webrtc-signal', {
+          socket.emit("webrtc-signal", {
             to: callee._id,
             from: user._id,
             signal: signalData,
           });
         }
       });
-      peer.on('connect', () => {
-        setCallStatus('Call Connected');
-        console.log('[VideoCall] Peer connected');
+      peer.on("connect", () => {
+        setCallStatus("Call Connected");
+        console.log("[VideoCall] Peer connected");
       });
-      peer.on('error', (err) => {
-        setCallStatus('Call Failed');
-        console.error('[VideoCall] Peer error:', err);
+      peer.on("error", (err) => {
+        setCallStatus("Call Failed");
+        console.error("[VideoCall] Peer error:", err);
       });
-      peer.on('close', () => {
-        setCallStatus('Call Ended');
-        console.log('[VideoCall] Peer closed');
+      peer.on("close", () => {
+        setCallStatus("Call Ended");
+        console.log("[VideoCall] Peer closed");
       });
-      peer.on('stream', (remoteStream) => {
-        console.log('[VideoCall] Received remote stream (startCall)');
+      peer.on("stream", (remoteStream) => {
+        console.log("[VideoCall] Received remote stream (startCall)");
         setRemoteStream(remoteStream);
         if (remoteVideo.current) {
           remoteVideo.current.srcObject = remoteStream;
@@ -225,15 +283,19 @@ const VideoCall = ({
       });
       peerRef.current = peer;
     } catch (err) {
-      console.error('[VideoCall] Error accessing media devices:', err, err?.stack);
-      onCallStatus && onCallStatus('Could not access media devices');
+      console.error(
+        "[VideoCall] Error accessing media devices:",
+        err,
+        err?.stack
+      );
+      onCallStatus && onCallStatus("Could not access media devices");
       setIsCalling(false);
     }
   };
 
   // Accept an incoming call
   const acceptCall = async () => {
-    console.log('[VideoCall] acceptCall called by', user?._id);
+    console.log("[VideoCall] acceptCall called by", user?._id);
     // Always destroy any existing peer before accepting a new call
     if (peerRef.current) {
       peerRef.current.destroy();
@@ -241,7 +303,7 @@ const VideoCall = ({
     }
     try {
       const mediaStream = await navigator.mediaDevices.getUserMedia({
-        video: callType === 'video',
+        video: callType === "video",
         audio: true,
       });
       setStream(mediaStream);
@@ -253,55 +315,63 @@ const VideoCall = ({
         trickle: true, // Enable trickle ICE
         stream: mediaStream,
       });
-      peer.on('signal', (signalData) => {
-        const type = signalData.type || (signalData.candidate ? 'candidate' : 'unknown');
-        console.log('[VideoCall] Emitting webrtc-signal (callee):', type, signalData);
-        socket.emit('webrtc-signal', {
+      peer.on("signal", (signalData) => {
+        const type =
+          signalData.type || (signalData.candidate ? "candidate" : "unknown");
+        console.log(
+          "[VideoCall] Emitting webrtc-signal (callee):",
+          type,
+          signalData
+        );
+        socket.emit("webrtc-signal", {
           to: incomingCall.from,
           from: user._id,
           signal: signalData,
         });
       });
-      peer.on('connect', () => {
-        setCallStatus('Call Connected');
-        console.log('[VideoCall] Peer connected (acceptCall)');
+      peer.on("connect", () => {
+        setCallStatus("Call Connected");
+        console.log("[VideoCall] Peer connected (acceptCall)");
       });
-      peer.on('error', (err) => {
-        setCallStatus('Call Failed');
-        console.error('[VideoCall] Peer error (acceptCall):', err);
+      peer.on("error", (err) => {
+        setCallStatus("Call Failed");
+        console.error("[VideoCall] Peer error (acceptCall):", err);
       });
-      peer.on('close', () => {
-        setCallStatus('Call Ended');
-        console.log('[VideoCall] Peer closed (acceptCall)');
+      peer.on("close", () => {
+        setCallStatus("Call Ended");
+        console.log("[VideoCall] Peer closed (acceptCall)");
       });
-      peer.on('stream', (remoteStream) => {
-        console.log('[VideoCall] Received remote stream (acceptCall)');
+      peer.on("stream", (remoteStream) => {
+        console.log("[VideoCall] Received remote stream (acceptCall)");
         setRemoteStream(remoteStream);
         if (remoteVideo.current) {
           remoteVideo.current.srcObject = remoteStream;
         }
       });
-      console.log('[VideoCall] Callee signaling with offer:', incomingCall.signal);
+      console.log(
+        "[VideoCall] Callee signaling with offer:",
+        incomingCall.signal
+      );
       peer.signal(incomingCall.signal);
       peerRef.current = peer;
       setCallAccepted(true);
     } catch (err) {
-      console.error('[VideoCall] Error accessing media devices (accept):', err);
-      onCallStatus && onCallStatus('Could not access media devices');
+      console.error("[VideoCall] Error accessing media devices (accept):", err);
+      onCallStatus && onCallStatus("Could not access media devices");
     }
   };
 
   // Reject an incoming call
   const rejectCall = () => {
-    console.log('[VideoCall] rejectCall called by', user?._id);
-    socket.emit('reject-call', {
+    console.log("[VideoCall] rejectCall called by", user?._id);
+    socket.emit("reject-call", {
       to: incomingCall.from,
       name: user.firstName || user.username,
       profilepic: user.avatar,
     });
     setCallRejected(true);
     if (onClose) {
-      console.log('[VideoCall] Calling onClose from rejectCall');
+      console.log("[VideoCall] Calling onClose from rejectCall");
       onClose();
     }
   };
@@ -322,14 +392,14 @@ const VideoCall = ({
     setIsCalling(false); // Ensure isCalling is reset
     setCallPeerId(null);
     setHadRemoteStream(false);
-    setCallStatus('');
+    setCallStatus("");
     if (onClose) onClose();
   };
 
   // End the call (local user hangs up)
   const endCall = () => {
-    console.log('[VideoCall] endCall called by', user?._id);
-    socket.emit('call-ended', {
+    console.log("[VideoCall] endCall called by", user?._id);
+    socket.emit("call-ended", {
       to: callPeerId,
       from: user._id,
       name: user.firstName || user.username,
@@ -358,7 +428,16 @@ const VideoCall = ({
   };
 
   // Debug log for render state
-  console.log('[VideoCall] Render: isOpen:', isOpen, 'incomingCall:', incomingCall, 'callAccepted:', callAccepted, 'callRejected:', callRejected);
+  console.log(
+    "[VideoCall] Render: isOpen:",
+    isOpen,
+    "incomingCall:",
+    incomingCall,
+    "callAccepted:",
+    callAccepted,
+    "callRejected:",
+    callRejected
+  );
 
   // Show IncomingCallModal for incoming calls
   if (isOpen && incomingCall && !callAccepted && !callRejected) {
@@ -382,8 +461,20 @@ const VideoCall = ({
     <div className="fixed inset-0 z-50 bg-gray-900">
       {/* Call Status Indicator - always visible at the top center */}
       <div className="absolute top-6 left-1/2 transform -translate-x-1/2 z-50">
-        <div className={`px-6 py-2 rounded-full text-lg font-bold shadow-lg backdrop-blur-md ${callStatus === 'Call Connected' ? 'bg-green-600 text-white' : callStatus === 'Call Ended' || callStatus === 'Call Failed' ? 'bg-red-600 text-white' : 'bg-yellow-400 text-gray-900'}`}
-             style={{ letterSpacing: '1px', minWidth: '180px', textAlign: 'center' }}>
+        <div
+          className={`px-6 py-2 rounded-full text-lg font-bold shadow-lg backdrop-blur-md ${
+            callStatus === "Call Connected"
+              ? "bg-green-600 text-white"
+              : callStatus === "Call Ended" || callStatus === "Call Failed"
+              ? "bg-red-600 text-white"
+              : "bg-yellow-400 text-gray-900"
+          }`}
+          style={{
+            letterSpacing: "1px",
+            minWidth: "180px",
+            textAlign: "center",
+          }}
+        >
           {callStatus}
         </div>
       </div>
@@ -391,8 +482,15 @@ const VideoCall = ({
       <div className="relative w-full h-full">
         {/* Remote video */}
         {(() => {
-          console.log('[VideoCall] Render check - callType:', callType, 'remoteStream:', !!remoteStream, 'remoteStream tracks:', remoteStream?.getTracks()?.length);
-          return callType === 'video' && remoteStream ? (
+          console.log(
+            "[VideoCall] Render check - callType:",
+            callType,
+            "remoteStream:",
+            !!remoteStream,
+            "remoteStream tracks:",
+            remoteStream?.getTracks()?.length
+          );
+          return callType === "video" && remoteStream ? (
             <video
               ref={remoteVideo}
               autoPlay
@@ -414,26 +512,34 @@ const VideoCall = ({
                 )}
               </div>
               <h2 className="text-2xl font-semibold text-white">
-                {callee?.firstName || incomingCall?.name || 'User'}
+                {callee?.firstName || incomingCall?.name || "User"}
               </h2>
               <p className="text-gray-400 mt-2">
-                {callStatus || (callType === 'video' ? 'Video call' : 'Voice call')}
+                {callStatus ||
+                  (callType === "video" ? "Video call" : "Voice call")}
               </p>
               {/* Start Call Button */}
-              {!callAccepted && !callRejected && !isCalling && (
-                <button
-                  onClick={startCall}
-                  className="mt-8 px-8 py-4 rounded-full bg-green-500 hover:bg-green-600 text-white text-xl font-bold shadow-lg transition-all"
-                >
-                  Start Call
-                </button>
-              )}
+              {!callAccepted &&
+                !callRejected &&
+                !isCalling &&
+                (canMakeCall ? (
+                  <button
+                    onClick={startCall}
+                    className="mt-8 px-8 py-4 rounded-full bg-green-500 hover:bg-green-600 text-white text-xl font-bold shadow-lg transition-all"
+                  >
+                    Start Call
+                  </button>
+                ) : (
+                  <p className="mt-8 text-red-400 text-lg font-semibold text-center">
+                    {callRestrictionMessage}
+                  </p>
+                ))}
             </div>
           );
         })()}
 
         {/* Local video preview (small in corner) */}
-        {callType === 'video' && stream && (
+        {callType === "video" && stream && (
           <div className="absolute bottom-24 right-4 w-32 h-48 rounded-lg overflow-hidden border-2 border-gray-600 bg-black">
             <video
               ref={myVideo}
@@ -446,7 +552,7 @@ const VideoCall = ({
         )}
 
         {/* Caller info (for voice calls) */}
-        {callType === 'voice' && (
+        {callType === "voice" && (
           <div className="absolute top-1/4 w-full flex flex-col items-center">
             <div className="w-32 h-32 rounded-full bg-gray-700 flex items-center justify-center mb-4">
               {callee?.avatar || incomingCall?.profilepic ? (
@@ -460,20 +566,25 @@ const VideoCall = ({
               )}
             </div>
             <h2 className="text-2xl font-semibold text-white">
-              {callee?.firstName || incomingCall?.name || 'User'}
+              {callee?.firstName || incomingCall?.name || "User"}
             </h2>
-            <p className="text-gray-400 mt-2">
-              {callStatus || 'Voice call'}
-            </p>
+            <p className="text-gray-400 mt-2">{callStatus || "Voice call"}</p>
             {/* Start Call Button for voice */}
-            {!callAccepted && !callRejected && !isCalling && (
-              <button
-                onClick={startCall}
-                className="mt-8 px-8 py-4 rounded-full bg-green-500 hover:bg-green-600 text-white text-xl font-bold shadow-lg transition-all"
-              >
-                Start Call
-              </button>
-            )}
+            {!callAccepted &&
+              !callRejected &&
+              !isCalling &&
+              (canMakeCall ? (
+                <button
+                  onClick={startCall}
+                  className="mt-8 px-8 py-4 rounded-full bg-green-500 hover:bg-green-600 text-white text-xl font-bold shadow-lg transition-all"
+                >
+                  Start Call
+                </button>
+              ) : (
+                <p className="mt-8 text-red-400 text-lg font-semibold text-center">
+                  {callRestrictionMessage}
+                </p>
+              ))}
           </div>
         )}
 
@@ -483,8 +594,12 @@ const VideoCall = ({
             {/* Mic toggle */}
             <button
               onClick={toggleMic}
-              className={`w-14 h-14 rounded-full flex items-center justify-center ${isMicOn ? 'bg-gray-700 hover:bg-gray-600' : 'bg-red-500 hover:bg-red-600'} transition-colors`}
-              title={isMicOn ? 'Mute' : 'Unmute'}
+              className={`w-14 h-14 rounded-full flex items-center justify-center ${
+                isMicOn
+                  ? "bg-gray-700 hover:bg-gray-600"
+                  : "bg-red-500 hover:bg-red-600"
+              } transition-colors`}
+              title={isMicOn ? "Mute" : "Unmute"}
             >
               {isMicOn ? (
                 <Mic className="w-6 h-6 text-white" />
@@ -494,11 +609,15 @@ const VideoCall = ({
             </button>
 
             {/* Camera toggle (video only) */}
-            {callType === 'video' && (
+            {callType === "video" && (
               <button
                 onClick={toggleCam}
-                className={`w-14 h-14 rounded-full flex items-center justify-center ${isCamOn ? 'bg-gray-700 hover:bg-gray-600' : 'bg-red-500 hover:bg-red-600'} transition-colors`}
-                title={isCamOn ? 'Turn off camera' : 'Turn on camera'}
+                className={`w-14 h-14 rounded-full flex items-center justify-center ${
+                  isCamOn
+                    ? "bg-gray-700 hover:bg-gray-600"
+                    : "bg-red-500 hover:bg-red-600"
+                } transition-colors`}
+                title={isCamOn ? "Turn off camera" : "Turn on camera"}
               >
                 {isCamOn ? (
                   <Video className="w-6 h-6 text-white" />

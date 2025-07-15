@@ -3,6 +3,7 @@ import notificationService from '../../services/notificationService';
 import { useAuth } from './AuthContext';
 import { useSocket } from './SocketContext';
 import toast from 'react-hot-toast';
+import { useQueryClient } from '@tanstack/react-query';
 
 const NotificationContext = createContext();
 
@@ -156,6 +157,38 @@ export function NotificationProvider({ children }) {
     // This will be handled by handleMessageNotification
     // This listener is kept for compatibility
     console.log('📩 New message received:', message.sender.name);
+  };
+
+  // Handle generic new notifications from socket
+  const handleNewNotification = (notificationData) => {
+    console.log('🔔 Received generic notification:', notificationData);
+
+    // Show toast notification
+    toast.success(notificationData.message, {
+      icon: '🔔',
+      duration: 5000,
+      onClick: () => {
+        if (notificationData.link) {
+          window.location.href = notificationData.link;
+        }
+      },
+    });
+
+    // Show desktop notification if enabled and tab is hidden
+    if (isEnabled && document.hidden) {
+      notificationService.showNotification({
+        title: notificationData.title,
+        body: notificationData.message,
+        tag: notificationData.type,
+        onClick: () => {
+          if (notificationData.link) {
+            window.focus();
+            window.location.href = notificationData.link;
+          }
+        },
+      });
+    }
+    queryClient.invalidateQueries(['notifications']);
   };
 
   const showCustomNotification = (options) => {

@@ -2,7 +2,7 @@ import User from "../models/User.js";
 import logger from "../utils/logger.js";
 
 export const getDailyRecommendations = async (userId, limit = 1) => {
-  const user = await User.findById(userId).lean();
+  const user = await User.findById(userId);
   if (!user) throw new Error("User not found");
 
   // 1. Build base query
@@ -50,7 +50,7 @@ const buildBaseQuery = (user) => {
 
 // Candidate Finder with Fallback
 const findCandidates = async (query, user) => {
-  let candidates = await User.find(query).lean();
+  let candidates = await User.find(query);
 
   // First fallback: Relax religion/caste filters
   if (candidates.length === 0) {
@@ -58,7 +58,7 @@ const findCandidates = async (query, user) => {
     const relaxedQuery = { ...query };
     delete relaxedQuery.religion;
     delete relaxedQuery.caste;
-    candidates = await User.find(relaxedQuery).lean();
+    candidates = await User.find(relaxedQuery);
   }
 
   // Second fallback: Only essential filters
@@ -68,7 +68,7 @@ const findCandidates = async (query, user) => {
       _id: { $ne: user._id },
       accountStatus: "active",
       isVerified: true,
-    }).lean();
+    });
   }
 
   return candidates;
@@ -76,35 +76,35 @@ const findCandidates = async (query, user) => {
 
 // Scoring Engine
 const scoreAndSortCandidates = (candidates, user) => {
-  return candidates
-    .map((candidate) => {
-      let score = 0;
+  candidates.forEach((candidate) => {
+    let score = 0;
 
-      // Core matching (higher weights)
-      if (candidate.religion === user.partnerReligion) score += 3;
-      if (candidate.caste === user.partnerCaste) score += 3;
+    // Core matching (higher weights)
+    if (candidate.religion === user.partnerReligion) score += 3;
+    if (candidate.caste === user.partnerCaste) score += 3;
 
-      // Education/occupation matching
-      if (candidate.education === user.partnerEducation) score += 2;
-      if (candidate.occupation === user.partnerOccupation) score += 2;
+    // Education/occupation matching
+    if (candidate.education === user.partnerEducation) score += 2;
+    if (candidate.occupation === user.partnerOccupation) score += 2;
 
-      // Profile completeness
-      if (candidate.photos?.length > 0) score += 1;
-      if (candidate.aboutMe) score += 1;
+    // Profile completeness
+    if (candidate.photos?.length > 0) score += 1;
+    if (candidate.aboutMe) score += 1;
 
-      // Recent activity bonus
-      if (candidate.lastActive) {
-        const daysSinceActive =
-          (Date.now() - new Date(candidate.lastActive)) / (1000 * 60 * 60 * 24);
-        if (daysSinceActive < 7) score += 2;
-        else if (daysSinceActive < 30) score += 1;
-      }
+    // Recent activity bonus
+    if (candidate.lastActive) {
+      const daysSinceActive =
+        (Date.now() - new Date(candidate.lastActive)) / (1000 * 60 * 60 * 24);
+      if (daysSinceActive < 7) score += 2;
+      else if (daysSinceActive < 30) score += 1;
+    }
 
-      return { ...candidate, matchScore: score };
-    })
-    .sort(
-      (a, b) =>
-        b.matchScore - a.matchScore ||
-        new Date(b.lastActive || 0) - new Date(a.lastActive || 0)
-    );
+    candidate.matchScore = score;
+  });
+
+  return candidates.sort(
+    (a, b) =>
+      b.matchScore - a.matchScore ||
+      new Date(b.lastActive || 0) - new Date(a.lastActive || 0)
+  );
 };

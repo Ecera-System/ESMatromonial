@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-
+import { useAuth } from "../../../contexts/Chat/AuthContext";
+import { useRequest } from "../../../hooks/useRequest";
 function DailyRecommendations() {
+  console.log("DailyRecommendations component rendering...");
   const [recommendation, setRecommendation] = useState(null);
   const [match, setMatch] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -10,28 +12,92 @@ function DailyRecommendations() {
   const [showPopup, setShowPopup] = useState(false);
   const [popupName, setPopupName] = useState("");
   const [popupAvatar, setPopupAvatar] = useState("");
+  const [trialDaysRemaining, setTrialDaysRemaining] = useState(0);
   const navigate = useNavigate();
+  const { user } = useAuth();
+
+  const canSendRequest =
+    user &&
+    (user.trial?.isActive ||
+      (user.subscription?.isActive &&
+        user.subscription?.planName === "Elite VIP") ||
+      (user.subscription?.isActive &&
+        user.subscription?.planName === "Premium" &&
+        user.connectionRequestsThisWeek < 10) ||
+      (!user.subscription?.isActive &&
+        !user.trial?.isActive &&
+        user.connectionRequestsThisWeek < 3));
+
+  const getConnectionLimitMessage = () => {
+    if (!user) return "";
+    if (
+      user.trial?.isActive ||
+      (user.subscription?.isActive &&
+        user.subscription?.planName === "Elite VIP")
+    ) {
+      return ""; // Unlimited for these users
+    }
+    if (
+      user.subscription?.isActive &&
+      user.subscription?.planName === "Premium"
+    ) {
+      return `Premium Plan users can send 10 requests per week. You have sent ${user.connectionRequestsThisWeek} this week.`;
+    }
+    // Basic user
+    return `Basic Plan users can send 3 requests per week. You have sent ${user.connectionRequestsThisWeek} this week.`;
+  };
+
+  const connectionLimitMessage = getConnectionLimitMessage();
+
+  useEffect(() => {
+    if (user && user.trial?.isActive && user.trial?.endDate) {
+      const endDate = new Date(user.trial.endDate);
+      const today = new Date();
+      const diffTime = endDate.getTime() - today.getTime();
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      setTrialDaysRemaining(diffDays > 0 ? diffDays : 0);
+    } else {
+      setTrialDaysRemaining(0);
+    }
+  }, [user]);
+
+  const calculateAge = (dateOfBirth) => {
+    if (!dateOfBirth) return "N/A";
+    const birthDate = new Date(dateOfBirth);
+    const today = new Date();
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const m = today.getMonth() - birthDate.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+      age--;
+    }
+    return age;
+  };
 
   // Fetch daily recommendation on mount
   useEffect(() => {
+    console.log("DailyRecommendations useEffect triggered.");
     fetchRecommendation();
     // eslint-disable-next-line
   }, []);
 
   const fetchRecommendation = async () => {
+    console.log("fetchRecommendation started.");
     setLoading(true);
     setError(null);
     try {
       const token = localStorage.getItem("token");
+      console.log("Fetching recommendation with token:", token);
       const res = await axios.get(
         `${import.meta.env.VITE_API_URL}/api/v1/users/daily-recommendation`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
+      console.log("Recommendation fetched successfully:", res.data);
       setRecommendation(res.data.recommendation);
       setMatch(res.data.matchPercentage);
     } catch (err) {
+      console.error("Error fetching recommendation:", err);
       setRecommendation(null);
       setMatch(null);
       if (err.response?.data?.message) {
@@ -41,17 +107,18 @@ function DailyRecommendations() {
       }
     } finally {
       setLoading(false);
+      console.log("fetchRecommendation finished.");
     }
   };
 
   const handleSkip = async () => {
-    if (!recommendation?._id) return;
+    if (!recommendation?.recommendedUserId?._id) return;
     try {
       const token = localStorage.getItem("token");
       await axios.post(
         `${import.meta.env.VITE_API_URL}/api/v1/users/skip`,
         {
-          skippedUserId: recommendation._id,
+          skippedUserId: recommendation.recommendedUserId._id,
           recommendationId: recommendation.recommendationId,
         },
         {
@@ -64,40 +131,41 @@ function DailyRecommendations() {
     }
   };
 
+  // ... (rest of the imports)
+
+  // function DailyRecommendations() {
+  // ... (state declarations)
+  const { sendRequest: sendInvite, loading: requestLoading } = useRequest();
+
+  // ... (useEffect)
+
   const handleConnect = async () => {
-    if (!recommendation?._id) return;
-    setShowPopup(true);
-    setPopupName(
-      recommendation.firstName + " " + (recommendation.lastName || "")
-    );
-    setPopupAvatar(recommendation.avatar || "");
-    try {
-      const token = localStorage.getItem("token");
-      await axios.post(
-        `${import.meta.env.VITE_API_URL}/api/v1/users/like`,
-        {
-          recommendedUserId: recommendation._id,
-          recommendationId: recommendation.recommendationId,
-        },
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
+    if (!recommendation?.recommendedUserId?._id) return;
+    const success = await sendInvite(recommendation.recommendedUserId._id);
+    if (success) {
+      setShowPopup(true);
+      setPopupName(
+        recommendation.recommendedUserId.firstName +
+          " " +
+          (recommendation.recommendedUserId.lastName || "")
       );
+      setPopupAvatar(recommendation.recommendedUserId.photos?.[0] || "");
       setTimeout(() => {
         setShowPopup(false);
         // Redirect to chat page with userId and default message as query param
         const defaultMsg = encodeURIComponent(
           "Hi, I just sent you an invitation!"
         );
-        navigate(`/chat?userId=${recommendation._id}&prefill=${defaultMsg}`);
+        navigate(
+          `/chat?userId=${recommendation.recommendedUserId._id}&prefill=${defaultMsg}`
+        );
       }, 1500);
-    } catch (err) {
-      setShowPopup(false);
-      setError("Failed to connect.");
     }
   };
 
-  console.log(recommendation);
+  // ... (rest of the component)
+
+  console.log("Daily Recommendation Data (from frontend):", recommendation);
 
   // UI rendering
   return (
@@ -106,6 +174,14 @@ function DailyRecommendations() {
         <span className="text-xl sm:text-2xl">✨</span>
         Daily Recommendations
       </h2>
+
+      {user && user.trial?.isActive && trialDaysRemaining > 0 && (
+        <div className="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-4 py-2 rounded-lg mb-4 text-center text-sm font-medium">
+          You have {trialDaysRemaining} day(s) remaining on your free trial!
+          Enjoy premium features.
+        </div>
+      )}
+
       <div className="relative min-h-[180px]">
         {/* Animated Popup */}
         {showPopup && (
@@ -169,35 +245,69 @@ function DailyRecommendations() {
             <div className="flex items-center gap-4 sm:gap-6 flex-1 min-w-0">
               {/* Avatar */}
               <div className="w-20 h-20 sm:w-24 sm:h-24 lg:w-32 lg:h-32 rounded-3xl bg-gradient-to-br from-blue-100 to-indigo-200 overflow-hidden cursor-pointer transition-all duration-300 hover:scale-105 shadow-lg flex-shrink-0 flex items-center justify-center text-4xl font-bold text-blue-700">
-                {recommendation.avatar ? (
-                  <img
-                    src={recommendation.avatar}
-                    alt={recommendation.firstName}
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <span>
-                    {recommendation.firstName?.charAt(0)?.toUpperCase() || ""}
-                    {recommendation.lastName?.charAt(0)?.toUpperCase() || ""}
-                  </span>
-                )}
+                {(() => {
+                  const photoUrl =
+                    recommendation.recommendedUserId?.photos?.[0];
+                  console.log("Photo URL:", photoUrl);
+                  if (photoUrl) {
+                    return (
+                      <img
+                        src={photoUrl}
+                        alt={recommendation.recommendedUserId.firstName}
+                        className="w-full h-full object-cover"
+                      />
+                    );
+                  } else {
+                    return (
+                      <span>
+                        {recommendation.recommendedUserId?.firstName
+                          ?.charAt(0)
+                          ?.toUpperCase() || ""}
+                        {recommendation.recommendedUserId?.lastName
+                          ?.charAt(0)
+                          ?.toUpperCase() || ""}
+                      </span>
+                    );
+                  }
+                })()}
               </div>
               {/* Profile Details */}
               <div className="flex flex-col gap-2 min-w-0">
                 <h3 className="text-lg sm:text-xl dark:text-white lg:text-2xl font-bold text-gray-800 m-0 truncate">
-                  {recommendation.firstName} {recommendation.lastName}
+                  {recommendation.recommendedUserId?.firstName}{" "}
+                  {recommendation.recommendedUserId?.lastName}
                 </h3>
                 <p className="text-sm sm:text-base dark:text-white lg:text-lg text-gray-600 m-0 font-medium">
-                  {recommendation.age} • {recommendation.profession}
+                  {calculateAge(recommendation.recommendedUserId?.dateOfBirth)}{" "}
+                  • {recommendation.recommendedUserId?.occupation}
                 </p>
                 <p className="text-xs sm:text-sm lg:text-base text-gray-500 m-0 truncate">
-                  {recommendation.city}, {recommendation.country}
+                  {recommendation.recommendedUserId?.city},{" "}
+                  {recommendation.recommendedUserId?.country}
                 </p>
                 <button
-                  className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold py-2 px-4 sm:py-3 sm:px-6 rounded-full mt-2 sm:mt-4 transition-all duration-300 hover:shadow-xl hover:scale-105 hover:from-blue-700 hover:to-indigo-700 text-xs sm:text-sm lg:text-base w-fit"
+                  className={`font-bold py-2 px-4 sm:py-3 sm:px-6 rounded-full mt-2 sm:mt-4 transition-all duration-300 hover:shadow-xl text-xs sm:text-sm lg:text-base w-fit ${
+                    canSendRequest
+                      ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:scale-105 hover:from-blue-700 hover:to-indigo-700"
+                      : "bg-gray-400 text-gray-700 cursor-not-allowed"
+                  }`}
                   onClick={handleConnect}
+                  disabled={!canSendRequest}
                 >
-                  Connect
+                  {canSendRequest ? "Connect" : "Limit Reached"}
+                </button>
+                {!canSendRequest && (
+                  <p className="text-red-500 text-xs mt-1">
+                    {connectionLimitMessage}
+                  </p>
+                )}
+                <button
+                  className="bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold py-2 px-4 sm:py-3 sm:px-6 rounded-full mt-2 sm:mt-4 transition-all duration-300 hover:shadow-md hover:scale-105 text-xs sm:text-sm lg:text-base w-fit"
+                  onClick={() =>
+                    navigate(`/profile/${recommendation.recommendedUserId._id}`)
+                  }
+                >
+                  View Profile
                 </button>
               </div>
             </div>

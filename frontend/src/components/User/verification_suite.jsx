@@ -1,22 +1,233 @@
 // UserVerificationDashboard.jsx
-import React, { useState } from "react";
-import { CheckCircle, Upload, X } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { CheckCircle, Upload, X, Loader2 } from "lucide-react";
 import BackButton from "../BackButton";
+import { useAuth } from "../../contexts/Chat/AuthContext";
+import {
+  getVerificationStatus,
+  sendEmailVerification,
+  sendPhoneVerification,
+  verifyPhoneOTP,
+  uploadAadhaarDocument,
+  verifyAadhaarDocument,
+  sendAadhaarOTP,
+  verifyAadhaarOTP,
+} from "../../services/verificationService";
 
 export default function UserVerificationDashboard() {
+  const { user, setUser } = useAuth();
   const [toast, setToast] = useState("");
   const [step, setStep] = useState("welcome");
-  const [mockAadharNumber, setMockAadharNumber] = useState("");
-  const [manualPhone, setManualPhone] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [aadhaarFile, setAadhaarFile] = useState(null);
+  const [aadhaarData, setAadhaarData] = useState(null);
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [email, setEmail] = useState("");
+  const [otp, setOtp] = useState("");
+  const [aadhaarMobile, setAadhaarMobile] = useState("");
   const [verificationStatus, setVerificationStatus] = useState({
     email: false,
     phone: false,
     aadhar: false,
   });
 
-  const handleMockOCR = () => {
-    setMockAadharNumber("1234 5678 9012");
-    setStep("aadhar-mobile");
+  // Load verification status on component mount
+  useEffect(() => {
+    if (user?._id) {
+      loadVerificationStatus();
+    }
+  }, [user]);
+
+  const loadVerificationStatus = async () => {
+    try {
+      const response = await getVerificationStatus(user._id);
+      if (response.success) {
+        setVerificationStatus({
+          email: response.verification.emailVerified,
+          phone: response.verification.phoneVerified,
+          aadhar: response.verification.aadhaarVerified,
+        });
+      }
+    } catch (error) {
+      console.error("Error loading verification status:", error);
+    }
+  };
+
+  const showToast = (message, type = "success") => {
+    setToast(message);
+    setTimeout(() => setToast(""), 3000);
+  };
+
+  const handleEmailVerification = async () => {
+    if (!email) {
+      showToast("Please enter your email address", "error");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const response = await sendEmailVerification(user._id, email);
+      if (response.success) {
+        showToast("Verification email sent successfully");
+        setVerificationStatus((prev) => ({ ...prev, email: true }));
+        setStep("phone");
+      } else {
+        showToast(
+          response.message || "Failed to send verification email",
+          "error"
+        );
+      }
+    } catch (error) {
+      showToast("Error sending verification email", "error");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handlePhoneVerification = async () => {
+    if (!phoneNumber || phoneNumber.length !== 10) {
+      showToast("Please enter a valid 10-digit phone number", "error");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const response = await sendPhoneVerification(user._id, phoneNumber);
+      if (response.success) {
+        showToast("OTP sent successfully");
+        setStep("phone-otp");
+      } else {
+        showToast(response.message || "Failed to send OTP", "error");
+      }
+    } catch (error) {
+      showToast("Error sending OTP", "error");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handlePhoneOTPVerification = async () => {
+    if (!otp || otp.length !== 6) {
+      showToast("Please enter a valid 6-digit OTP", "error");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const response = await verifyPhoneOTP(user._id, otp);
+      if (response.success) {
+        showToast("Phone number verified successfully");
+        setVerificationStatus((prev) => ({ ...prev, phone: true }));
+        setStep("aadhar-upload");
+      } else {
+        showToast(response.message || "Invalid OTP", "error");
+      }
+    } catch (error) {
+      showToast("Error verifying OTP", "error");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleAadhaarUpload = async () => {
+    if (!aadhaarFile) {
+      showToast("Please select a file to upload", "error");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const response = await uploadAadhaarDocument(user._id, aadhaarFile);
+      if (response.success) {
+        showToast("Aadhaar document uploaded successfully");
+        setStep("aadhar-verify");
+      } else {
+        showToast(response.message || "Failed to upload document", "error");
+      }
+    } catch (error) {
+      showToast("Error uploading document", "error");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleAadhaarVerification = async () => {
+    setLoading(true);
+    try {
+      const response = await verifyAadhaarDocument(user._id);
+      if (response.success) {
+        setAadhaarData(response.aadhaarData);
+        showToast("Aadhaar verified successfully");
+        setVerificationStatus((prev) => ({ ...prev, aadhar: true }));
+        setStep("aadhar-mobile");
+      } else {
+        showToast(response.message || "Aadhaar verification failed", "error");
+      }
+    } catch (error) {
+      showToast("Error verifying Aadhaar", "error");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleAadhaarOTPSend = async () => {
+    if (!aadhaarMobile || aadhaarMobile.length !== 10) {
+      showToast("Please enter a valid 10-digit mobile number", "error");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const response = await sendAadhaarOTP(user._id, aadhaarMobile);
+      if (response.success) {
+        showToast("Aadhaar OTP sent successfully");
+        setStep("aadhar-otp");
+      } else {
+        showToast(response.message || "Failed to send Aadhaar OTP", "error");
+      }
+    } catch (error) {
+      showToast("Error sending Aadhaar OTP", "error");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleAadhaarOTPVerification = async () => {
+    if (!otp || otp.length !== 6) {
+      showToast("Please enter a valid 6-digit OTP", "error");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const response = await verifyAadhaarOTP(user._id, otp);
+      if (response.success) {
+        showToast("Aadhaar OTP verified successfully");
+        setVerificationStatus((prev) => ({ ...prev, aadhar: true }));
+        // Fetch latest user info from backend
+        await refreshUser();
+        setStep("welcome");
+      } else {
+        showToast(response.message || "Invalid OTP", "error");
+      }
+    } catch (error) {
+      showToast("Error verifying Aadhaar OTP", "error");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Function to refresh user state from backend
+  const refreshUser = async () => {
+    try {
+      const res = await fetch(`/api/v1/users/${user._id}`);
+      const data = await res.json();
+      if (data && data.user) {
+        setUser(data.user);
+      }
+    } catch (err) {
+      // ignore
+    }
   };
 
   const verificationSteps = [
@@ -103,19 +314,24 @@ export default function UserVerificationDashboard() {
               </h1>
               <input
                 type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-sm sm:text-base bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
                 placeholder="Enter your email address"
               />
               <button
-                onClick={() => {
-                  setVerificationStatus((prev) => ({ ...prev, email: true }));
-                  setStep("phone");
-                  setToast("Email verified successfully");
-                  setTimeout(() => setToast(""), 3000);
-                }}
-                className="w-full py-2 px-4 bg-orange-500 hover:bg-orange-600 text-white font-semibold rounded-lg shadow-md text-sm sm:text-base"
+                onClick={handleEmailVerification}
+                disabled={loading}
+                className="w-full py-2 px-4 bg-orange-500 hover:bg-orange-600 disabled:bg-gray-400 text-white font-semibold rounded-lg shadow-md text-sm sm:text-base flex items-center justify-center"
               >
-                Send Verification Email
+                {loading ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Sending...
+                  </>
+                ) : (
+                  "Send Verification Email"
+                )}
               </button>
             </div>
           )}
@@ -128,19 +344,57 @@ export default function UserVerificationDashboard() {
               <input
                 type="tel"
                 maxLength={10}
+                value={phoneNumber}
+                onChange={(e) => setPhoneNumber(e.target.value)}
                 className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-sm sm:text-base bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
                 placeholder="Enter your phone number"
               />
               <button
-                onClick={() => {
-                  setVerificationStatus((prev) => ({ ...prev, phone: true }));
-                  setStep("aadhar-upload");
-                  setToast("Phone number verified successfully");
-                  setTimeout(() => setToast(""), 3000);
-                }}
-                className="w-full py-2 px-4 bg-orange-500 hover:bg-orange-600 text-white font-semibold rounded-lg shadow-md text-sm sm:text-base"
+                onClick={handlePhoneVerification}
+                disabled={loading}
+                className="w-full py-2 px-4 bg-orange-500 hover:bg-orange-600 disabled:bg-gray-400 text-white font-semibold rounded-lg shadow-md text-sm sm:text-base flex items-center justify-center"
               >
-                Send OTP
+                {loading ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Sending...
+                  </>
+                ) : (
+                  "Send OTP"
+                )}
+              </button>
+            </div>
+          )}
+
+          {step === "phone-otp" && (
+            <div className="space-y-6 animate-fade-in">
+              <h1 className="text-xl sm:text-2xl font-bold text-center text-gray-800 dark:text-white">
+                Enter OTP
+              </h1>
+              <p className="text-sm text-center text-gray-600 dark:text-gray-300">
+                Enter the 6-digit OTP sent to {phoneNumber}
+              </p>
+              <input
+                type="text"
+                maxLength={6}
+                value={otp}
+                onChange={(e) => setOtp(e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-sm sm:text-base bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-center text-lg tracking-widest"
+                placeholder="000000"
+              />
+              <button
+                onClick={handlePhoneOTPVerification}
+                disabled={loading}
+                className="w-full py-2 px-4 bg-orange-500 hover:bg-orange-600 disabled:bg-gray-400 text-white font-semibold rounded-lg shadow-md text-sm sm:text-base flex items-center justify-center"
+              >
+                {loading ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Verifying...
+                  </>
+                ) : (
+                  "Verify OTP"
+                )}
               </button>
             </div>
           )}
@@ -156,13 +410,48 @@ export default function UserVerificationDashboard() {
               <input
                 type="file"
                 accept=".pdf, image/*"
+                onChange={(e) => setAadhaarFile(e.target.files[0])}
                 className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-sm sm:text-base bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
               />
               <button
-                onClick={handleMockOCR}
-                className="w-full py-2 px-4 bg-orange-500 hover:bg-orange-600 text-white font-semibold rounded-lg shadow-md text-sm sm:text-base"
+                onClick={handleAadhaarUpload}
+                disabled={loading || !aadhaarFile}
+                className="w-full py-2 px-4 bg-orange-500 hover:bg-orange-600 disabled:bg-gray-400 text-white font-semibold rounded-lg shadow-md text-sm sm:text-base flex items-center justify-center"
               >
-                Scan & Continue
+                {loading ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Uploading...
+                  </>
+                ) : (
+                  "Upload & Continue"
+                )}
+              </button>
+            </div>
+          )}
+
+          {step === "aadhar-verify" && (
+            <div className="space-y-6 animate-fade-in">
+              <h1 className="text-xl sm:text-2xl font-bold text-center text-gray-800 dark:text-white">
+                Verify Aadhaar Document
+              </h1>
+              <p className="text-sm text-center text-gray-600 dark:text-gray-300">
+                We'll now scan and verify your Aadhaar document using secure OCR
+                technology.
+              </p>
+              <button
+                onClick={handleAadhaarVerification}
+                disabled={loading}
+                className="w-full py-2 px-4 bg-orange-500 hover:bg-orange-600 disabled:bg-gray-400 text-white font-semibold rounded-lg shadow-md text-sm sm:text-base flex items-center justify-center"
+              >
+                {loading ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Verifying...
+                  </>
+                ) : (
+                  "Scan & Verify"
+                )}
               </button>
             </div>
           )}
@@ -172,24 +461,39 @@ export default function UserVerificationDashboard() {
               <h1 className="text-xl sm:text-2xl font-bold text-center text-gray-800 dark:text-white">
                 Enter Mobile Linked to Aadhaar
               </h1>
-              <input
-                type="text"
-                value={mockAadharNumber}
-                readOnly
-                className="w-full px-4 py-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none text-sm sm:text-base text-gray-900 dark:text-white"
-              />
+              {aadhaarData && (
+                <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+                  <p className="text-sm text-gray-600 dark:text-gray-300 mb-2">
+                    Aadhaar Number: {aadhaarData.uid}
+                  </p>
+                  <p className="text-sm text-gray-600 dark:text-gray-300">
+                    Name: {aadhaarData.name}
+                  </p>
+                </div>
+              )}
               <input
                 type="tel"
                 maxLength={10}
+                value={aadhaarMobile}
+                onChange={(e) => setAadhaarMobile(e.target.value)}
                 className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-sm sm:text-base bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
                 placeholder="Enter your mobile number"
-                onChange={(e) => setManualPhone(e.target.value)}
               />
               <button
-                onClick={() => setStep("aadhar-otp")}
-                className="w-full py-2 px-4 bg-orange-500 hover:bg-orange-600 text-white font-semibold rounded-lg shadow-md text-sm sm:text-base"
+                onClick={handleAadhaarOTPSend}
+                disabled={
+                  loading || !aadhaarMobile || aadhaarMobile.length !== 10
+                }
+                className="w-full py-2 px-4 bg-orange-500 hover:bg-orange-600 disabled:bg-gray-400 text-white font-semibold rounded-lg shadow-md text-sm sm:text-base flex items-center justify-center"
               >
-                Send OTP
+                {loading ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Sending...
+                  </>
+                ) : (
+                  "Send OTP"
+                )}
               </button>
             </div>
           )}
@@ -199,30 +503,39 @@ export default function UserVerificationDashboard() {
               <h1 className="text-xl sm:text-2xl font-bold text-center text-gray-800 dark:text-white">
                 OTP Verification
               </h1>
+              <p className="text-sm text-center text-gray-600 dark:text-gray-300">
+                Enter the 6-digit OTP sent to {aadhaarMobile}
+              </p>
               <input
                 type="text"
                 maxLength={6}
-                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-sm sm:text-base bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-                placeholder={`Enter OTP sent to ${manualPhone}`}
+                value={otp}
+                onChange={(e) => setOtp(e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-sm sm:text-base bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-center text-lg tracking-widest"
+                placeholder="000000"
               />
               <button
-                onClick={() => {
-                  setVerificationStatus((prev) => ({ ...prev, aadhar: true }));
-                  setToast("Aadhaar verified successfully");
-                  setTimeout(() => setToast(""), 3000);
-                }}
-                className="w-full py-2 px-4 bg-green-500 hover:bg-green-600 text-white font-semibold rounded-lg shadow-md text-sm sm:text-base"
+                onClick={handleAadhaarOTPVerification}
+                disabled={loading || !otp || otp.length !== 6}
+                className="w-full py-2 px-4 bg-green-500 hover:bg-green-600 disabled:bg-gray-400 text-white font-semibold rounded-lg shadow-md text-sm sm:text-base flex items-center justify-center"
               >
-                Verify
+                {loading ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Verifying...
+                  </>
+                ) : (
+                  "Verify OTP"
+                )}
               </button>
               <p className="text-sm text-center text-gray-500 dark:text-gray-400">
                 Didn&apos;t get OTP?{" "}
-                <a
-                  href="#"
+                <button
+                  onClick={handleAadhaarOTPSend}
                   className="text-orange-500 dark:text-orange-400 hover:underline"
                 >
                   Resend
-                </a>
+                </button>
               </p>
             </div>
           )}
@@ -254,7 +567,15 @@ export default function UserVerificationDashboard() {
         </div>
 
         {toast && (
-          <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 bg-black/80 text-white px-4 py-2 rounded-xl text-sm shadow-lg animate-fade-in">
+          <div
+            className={`absolute bottom-6 left-1/2 transform -translate-x-1/2 px-4 py-2 rounded-xl text-sm shadow-lg animate-fade-in ${
+              toast.includes("error") ||
+              toast.includes("failed") ||
+              toast.includes("Invalid")
+                ? "bg-red-500 text-white"
+                : "bg-green-500 text-white"
+            }`}
+          >
             {toast}
           </div>
         )}

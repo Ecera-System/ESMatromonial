@@ -69,6 +69,29 @@ const ChatWindow = ({
   const [videoCallOpen, setVideoCallOpen] = useState(false);
   const [incomingCallData, setIncomingCallData] = useState(null);
   const [videoCallType, setVideoCallType] = useState("video");
+  const [callRestrictionMessage, setCallRestrictionMessage] = useState("");
+
+  const canMakeCall = (type) => {
+    console.log("ChatWindow: User object", user);
+    console.log("ChatWindow: User subscription", user?.subscription);
+    console.log("ChatWindow: User trial", user?.trial);
+    if (!user) return false;
+    if (user.trial?.isActive) return true; // Trial users have full access
+    if (!user.subscription?.isActive) return false; // Free users cannot make calls
+
+    if (
+      user.subscription?.planName === "499 Plan" ||
+      user.subscription?.planName === "Premium"
+    ) {
+      return type === "voice"; // 499 Plan and Premium users can only voice call
+    } else if (
+      user.subscription?.planName === "999 Plan" ||
+      user.subscription?.planName === "Elite VIP"
+    ) {
+      return true; // 999 Plan and Elite users can make all calls
+    }
+    return false;
+  };
 
   // Handler: When a call is incoming
   const handleIncomingCall = ({ caller, callType }) => {
@@ -137,6 +160,19 @@ const ChatWindow = ({
 
   // Handler to start a call
   const handleStartCall = (type = "video") => {
+    if (!canMakeCall(type)) {
+      if (!user || (!user.subscription?.isActive && !user.trial?.isActive)) {
+        setCallRestrictionMessage("Subscribe to a premium plan to make calls.");
+      } else if (
+        user.subscription?.planName === "499 Plan" &&
+        type === "video"
+      ) {
+        setCallRestrictionMessage("Video calls require the 999 Plan.");
+      }
+      // Optionally, show a temporary message or modal here
+      setTimeout(() => setCallRestrictionMessage(""), 3000); // Clear message after 3 seconds
+      return;
+    }
     console.log("[ChatWindow] handleStartCall called with type:", type);
     setVideoCallType(type);
     setVideoCallOpen(true);
@@ -843,19 +879,39 @@ const ChatWindow = ({
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => handleStartCall("voice")}
-                className="p-2 sm:p-3 bg-rose-100 hover:bg-rose-200 text-rose-600 rounded-xl transition-all duration-200"
+                className={`relative p-2 sm:p-3 rounded-xl transition-all duration-200 ${
+                  canMakeCall("voice")
+                    ? "bg-rose-100 hover:bg-rose-200 text-rose-600"
+                    : "bg-gray-200 text-gray-500 cursor-not-allowed"
+                }`}
                 title="Voice Call"
+                disabled={!canMakeCall("voice")}
               >
                 <Phone className="w-4 h-4 sm:w-5 sm:h-5" />
+                {!canMakeCall("voice") && (
+                  <span className="absolute -top-2 -right-2 bg-yellow-500 text-white text-xs px-1.5 py-0.5 rounded-full font-bold">
+                    PRO
+                  </span>
+                )}
               </motion.button>
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => handleStartCall("video")}
-                className="p-2 sm:p-3 bg-rose-500 hover:bg-rose-600 text-white rounded-xl transition-all duration-200"
+                className={`relative p-2 sm:p-3 rounded-xl transition-all duration-200 ${
+                  canMakeCall("video")
+                    ? "bg-rose-500 hover:bg-rose-600 text-white"
+                    : "bg-gray-200 text-gray-500 cursor-not-allowed"
+                }`}
                 title="Video Call"
+                disabled={!canMakeCall("video")}
               >
                 <Video className="w-4 h-4 sm:w-5 sm:h-5" />
+                {!canMakeCall("video") && (
+                  <span className="absolute -top-2 -right-2 bg-yellow-500 text-white text-xs px-1.5 py-0.5 rounded-full font-bold">
+                    PRO
+                  </span>
+                )}
               </motion.button>
               <motion.button
                 whileHover={{ scale: 1.05 }}
@@ -866,6 +922,12 @@ const ChatWindow = ({
               </motion.button>
             </div>
           </div>
+        </div>
+      )}
+
+      {callRestrictionMessage && (
+        <div className="bg-red-100 text-red-700 p-2 text-center text-sm font-medium">
+          {callRestrictionMessage}
         </div>
       )}
 

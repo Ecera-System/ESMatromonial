@@ -14,4 +14,9 @@ export const getUserRequests = async () => {
 export const respondToRequest = async (requestId, action) => {
   const response = await axios.put(`${API_URL}/respond/${requestId}`, { action });
   return response.data;
+};
+
+export const cancelRequest = async (requestId) => {
+  const response = await axios.delete(`${API_URL}/${requestId}`);
+  return response.data;
 }; 

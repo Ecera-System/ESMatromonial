@@ -80,13 +80,24 @@ const userSchema = new mongoose.Schema(
     emailVerificationExpires: { type: Date }, // email verification token expiry
     isEmailVerified: { type: Boolean, default: false }, // email verification status
     isVerified: { type: Boolean, default: false }, // overall verification status
+    verificationCompleted: { type: Boolean, default: false }, // verification suite completed
     verificationDocuments: [{ type: String }],
     subscription: {
       isActive: { type: Boolean, default: false },
-      plan: { type: mongoose.Schema.Types.ObjectId, ref: 'Plan' },
+      plan: { type: mongoose.Schema.Types.ObjectId, ref: "Plan" },
       planName: { type: String },
       activatedAt: { type: Date },
+      expiresAt: { type: Date },
     },
+    trial: {
+      startDate: { type: Date },
+      endDate: { type: Date },
+      isActive: { type: Boolean, default: false },
+    },
+    connectionRequestsToday: { type: Number, default: 0 },
+    lastConnectionRequestDate: { type: Date },
+    connectionRequestsThisWeek: { type: Number, default: 0 },
+    lastConnectionRequestWeek: { type: Date },
     lastActive: { type: Date },
     accountStatus: {
       type: String,
