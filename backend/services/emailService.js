@@ -12,11 +12,16 @@ const createTransporter = () => {
   }
 
   const transporter = nodemailer.createTransport({
-    service: process.env.EMAIL_SERVICE || "gmail",
+    host: process.env.EMAIL_HOST || "smtp.gmail.com", // Use explicit host
+    port: process.env.EMAIL_PORT || 465, // Use explicit port
+    secure: process.env.EMAIL_SECURE === "true", // Use SSL/TLS
     auth: {
       user: process.env.EMAIL_USER,
       pass: process.env.EMAIL_PASSWORD,
     },
+    tls: {
+      rejectUnauthorized: false // Only for development, remove in production
+    }
   });
 
   transporter.verify(function(error, success) {
