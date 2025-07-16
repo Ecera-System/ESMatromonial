@@ -24,6 +24,7 @@ import { initializeSocket } from './utils/socket.js';
 import visitorRoutes from "./routes/visitorRoutes.js";
 import requestRoutes from "./routes/requestRoutes.js";
 import subscriptionRoutes from './routes/subscriptionRoutes.js';
+import feedbackRoutes from './routes/feedbackRoutes.js';
 
 import { authenticate, requireAdmin, requireUser } from "./middleware/auth.js";
 
@@ -90,6 +91,8 @@ app.use('/api/v1/upload', uploadRoutes);
 app.use('/api/v1/visiter',visitorRoutes)
 app.use('/api/v1/requests', requestRoutes);
 app.use('/api/v1/subscription', subscriptionRoutes);
+app.use('/api/v1/feedback', feedbackRoutes);
+
 
 // 404 handler
 app.use((req, res) => {

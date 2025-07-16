@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import FormInput from "../../components/Admin/FormInput";
-
+import axios from "axios";
+console.log("VITE_API_BASE_URL:", import.meta.env.VITE_API_BASE_URL);
 const AdminSignIn = () => {
   const [credentials, setCredentials] = useState({
     email: "",
@@ -11,11 +12,27 @@ const AdminSignIn = () => {
     setCredentials({ ...credentials, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Here you would call your API to authenticate admin
-    console.log("Admin Sign In Data:", credentials);
-    alert("Admin signed in successfully!");
+
+    try {
+      const response = await axios.post(
+        `${import.meta.env.VITE_API_BASE_URL}/auth/admin/login`,
+        credentials,
+        { withCredentials: true }
+      );
+
+      alert("Admin signed in successfully!");
+      console.log("Login response:", response.data);
+
+      // You can redirect the admin here or store token/state as needed
+    } catch (error) {
+      console.error("Login failed:", error.response?.data || error.message);
+      alert(
+        "Login failed: " +
+          (error.response?.data?.message || "Something went wrong")
+      );
+    }
   };
 
   return (
@@ -38,7 +55,9 @@ const AdminSignIn = () => {
           onChange={handleChange}
           placeholder="Enter password"
         />
-        <button type="submit" style={styles.button}>Sign In</button>
+        <button type="submit" style={styles.button}>
+          Sign In
+        </button>
       </form>
     </div>
   );

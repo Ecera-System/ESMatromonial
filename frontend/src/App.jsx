@@ -19,6 +19,10 @@ import ScrollToTop from './components/ScrollToTop';
 import ProtectedRoute from './components/ProtectedRoute';
 import './App.css'
 import UserProfilePage from './pages/UserProfilePage';
+import AdminFeedbackPage from './pages/AdminFeedbackPage';
+import SubmitFeedbackPage from './pages/SubmitFeedbackPage';
+
+
 
 function App() {
   return (
@@ -30,6 +34,11 @@ function App() {
             <Route path="/" element={<Landing />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
+            <Route path="/admin/feedback" element={<AdminFeedbackPage />} />
+           <Route path="/admin/feedback/submit" element={<ProtectedRoute><SubmitFeedbackPage /></ProtectedRoute>} />
+
+
+
             
             {/* User Layout Routes - All protected routes with Header and Sidebar */}
             <Route path="/" element={<ProtectedRoute><UserLayout /></ProtectedRoute>}>
