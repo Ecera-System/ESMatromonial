@@ -41,7 +41,7 @@ function ProfileCompletion() {
   };
 
   const handleFieldClick = (field) => {
-    navigate(`/profile/edit?focus=${field}`);
+    navigate(`/profile?focus=${field}`);
   };
 
   // Example mapping for some common fields
@@ -51,6 +51,32 @@ function ProfileCompletion() {
     isVerified: "Verify Email/Phone",
     aboutMe: "Add About Me",
     // Add more mappings as needed
+    firstName: "Add First Name",
+    lastName: "Add Last Name",
+    dateOfBirth: "Add Date of Birth",
+    gender: "Add Gender",
+    height: "Add Height",
+    maritalStatus: "Add Marital Status",
+    religion: "Add Religion",
+    motherTongue: "Add Mother Tongue",
+    email: "Add Email",
+    phone: "Add Phone Number",
+    country: "Add Country",
+    state: "Add State",
+    city: "Add City",
+    education: "Add Education",
+    occupation: "Add Occupation",
+    familyType: "Add Family Type",
+    diet: "Add Diet",
+    partnerAgeMin: "Add Partner Age Preference",
+    partnerHeightMin: "Add Partner Height Preference",
+    partnerEducation: "Add Partner Education Preference",
+    partnerOccupation: "Add Partner Occupation Preference",
+    partnerIncome: "Add Partner Income Preference",
+    partnerCountry: "Add Partner Country Preference",
+    partnerLocation: "Add Partner State Preference",
+    partnerReligion: "Add Partner Religion Preference",
+    partnerMaritalStatus: "Add Partner Marital Status Preference",
   };
 
   return (

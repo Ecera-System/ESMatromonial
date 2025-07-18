@@ -9,6 +9,7 @@ import {
   validateResetToken,
   verifyEmail,
   resendVerificationEmail,
+  changePassword,
   testEmail
 } from "../controllers/authController.js";
 import { authenticate, requireUser } from "../middleware/auth.js";
@@ -29,6 +30,8 @@ userAuthRouter.post("/reset-password/:token", resetPassword);
 // Email verification routes
 userAuthRouter.get("/verify-email/:token", verifyEmail);
 userAuthRouter.post("/resend-verification", resendVerificationEmail);
+
+userAuthRouter.post("/change-password", authenticate, requireUser, changePassword);
 
 // Test route
 userAuthRouter.post("/test-email", testEmail);

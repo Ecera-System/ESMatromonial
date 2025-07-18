@@ -806,124 +806,118 @@ const ChatWindow = ({
     : false;
 
   return (
-    <div className="h-full flex flex-col bg-white dark:bg-gray-900">
-      {/* Chat Header */}
-      {selectedChat && (
-        <div className="p-3 sm:p-4 border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2 sm:space-x-4 min-w-0 flex-1">
-              {/* Back button for mobile only */}
-              {mobileBackButton && (
-                <button
-                  onClick={mobileBackButton}
-                  className="lg:hidden p-2 mr-2 text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
-                >
-                  <svg
-                    className="w-5 h-5"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M15 19l-7-7 7-7"
-                    />
-                  </svg>
-                </button>
+    <div className="flex flex-col h-full bg-white dark:bg-gray-900 transition-colors duration-300">
+      {/* Header */}
+      <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
+        <div className="flex items-center space-x-2 sm:space-x-4 min-w-0 flex-1">
+          {/* Back button for mobile only */}
+          {mobileBackButton && (
+            <button
+              onClick={mobileBackButton}
+              className="lg:hidden p-2 mr-2 text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+            >
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M15 19l-7-7 7-7"
+                />
+              </svg>
+            </button>
+          )}
+          <div className="relative flex-shrink-0">
+            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-r from-rose-400 to-pink-500 rounded-full flex items-center justify-center text-white font-bold shadow-lg text-sm sm:text-base">
+              {otherUser?.photos ? (
+                <img
+                  src={otherUser.photos[0]}
+                  alt={`${otherUser.firstName} ${otherUser.lastName}`}
+                  className="w-full h-full rounded-full object-cover"
+                />
+              ) : (
+                `${otherUser?.firstName?.charAt(0) || ""}${
+                  otherUser?.lastName?.charAt(0) || ""
+                }`.toUpperCase()
               )}
-              <div className="relative flex-shrink-0">
-                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-r from-rose-400 to-pink-500 rounded-full flex items-center justify-center text-white font-bold shadow-lg text-sm sm:text-base">
-                  {otherUser?.avatar ? (
-                    <img
-                      src={otherUser.avatar}
-                      alt={`${otherUser.firstName} ${otherUser.lastName}`}
-                      className="w-full h-full rounded-full object-cover"
-                    />
-                  ) : (
-                    `${otherUser?.firstName?.charAt(0) || ""}${
-                      otherUser?.lastName?.charAt(0) || ""
-                    }`.toUpperCase()
-                  )}
-                </div>
-                {isOtherUserOnline && (
-                  <div className="absolute -bottom-1 -right-1 w-3 h-3 sm:w-4 sm:h-4 bg-emerald-500 rounded-full border-2 border-white dark:border-gray-900"></div>
-                )}
-              </div>
-              <div className="min-w-0 flex-1">
-                <h3 className="font-bold text-gray-900 text-base sm:text-lg truncate">
-                  {otherUser?.firstName} {otherUser?.lastName}
-                </h3>
-                <div className="flex items-center space-x-2">
-                  {isOtherUserOnline ? (
-                    <>
-                      <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
-                      <p className="text-xs sm:text-sm text-emerald-600 font-medium">
-                        Active now
-                      </p>
-                    </>
-                  ) : (
-                    <>
-                      <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
-                      <p className="text-xs sm:text-sm text-gray-500">
-                        Offline
-                      </p>
-                    </>
-                  )}
-                </div>
-              </div>
             </div>
-            <div className="flex items-center space-x-1 sm:space-x-2 flex-shrink-0">
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => handleStartCall("voice")}
-                className={`relative p-2 sm:p-3 rounded-xl transition-all duration-200 ${
-                  canMakeCall("voice")
-                    ? "bg-rose-100 hover:bg-rose-200 text-rose-600"
-                    : "bg-gray-200 text-gray-500 cursor-not-allowed"
-                }`}
-                title="Voice Call"
-                disabled={!canMakeCall("voice")}
-              >
-                <Phone className="w-4 h-4 sm:w-5 sm:h-5" />
-                {!canMakeCall("voice") && (
-                  <span className="absolute -top-2 -right-2 bg-yellow-500 text-white text-xs px-1.5 py-0.5 rounded-full font-bold">
-                    PRO
-                  </span>
-                )}
-              </motion.button>
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => handleStartCall("video")}
-                className={`relative p-2 sm:p-3 rounded-xl transition-all duration-200 ${
-                  canMakeCall("video")
-                    ? "bg-rose-500 hover:bg-rose-600 text-white"
-                    : "bg-gray-200 text-gray-500 cursor-not-allowed"
-                }`}
-                title="Video Call"
-                disabled={!canMakeCall("video")}
-              >
-                <Video className="w-4 h-4 sm:w-5 sm:h-5" />
-                {!canMakeCall("video") && (
-                  <span className="absolute -top-2 -right-2 bg-yellow-500 text-white text-xs px-1.5 py-0.5 rounded-full font-bold">
-                    PRO
-                  </span>
-                )}
-              </motion.button>
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className="p-2 sm:p-3 bg-gray-100 hover:bg-gray-200 rounded-xl transition-all duration-200"
-              >
-                <MoreVertical className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600" />
-              </motion.button>
+            {isOtherUserOnline && (
+              <div className="absolute -bottom-1 -right-1 w-3 h-3 sm:w-4 sm:h-4 bg-emerald-500 rounded-full border-2 border-white dark:border-gray-900"></div>
+            )}
+          </div>
+          <div className="min-w-0 flex-1">
+            <h3 className="font-bold dark:text-white text-gray-900 text-base sm:text-lg truncate">
+              {otherUser?.firstName} {otherUser?.lastName}
+            </h3>
+            <div className="flex items-center space-x-2">
+              {isOtherUserOnline ? (
+                <>
+                  <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
+                  <p className="text-xs sm:text-sm text-emerald-600 font-medium">
+                    Active now
+                  </p>
+                </>
+              ) : (
+                <>
+                  <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
+                  <p className="text-xs sm:text-sm text-gray-500">Offline</p>
+                </>
+              )}
             </div>
           </div>
         </div>
-      )}
+        <div className="flex items-center space-x-1 sm:space-x-2 flex-shrink-0">
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => handleStartCall("voice")}
+            className={`relative p-2 sm:p-3 rounded-xl transition-all duration-200 ${
+              canMakeCall("voice")
+                ? "bg-rose-100 hover:bg-rose-200 text-rose-600"
+                : "bg-gray-200 text-gray-500 cursor-not-allowed"
+            }`}
+            title="Voice Call"
+            disabled={!canMakeCall("voice")}
+          >
+            <Phone className="w-4 h-4 sm:w-5 sm:h-5" />
+            {!canMakeCall("voice") && (
+              <span className="absolute -top-2 -right-2 bg-yellow-500 text-white text-xs px-1.5 py-0.5 rounded-full font-bold">
+                PRO
+              </span>
+            )}
+          </motion.button>
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => handleStartCall("video")}
+            className={`relative p-2 sm:p-3 rounded-xl transition-all duration-200 ${
+              canMakeCall("video")
+                ? "bg-rose-500 hover:bg-rose-600 text-white"
+                : "bg-gray-200 text-gray-500 cursor-not-allowed"
+            }`}
+            title="Video Call"
+            disabled={!canMakeCall("video")}
+          >
+            <Video className="w-4 h-4 sm:w-5 sm:h-5" />
+            {!canMakeCall("video") && (
+              <span className="absolute -top-2 -right-2 bg-yellow-500 text-white text-xs px-1.5 py-0.5 rounded-full font-bold">
+                PRO
+              </span>
+            )}
+          </motion.button>
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            className="p-2 sm:p-3 bg-gray-100 hover:bg-gray-200 rounded-xl transition-all duration-200"
+          >
+            <MoreVertical className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600" />
+          </motion.button>
+        </div>
+      </div>
 
       {callRestrictionMessage && (
         <div className="bg-red-100 text-red-700 p-2 text-center text-sm font-medium">
@@ -932,7 +926,7 @@ const ChatWindow = ({
       )}
 
       {/* Messages Area */}
-      <div className="flex-1 overflow-y-auto bg-gradient-to-b from-gray-50 to-white scrollbar-hide">
+      <div className="flex-1 overflow-y-auto px-4 py-2 bg-gray-50 dark:bg-gray-800 transition-colors duration-300">
         {/* Custom CSS for hiding scrollbar */}
         <style jsx>{`
           .scrollbar-hide {
@@ -961,7 +955,7 @@ const ChatWindow = ({
       </div>
 
       {/* Message Input */}
-      <div className="p-3 sm:p-4 bg-white border-t border-gray-200">
+      <div className="px-4 py-3 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
         {/* File Previews */}
         {uploadedFiles.length > 0 && (
           <div className="mb-3 sm:mb-4 p-2 sm:p-3 bg-gray-50 rounded-lg border border-gray-200">

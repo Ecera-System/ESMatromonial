@@ -25,10 +25,8 @@ import visitorRoutes from "./routes/visitorRoutes.js";
 import requestRoutes from "./routes/requestRoutes.js";
 import subscriptionRoutes from "./routes/subscriptionRoutes.js";
 import verificationRoutes from "./routes/verificationRoutes.js";
-
-import { authenticate, requireAdmin, requireUser } from "./middleware/auth.js";
 import { checkSubscriptionAndTrial } from "./middleware/subscriptionCheck.js";
-
+import { authenticate } from "./middleware/auth.js";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 

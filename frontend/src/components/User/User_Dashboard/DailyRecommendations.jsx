@@ -49,18 +49,6 @@ function DailyRecommendations() {
 
   const connectionLimitMessage = getConnectionLimitMessage();
 
-  useEffect(() => {
-    if (user && user.trial?.isActive && user.trial?.endDate) {
-      const endDate = new Date(user.trial.endDate);
-      const today = new Date();
-      const diffTime = endDate.getTime() - today.getTime();
-      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-      setTrialDaysRemaining(diffDays > 0 ? diffDays : 0);
-    } else {
-      setTrialDaysRemaining(0);
-    }
-  }, [user]);
-
   const calculateAge = (dateOfBirth) => {
     if (!dateOfBirth) return "N/A";
     const birthDate = new Date(dateOfBirth);
@@ -174,13 +162,6 @@ function DailyRecommendations() {
         <span className="text-xl sm:text-2xl">✨</span>
         Daily Recommendations
       </h2>
-
-      {user && user.trial?.isActive && trialDaysRemaining > 0 && (
-        <div className="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-4 py-2 rounded-lg mb-4 text-center text-sm font-medium">
-          You have {trialDaysRemaining} day(s) remaining on your free trial!
-          Enjoy premium features.
-        </div>
-      )}
 
       <div className="relative min-h-[180px]">
         {/* Animated Popup */}

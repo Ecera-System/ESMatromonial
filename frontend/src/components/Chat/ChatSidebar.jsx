@@ -80,9 +80,9 @@ const ChatSidebar = ({
 
   return (
     <>
-      <div className="h-full flex flex-col bg-gray-50">
+      <div className="h-full flex flex-col bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
         {/* Header */}
-        <div className="p-4 sm:p-6 bg-white border-b border-gray-200">
+        <div className="p-4 sm:p-6 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 transition-colors duration-300">
           {/* User Profile */}
           <div className="flex items-center justify-between mb-4 sm:mb-6">
             <div className="flex items-center space-x-3 sm:space-x-4 min-w-0 flex-1">
@@ -98,10 +98,10 @@ const ChatSidebar = ({
                     <User className="w-5 h-5 sm:w-6 sm:h-6" />
                   )}
                 </div>
-                <div className="absolute -bottom-1 -right-1 w-3 h-3 sm:w-4 sm:h-4 bg-emerald-500 rounded-full border-2 border-white"></div>
+                <div className="absolute -bottom-1 -right-1 w-3 h-3 sm:w-4 sm:h-4 bg-emerald-500 rounded-full border-2 border-white dark:border-gray-900"></div>
               </div>
               <div className="min-w-0 flex-1">
-                <h2 className="font-bold text-gray-900 text-base sm:text-lg truncate">
+                <h2 className="font-bold text-gray-900 dark:text-white text-base sm:text-lg truncate">
                   {user?.firstName} {user?.lastName}
                 </h2>
                 <div className="flex items-center space-x-2">
@@ -121,7 +121,7 @@ const ChatSidebar = ({
                 className={`p-2 sm:p-2.5 rounded-xl transition-all duration-200 ${
                   notificationsEnabled
                     ? "bg-rose-100 text-rose-600 hover:bg-rose-200"
-                    : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                    : "bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
                 }`}
                 title="Notifications"
               >
@@ -140,7 +140,7 @@ const ChatSidebar = ({
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={logout}
-                className="p-2 sm:p-2.5 bg-gray-100 hover:bg-red-100 text-gray-600 hover:text-red-600 rounded-xl transition-all duration-200"
+                className="p-2 sm:p-2.5 bg-gray-100 hover:bg-red-100 text-gray-600 hover:text-red-600 rounded-xl transition-all duration-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-red-900"
                 title="Logout"
               >
                 <LogOut className="w-4 h-4 sm:w-5 sm:h-5" />
@@ -156,22 +156,22 @@ const ChatSidebar = ({
               placeholder="Search conversations..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 sm:pl-12 pr-3 sm:pr-4 py-2.5 sm:py-3.5 bg-gray-100 border-0 rounded-xl focus:ring-2 focus:ring-rose-500 focus:bg-white transition-all duration-200 placeholder-gray-500 text-sm sm:text-base"
+              className="w-full pl-10 sm:pl-12 pr-3 sm:pr-4 py-2.5 sm:py-3.5 bg-gray-100 dark:bg-gray-800 border-0 rounded-xl focus:ring-2 focus:ring-rose-500 focus:bg-white dark:focus:bg-gray-900 transition-all duration-200 placeholder-gray-500 text-sm sm:text-base text-gray-900 dark:text-white"
             />
           </div>
         </div>
 
         {/* Chat List */}
-        <div className="flex-1 overflow-y-auto chat-scroll">
+        <div className="flex-1 overflow-y-auto chat-scroll bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
           {filteredChats.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full p-4 sm:p-8">
               <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-r from-rose-100 to-pink-100 rounded-full flex items-center justify-center mb-4 sm:mb-6">
                 <MessageCircle className="w-8 h-8 sm:w-10 sm:h-10 text-rose-500" />
               </div>
-              <h3 className="text-lg sm:text-xl font-bold text-gray-800 mb-2 text-center">
+              <h3 className="text-lg sm:text-xl font-bold text-gray-800 dark:text-white mb-2 text-center">
                 {searchTerm ? "No chats found" : "Start a conversation"}
               </h3>
-              <p className="text-center text-gray-500 mb-4 sm:mb-6 max-w-xs text-sm sm:text-base">
+              <p className="text-center text-gray-500 dark:text-gray-300 mb-4 sm:mb-6 max-w-xs text-sm sm:text-base">
                 {searchTerm
                   ? "Try searching with a different name"
                   : "Connect with someone special and start chatting"}
@@ -190,9 +190,12 @@ const ChatSidebar = ({
           ) : (
             <div className="p-2 sm:p-3 space-y-1">
               {filteredChats.map((chat) => {
+                console.log("chat:", chat);
+                console.log("user._id:", user._id);
                 const otherUser = chat.participants.find(
-                  (p) => p._id !== user._id
+                  (p) => p._id && p._id.toString() !== user._id.toString()
                 );
+                console.log("otherUser:", otherUser);
                 const isSelected = selectedChat?._id === chat._id;
                 const isOtherUserOnline = otherUser
                   ? onlineUsers.includes(otherUser._id)
@@ -206,39 +209,49 @@ const ChatSidebar = ({
                     onClick={() => onChatSelect(chat)}
                     className={`flex items-center p-3 sm:p-4 rounded-xl cursor-pointer transition-all duration-200 ${
                       isSelected
-                        ? "bg-gradient-to-r from-rose-50 to-pink-50 border border-rose-200 shadow-md"
-                        : "hover:bg-white hover:shadow-sm"
+                        ? "bg-gradient-to-r from-rose-50 to-pink-50 border border-rose-200 shadow-md dark:bg-gradient-to-r dark:from-gray-800 dark:to-gray-900 dark:border-rose-400"
+                        : "hover:bg-white hover:shadow-sm dark:hover:bg-gray-800"
                     }`}
                   >
                     <div className="relative flex-shrink-0">
                       <div className="w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-r from-rose-400 to-pink-500 rounded-full flex items-center justify-center text-white font-bold text-sm sm:text-lg shadow-lg">
-                        {otherUser?.avatar ? (
+                        {otherUser &&
+                        ((otherUser.photos && otherUser.photos[0]) ||
+                          otherUser.avatar) ? (
                           <img
-                            src={otherUser.avatar}
-                            alt={`${otherUser.firstName} ${otherUser.lastName}`}
+                            src={
+                              otherUser.photos && otherUser.photos[0]
+                                ? otherUser.photos[0]
+                                : otherUser.avatar
+                            }
+                            alt={
+                              otherUser.firstName
+                                ? `${otherUser.firstName} ${
+                                    otherUser.lastName || ""
+                                  }`
+                                : "User"
+                            }
                             className="w-full h-full rounded-full object-cover"
                           />
                         ) : (
-                          `${otherUser?.firstName?.charAt(0) || ""}${
-                            otherUser?.lastName?.charAt(0) || ""
-                          }`.toUpperCase()
+                          <User className="w-6 h-6 text-white opacity-70" />
                         )}
                       </div>
                       {isOtherUserOnline && (
-                        <div className="absolute -bottom-1 -right-1 w-3 h-3 sm:w-4 sm:h-4 bg-emerald-500 rounded-full border-2 border-white"></div>
+                        <div className="absolute -bottom-1 -right-1 w-3 h-3 sm:w-4 sm:h-4 bg-emerald-500 rounded-full border-2 border-white dark:border-gray-900"></div>
                       )}
                     </div>
 
                     <div className="flex-1 min-w-0 ml-3 sm:ml-4">
                       <div className="flex items-center justify-between mb-1">
-                        <h4 className="font-semibold text-gray-900 text-sm sm:text-base truncate">
+                        <h4 className="font-semibold text-gray-900 dark:text-white text-sm sm:text-base truncate">
                           {otherUser?.firstName} {otherUser?.lastName}
                         </h4>
-                        <span className="text-xs text-gray-500 flex-shrink-0 ml-2">
+                        <span className="text-xs text-gray-500 dark:text-gray-300 flex-shrink-0 ml-2">
                           {formatLastMessageTime(chat.lastMessage?.createdAt)}
                         </span>
                       </div>
-                      <p className="text-xs sm:text-sm text-gray-600 truncate">
+                      <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 truncate">
                         {getLastMessagePreview(chat.lastMessage)}
                       </p>
                     </div>

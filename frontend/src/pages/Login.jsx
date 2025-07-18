@@ -1,131 +1,158 @@
-import React, { useState, useEffect } from 'react';
-import { Mail, Lock, Eye, EyeOff, LogIn, Heart, Sparkles, Shield } from 'lucide-react';
-import { useNavigate, Link, useLocation } from 'react-router-dom';
-import { useAuth } from '../contexts/Chat/AuthContext';
+import React, { useState, useEffect } from "react";
+import {
+  Mail,
+  Lock,
+  Eye,
+  EyeOff,
+  LogIn,
+  Heart,
+  Sparkles,
+  Shield,
+} from "lucide-react";
+import { useNavigate, Link, useLocation } from "react-router-dom";
+import { useAuth } from "../contexts/Chat/AuthContext";
+import ReCAPTCHA from "react-google-recaptcha";
 
 const Login = () => {
   const [formData, setFormData] = useState({
-    email: '',
-    password: ''
+    email: "",
+    password: "",
   });
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const [showForgotPassword, setShowForgotPassword] = useState(false);
-  const [forgotEmail, setForgotEmail] = useState('');
+  const [forgotEmail, setForgotEmail] = useState("");
   const [forgotLoading, setForgotLoading] = useState(false);
-  const [forgotMessage, setForgotMessage] = useState('');
-  const [socialLoginWarning, setSocialLoginWarning] = useState('');
+  const [forgotMessage, setForgotMessage] = useState("");
+  const [socialLoginWarning, setSocialLoginWarning] = useState("");
+  const [captchaVerified, setCaptchaVerified] = useState(false);
+  const [showCaptchaError, setShowCaptchaError] = useState(false);
   const navigate = useNavigate();
   const { login } = useAuth();
   const location = useLocation();
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);
-    const token = params.get('token');
-    const success = params.get('success');
+    const token = params.get("token");
+    const success = params.get("success");
     if (token && success) {
       // Save token, fetch user info, set context, and redirect
-      localStorage.setItem('token', token);
+      localStorage.setItem("token", token);
       // Optionally, fetch user info from backend
       fetch(`${import.meta.env.VITE_API_URL}/api/v1/auth/me`, {
-        headers: { Authorization: `Bearer ${token}` }
+        headers: { Authorization: `Bearer ${token}` },
       })
-        .then(res => res.json())
-        .then(data => {
+        .then((res) => res.json())
+        .then((data) => {
           if (data.user) {
-            login('', '', data.user, token); // or just login(data.user, token) depending on your context
-            navigate('/dashboard', { replace: true });
+            login("", "", data.user, token); // or just login(data.user, token) depending on your context
+            navigate("/dashboard", { replace: true });
           } else {
-            setError('Google login failed. Please try again.');
+            setError("Google login failed. Please try again.");
           }
         })
-        .catch(() => setError('Google login failed. Please try again.'));
+        .catch(() => setError("Google login failed. Please try again."));
     }
   }, [location.search]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-    if (error) setError('');
-    if (socialLoginWarning) setSocialLoginWarning('');
+    setFormData((prev) => ({ ...prev, [name]: value }));
+    if (error) setError("");
+    if (socialLoginWarning) setSocialLoginWarning("");
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setSocialLoginWarning('');
+    setSocialLoginWarning("");
     // Basic validation
     if (!formData.email || !formData.password) {
-      setError('Please fill in all fields');
+      setError("Please fill in all fields");
       return;
     }
     if (formData.password.length < 6) {
-      setError('Password must be at least 6 characters');
+      setError("Password must be at least 6 characters");
+      return;
+    }
+    // reCaptcha check
+    if (!captchaVerified) {
+      setShowCaptchaError(true);
       return;
     }
     setIsLoading(true);
-    setError('');
+    setError("");
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/v1/auth/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
-      });
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/v1/auth/login`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(formData),
+        }
+      );
       const data = await response.json();
       if (response.ok) {
         if (!data.user || !data.token) {
-          throw new Error('Invalid response from server');
+          throw new Error("Invalid response from server");
         }
         if (data.user.socialMediaLogin) {
-          setSocialLoginWarning('This account was created with Google. Please use Google to log in.');
+          setSocialLoginWarning(
+            "This account was created with Google. Please use Google to log in."
+          );
           return;
         }
-        await login('', '', data.user, data.token);
+        await login("", "", data.user, data.token);
         setTimeout(() => {
-          navigate('/dashboard', { replace: true });
+          navigate("/dashboard", { replace: true });
         }, 100);
       } else {
         if (data.socialMediaLogin) {
-          setSocialLoginWarning('This account was created with Google. Please use Google to log in.');
+          setSocialLoginWarning(
+            "This account was created with Google. Please use Google to log in."
+          );
         } else {
-          setError(data.error || 'Login failed. Please try again.');
+          setError(data.error || "Login failed. Please try again.");
         }
       }
     } catch (err) {
-      setError('Network error. Please check your connection and try again.');
+      setError("Network error. Please check your connection and try again.");
     } finally {
       setIsLoading(false);
     }
   };
 
   const handleSignupClick = () => {
-    navigate('/signup');
+    navigate("/signup");
   };
 
   const handleGoogleLogin = () => {
-    const backendUrl = import.meta.env.VITE_API_URL?.replace('/api/v1', '') || 'https://matromatch.com';
-    const redirectUrl = encodeURIComponent(window.location.origin + '/login');
+    const backendUrl = import.meta.env.VITE_API_URL?.replace("/api/v1", "");
+    const redirectUrl = encodeURIComponent(window.location.origin + "/login");
     window.location.href = `${backendUrl}/api/v1/auth/google?redirect=${redirectUrl}`;
   };
 
   const handleForgotPassword = async (e) => {
     e.preventDefault();
     setForgotLoading(true);
-    setForgotMessage('');
+    setForgotMessage("");
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/v1/auth/forgot-password`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: forgotEmail }),
-      });
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/v1/auth/forgot-password`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email: forgotEmail }),
+        }
+      );
       const data = await response.json();
       if (response.ok) {
-        setForgotMessage('Password reset instructions sent to your email.');
+        setForgotMessage("Password reset instructions sent to your email.");
       } else {
-        setForgotMessage(data.error || 'Failed to send reset email.');
+        setForgotMessage(data.error || "Failed to send reset email.");
       }
     } catch (err) {
-      setForgotMessage('Network error. Please try again.');
+      setForgotMessage("Network error. Please try again.");
     } finally {
       setForgotLoading(false);
     }
@@ -137,12 +164,14 @@ const Login = () => {
       {showForgotPassword && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 z-50">
           <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8 max-w-sm w-full mx-4 text-center">
-            <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">Forgot Password?</h2>
+            <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">
+              Forgot Password?
+            </h2>
             <form onSubmit={handleForgotPassword}>
               <input
                 type="email"
                 value={forgotEmail}
-                onChange={e => setForgotEmail(e.target.value)}
+                onChange={(e) => setForgotEmail(e.target.value)}
                 placeholder="Enter your email"
                 className="w-full px-4 py-2 border rounded mb-4 bg-gray-100 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                 required
@@ -152,10 +181,14 @@ const Login = () => {
                 className="bg-pink-600 text-white px-6 py-2 rounded-lg font-semibold w-full"
                 disabled={forgotLoading}
               >
-                {forgotLoading ? 'Sending...' : 'Send Reset Link'}
+                {forgotLoading ? "Sending..." : "Send Reset Link"}
               </button>
             </form>
-            {forgotMessage && <div className="mt-4 text-sm text-gray-700 dark:text-gray-300">{forgotMessage}</div>}
+            {forgotMessage && (
+              <div className="mt-4 text-sm text-gray-700 dark:text-gray-300">
+                {forgotMessage}
+              </div>
+            )}
             <button
               className="mt-6 text-pink-600 hover:underline font-semibold"
               onClick={() => setShowForgotPassword(false)}
@@ -187,10 +220,14 @@ const Login = () => {
           <h1 className="text-4xl font-bold bg-gradient-to-r from-gray-900 via-purple-900 to-indigo-900 bg-clip-text text-transparent dark:from-white dark:via-gray-200 dark:to-gray-400 mb-3">
             Welcome Back
           </h1>
-          <p className="text-gray-600 dark:text-gray-300 text-lg font-medium">Sign in to your HeartConnect account</p>
+          <p className="text-gray-600 dark:text-gray-300 text-lg font-medium">
+            Sign in to your HeartConnect account
+          </p>
           <div className="flex items-center justify-center mt-2 space-x-2">
             <Shield className="w-4 h-4 text-green-500" />
-            <span className="text-sm text-green-600 dark:text-green-400 font-medium">Secure & Trusted</span>
+            <span className="text-sm text-green-600 dark:text-green-400 font-medium">
+              Secure & Trusted
+            </span>
           </div>
         </div>
 
@@ -198,11 +235,14 @@ const Login = () => {
         <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg rounded-3xl shadow-2xl p-8 border border-white/20 dark:border-gray-700/20 relative overflow-hidden">
           {/* Subtle gradient overlay */}
           <div className="absolute inset-0 bg-gradient-to-br from-white/50 to-purple-50/30 dark:from-gray-700/50 dark:to-gray-800/30 rounded-3xl"></div>
-          
+
           <form onSubmit={handleSubmit} className="space-y-6 relative z-10">
             {/* Enhanced Email Field */}
             <div className="group">
-              <label htmlFor="email" className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
+              <label
+                htmlFor="email"
+                className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3"
+              >
                 Email Address
               </label>
               <div className="relative">
@@ -224,7 +264,10 @@ const Login = () => {
 
             {/* Enhanced Password Field */}
             <div className="group">
-              <label htmlFor="password" className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
+              <label
+                htmlFor="password"
+                className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3"
+              >
                 Password
               </label>
               <div className="relative">
@@ -233,7 +276,7 @@ const Login = () => {
                 </div>
                 <input
                   id="password"
-                  type={showPassword ? 'text' : 'password'}
+                  type={showPassword ? "text" : "password"}
                   name="password"
                   value={formData.password}
                   onChange={handleInputChange}
@@ -255,6 +298,14 @@ const Login = () => {
               </div>
             </div>
 
+            {/* reCAPTCHA */}
+            <div className="flex justify-center">
+              <ReCAPTCHA
+                sitekey={import.meta.env.VITE_RECAPTCHA_SITE_KEY}
+                onChange={() => setCaptchaVerified(true)}
+              />
+            </div>
+
             {/* Enhanced Remember Me and Forgot Password */}
             <div className="flex items-center justify-between">
               <div className="flex items-center group">
@@ -263,11 +314,18 @@ const Login = () => {
                   type="checkbox"
                   className="h-4 w-4 text-pink-600 focus:ring-pink-500 border-gray-300 dark:border-gray-600 rounded transition-colors"
                 />
-                <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-700 dark:text-gray-300 font-medium group-hover:text-gray-900 dark:group-hover:text-white transition-colors">
+                <label
+                  htmlFor="remember-me"
+                  className="ml-2 block text-sm text-gray-700 dark:text-gray-300 font-medium group-hover:text-gray-900 dark:group-hover:text-white transition-colors"
+                >
                   Remember me
                 </label>
               </div>
-              <button type="button" className="text-sm text-pink-600 hover:text-pink-500 font-semibold hover:underline transition-all" onClick={() => setShowForgotPassword(true)}>
+              <button
+                type="button"
+                className="text-sm text-pink-600 hover:text-pink-500 font-semibold hover:underline transition-all"
+                onClick={() => setShowForgotPassword(true)}
+              >
                 Forgot password?
               </button>
             </div>
@@ -275,13 +333,22 @@ const Login = () => {
             {/* Enhanced Error Message */}
             {error && (
               <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-500/30 rounded-xl p-4 backdrop-blur-sm">
-                <p className="text-red-800 dark:text-red-300 text-sm font-medium">{error}</p>
+                <p className="text-red-800 dark:text-red-300 text-sm font-medium">
+                  {error}
+                </p>
               </div>
             )}
             {socialLoginWarning && (
               <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-500/30 rounded-xl p-4 backdrop-blur-sm mt-2">
-                <p className="text-yellow-800 dark:text-yellow-300 text-sm font-medium">{socialLoginWarning}</p>
+                <p className="text-yellow-800 dark:text-yellow-300 text-sm font-medium">
+                  {socialLoginWarning}
+                </p>
               </div>
+            )}
+            {showCaptchaError && (
+              <p className="mt-2 text-sm text-red-600 font-medium text-center">
+                Please verify you are human
+              </p>
             )}
 
             {/* Enhanced Submit Button */}
@@ -312,7 +379,9 @@ const Login = () => {
                 <div className="w-full border-t border-gray-200 dark:border-gray-600" />
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-4 bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400 font-medium rounded-full">Or continue with</span>
+                <span className="px-4 bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400 font-medium rounded-full">
+                  Or continue with
+                </span>
               </div>
             </div>
           </div>
@@ -325,28 +394,39 @@ const Login = () => {
               className="w-full inline-flex ml-[100px] justify-center py-3 px-4 border border-gray-200 dark:border-gray-600 rounded-xl shadow-sm bg-white/70 dark:bg-gray-700/70 backdrop-blur-sm text-sm font-semibold text-gray-700 dark:text-gray-300 hover:bg-white dark:hover:bg-gray-700 hover:shadow-md transition-all duration-300 hover:scale-105 active:scale-95"
             >
               <svg className="w-6 h-6" viewBox="0 0 24 24">
-                <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
-                <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                <path
+                  fill="#4285F4"
+                  d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                />
+                <path
+                  fill="#34A853"
+                  d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                />
+                <path
+                  fill="#FBBC05"
+                  d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+                />
+                <path
+                  fill="#EA4335"
+                  d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+                />
               </svg>
             </button>
-            
           </div>
 
           {/* Enhanced Sign Up Link */}
           <div className="mt-8 text-center">
-  <p className="text-sm text-gray-600 dark:text-gray-300 font-medium">
-    Don't have an account?{' '}
-    <Link
-      to="/signup"
-      className="font-bold text-transparent bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text hover:from-pink-700 hover:to-purple-700 transition-all duration-300 hover:underline"
-      style={{ position: 'relative', zIndex: 9999 }} // Add these styles
-    >
-      Sign up now
-    </Link>
-  </p>
-</div>
+            <p className="text-sm text-gray-600 dark:text-gray-300 font-medium">
+              Don't have an account?{" "}
+              <Link
+                to="/signup"
+                className="font-bold text-transparent bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text hover:from-pink-700 hover:to-purple-700 transition-all duration-300 hover:underline"
+                style={{ position: "relative", zIndex: 9999 }} // Add these styles
+              >
+                Sign up now
+              </Link>
+            </p>
+          </div>
         </div>
       </div>
     </div>

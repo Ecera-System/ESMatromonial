@@ -157,6 +157,7 @@ function RequestsSection() {
           <ul className="space-y-4">
             {tabData[activeTab].map((req) => {
               const profile = activeTab === "Sent" ? req.receiver : req.sender;
+
               return (
                 <li
                   key={req._id}
@@ -165,10 +166,10 @@ function RequestsSection() {
                   <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between">
                     <div className="flex items-center space-x-4 mb-4 sm:mb-0">
                       <div className="flex-shrink-0">
-                        {profile?.avatar ? (
+                        {profile?.photos[0] ? (
                           <img
                             className="h-12 w-12 rounded-full object-cover"
-                            src={profile.avatar}
+                            src={profile.photos[0]}
                             alt={`${profile.firstName} ${profile.lastName}`}
                           />
                         ) : (

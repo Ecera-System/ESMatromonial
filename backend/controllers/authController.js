@@ -31,6 +31,7 @@ export const register = async (req, res) => {
       endDate: trialEndDate,
       isActive: true,
     };
+    userData.isNewUser = true; // Explicitly set isNewUser to true
     await userData.save();
 
     logger.info(`User registered: ${req.body.email}`);
@@ -73,7 +74,7 @@ export const register = async (req, res) => {
     res.status(201).json({
       message:
         "User registered successfully. Please check your email for verification. You must verify your email before logging in.",
-      user: userData,
+      user: { ...userData.toObject(), isNewUser: true },
       token,
     });
   } catch (err) {
@@ -131,10 +132,11 @@ export const getMe = async (req, res) => {
     const user = await User.findById(
       req.user.id,
       "-password -verificationDocuments"
-    );
+    ).populate("subscription.plan");
     if (!user) return res.status(404).json({ error: "User not found" });
     res.json({ user });
   } catch (err) {
+    logger.error(`Error in getMe: ${err.message}`, { stack: err.stack });
     res.status(500).json({ error: "Server error" });
   }
 };
@@ -403,6 +405,45 @@ export const testEmail = async (req, res) => {
       error: "Failed to send test email",
       details: err.message,
     });
+  }
+};
+
+// Change password
+export const changePassword = async (req, res) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+    const userId = req.user.id;
+
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({ error: "All fields are required" });
+    }
+
+    const user = await User.findById(userId).select("+password");
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    const isPasswordValid = await bcrypt.compare(currentPassword, user.password);
+    if (!isPasswordValid) {
+      return res.status(401).json({ error: "Invalid current password" });
+    }
+
+    user.password = await bcrypt.hash(newPassword, 10);
+    await user.save();
+
+    await createNotification({
+      user: user._id,
+      type: 'password_change',
+      title: 'Password Changed',
+      message: 'Your password has been successfully changed from settings.',
+      link: '/settings',
+    });
+
+    logger.info(`Password changed for user: ${user.email}`);
+    res.json({ message: "Password changed successfully" });
+  } catch (err) {
+    logger.error(`Change password error: ${err.message}`);
+    res.status(500).json({ error: "Failed to change password" });
   }
 };
 

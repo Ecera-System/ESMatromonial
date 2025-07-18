@@ -53,3 +53,29 @@ export const clearAllNotifications = async (req, res) => {
     res.status(500).json({ message: 'Server error while clearing notifications' });
   }
 };
+
+export const updateNotificationSettings = async (req, res) => {
+  try {
+    const { emailNotifications, pushNotifications } = req.body;
+    const userId = req.user.id;
+
+    const user = await User.findByIdAndUpdate(
+      userId,
+      {
+        "notificationSettings.email": emailNotifications,
+        "notificationSettings.push": pushNotifications,
+      },
+      { new: true }
+    );
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    logger.info(`Notification settings updated for user: ${user.email}`);
+    res.json({ message: "Notification settings updated successfully", notificationSettings: user.notificationSettings });
+  } catch (err) {
+    logger.error(`Notification settings update error: ${err.message}`);
+    res.status(500).json({ error: "Failed to update notification settings" });
+  }
+};

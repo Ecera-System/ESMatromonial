@@ -1,5 +1,5 @@
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import React from "react";
+import { useNavigate } from "react-router-dom";
 import {
   User,
   MapPin,
@@ -15,12 +15,12 @@ import {
   GraduationCap,
   Building,
   DollarSign,
-  Edit
-} from 'lucide-react';
-import BackButton from '../../BackButton';
-import { useAuth } from '../../../contexts/Chat/AuthContext';
-import axios from 'axios';
-import { addVisitor } from '../../../services/visitorService';
+  Edit,
+} from "lucide-react";
+import BackButton from "../../BackButton";
+import { useAuth } from "../../../contexts/Chat/AuthContext";
+import axios from "axios";
+import { addVisitor } from "../../../services/visitorService";
 
 const ViewProfile = ({ onEdit, isDarkMode }) => {
   const { user } = useAuth();
@@ -34,10 +34,12 @@ const ViewProfile = ({ onEdit, isDarkMode }) => {
       setLoading(true);
       setError(null);
       try {
-        const response = await axios.get(`/api/v1/users/${user._id}`);
+        const response = await axios.get(
+          `${import.meta.env.VITE_API_URL}/api/v1/users/${user._id}`
+        );
         setProfileData(response.data);
       } catch (err) {
-        setError('Failed to load profile');
+        setError("Failed to load profile");
       } finally {
         setLoading(false);
       }
@@ -56,12 +58,15 @@ const ViewProfile = ({ onEdit, isDarkMode }) => {
   }, [user, profileData]);
 
   const calculateAge = (dateOfBirth) => {
-    if (!dateOfBirth) return '';
+    if (!dateOfBirth) return "";
     const today = new Date();
     const birthDate = new Date(dateOfBirth);
     let age = today.getFullYear() - birthDate.getFullYear();
     const monthDiff = today.getMonth() - birthDate.getMonth();
-    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+    if (
+      monthDiff < 0 ||
+      (monthDiff === 0 && today.getDate() < birthDate.getDate())
+    ) {
       age--;
     }
     return age;
@@ -71,7 +76,9 @@ const ViewProfile = ({ onEdit, isDarkMode }) => {
     <div className="bg-white dark:bg-black rounded-2xl shadow-xl p-6 border border-gray-300 dark:border-gray-700">
       <div className="flex items-center space-x-3 mb-4">
         <Icon className="w-6 h-6 text-black dark:text-white" />
-        <h3 className="text-xl font-bold text-black dark:text-white">{title}</h3>
+        <h3 className="text-xl font-bold text-black dark:text-white">
+          {title}
+        </h3>
       </div>
       {children}
     </div>
@@ -81,14 +88,26 @@ const ViewProfile = ({ onEdit, isDarkMode }) => {
     if (!value) return null;
     return (
       <div className="flex justify-between py-2 border-b border-gray-200 dark:border-gray-700 last:border-b-0">
-        <span className="text-gray-600 dark:text-gray-400 font-medium">{label}:</span>
+        <span className="text-gray-600 dark:text-gray-400 font-medium">
+          {label}:
+        </span>
         <span className="text-black dark:text-white">{value}</span>
       </div>
     );
   };
 
-  if (loading) return <div className="min-h-screen flex items-center justify-center text-xl">Loading profile...</div>;
-  if (error) return <div className="min-h-screen flex items-center justify-center text-xl text-red-600">{error}</div>;
+  if (loading)
+    return (
+      <div className="min-h-screen flex items-center justify-center text-xl">
+        Loading profile...
+      </div>
+    );
+  if (error)
+    return (
+      <div className="min-h-screen flex items-center justify-center text-xl text-red-600">
+        {error}
+      </div>
+    );
   if (!profileData) return null;
 
   return (
@@ -99,18 +118,19 @@ const ViewProfile = ({ onEdit, isDarkMode }) => {
         </div>
         {/* Header */}
         <div className="flex flex-col sm:flex-row items-center justify-between mb-8">
-          
-          
           <div className="text-center">
             <h1 className="text-3xl lg:text-4xl font-bold text-black dark:text-white mb-2">
               {profileData.firstName} {profileData.lastName}
             </h1>
             <p className="text-gray-600 dark:text-gray-400">
-              {calculateAge(profileData.dateOfBirth) && `${calculateAge(profileData.dateOfBirth)} years old`}
-              {profileData.city && profileData.state && ` • ${profileData.city}, ${profileData.state}`}
+              {calculateAge(profileData.dateOfBirth) &&
+                `${calculateAge(profileData.dateOfBirth)} years old`}
+              {profileData.city &&
+                profileData.state &&
+                ` • ${profileData.city}, ${profileData.state}`}
             </p>
           </div>
-          
+
           <button
             onClick={onEdit}
             className="flex items-center space-x-2 px-4 py-2 bg-black dark:bg-white text-white dark:text-black rounded-full font-semibold hover:bg-gray-800 dark:hover:bg-gray-200 transition-all mt-4 sm:mt-0"
@@ -139,7 +159,9 @@ const ViewProfile = ({ onEdit, isDarkMode }) => {
               ) : (
                 <div className="text-center py-8">
                   <Camera className="w-12 h-12 text-gray-400 dark:text-gray-500 mx-auto mb-4" />
-                  <p className="text-gray-500 dark:text-gray-400">No photos uploaded</p>
+                  <p className="text-gray-500 dark:text-gray-400">
+                    No photos uploaded
+                  </p>
                 </div>
               )}
             </InfoCard>
@@ -150,14 +172,29 @@ const ViewProfile = ({ onEdit, isDarkMode }) => {
             {/* Personal Information */}
             <InfoCard title="Personal Information" icon={User}>
               <div className="space-y-2">
-                <InfoRow label="Full Name" value={`${profileData.firstName} ${profileData.lastName}`} />
-                <InfoRow label="Date of Birth" value={profileData.dateOfBirth} />
-                <InfoRow label="Age" value={calculateAge(profileData.dateOfBirth).toString()} />
+                <InfoRow
+                  label="Full Name"
+                  value={`${profileData.firstName} ${profileData.lastName}`}
+                />
+                <InfoRow
+                  label="Date of Birth"
+                  value={profileData.dateOfBirth}
+                />
+                <InfoRow
+                  label="Age"
+                  value={calculateAge(profileData.dateOfBirth).toString()}
+                />
                 <InfoRow label="Gender" value={profileData.gender} />
                 <InfoRow label="Height" value={profileData.height} />
-                <InfoRow label="Marital Status" value={profileData.maritalStatus} />
+                <InfoRow
+                  label="Marital Status"
+                  value={profileData.maritalStatus}
+                />
                 <InfoRow label="Religion" value={profileData.religion} />
-                <InfoRow label="Mother Tongue" value={profileData.motherTongue} />
+                <InfoRow
+                  label="Mother Tongue"
+                  value={profileData.motherTongue}
+                />
               </div>
             </InfoCard>
 
@@ -169,7 +206,10 @@ const ViewProfile = ({ onEdit, isDarkMode }) => {
                 <InfoRow label="Country" value={profileData.country} />
                 <InfoRow label="State" value={profileData.state} />
                 <InfoRow label="City" value={profileData.city} />
-                <InfoRow label="Residential Status" value={profileData.residentialStatus} />
+                <InfoRow
+                  label="Residential Status"
+                  value={profileData.residentialStatus}
+                />
               </div>
             </InfoCard>
 
@@ -177,11 +217,23 @@ const ViewProfile = ({ onEdit, isDarkMode }) => {
             <InfoCard title="Professional Information" icon={Briefcase}>
               <div className="space-y-2">
                 <InfoRow label="Education" value={profileData.education} />
-                <InfoRow label="Education Details" value={profileData.educationDetails} />
+                <InfoRow
+                  label="Education Details"
+                  value={profileData.educationDetails}
+                />
                 <InfoRow label="Occupation" value={profileData.occupation} />
-                <InfoRow label="Occupation Details" value={profileData.occupationDetails} />
-                <InfoRow label="Annual Income" value={profileData.annualIncome} />
-                <InfoRow label="Work Location" value={profileData.workLocation} />
+                <InfoRow
+                  label="Occupation Details"
+                  value={profileData.occupationDetails}
+                />
+                <InfoRow
+                  label="Annual Income"
+                  value={profileData.annualIncome}
+                />
+                <InfoRow
+                  label="Work Location"
+                  value={profileData.workLocation}
+                />
               </div>
             </InfoCard>
 
@@ -189,11 +241,23 @@ const ViewProfile = ({ onEdit, isDarkMode }) => {
             <InfoCard title="Family Information" icon={Home}>
               <div className="space-y-2">
                 <InfoRow label="Family Type" value={profileData.familyType} />
-                <InfoRow label="Family Status" value={profileData.familyStatus} />
-                <InfoRow label="Father's Occupation" value={profileData.fatherOccupation} />
-                <InfoRow label="Mother's Occupation" value={profileData.motherOccupation} />
+                <InfoRow
+                  label="Family Status"
+                  value={profileData.familyStatus}
+                />
+                <InfoRow
+                  label="Father's Occupation"
+                  value={profileData.fatherOccupation}
+                />
+                <InfoRow
+                  label="Mother's Occupation"
+                  value={profileData.motherOccupation}
+                />
                 <InfoRow label="Siblings" value={profileData.siblings} />
-                <InfoRow label="Family Location" value={profileData.familyLocation} />
+                <InfoRow
+                  label="Family Location"
+                  value={profileData.familyLocation}
+                />
               </div>
             </InfoCard>
 
@@ -206,8 +270,12 @@ const ViewProfile = ({ onEdit, isDarkMode }) => {
                 <InfoRow label="Hobbies" value={profileData.hobbies} />
                 {profileData.aboutMe && (
                   <div className="pt-4">
-                    <h4 className="text-lg font-semibold text-black dark:text-white mb-2">About Me</h4>
-                    <p className="text-gray-700 dark:text-gray-300 leading-relaxed">{profileData.aboutMe}</p>
+                    <h4 className="text-lg font-semibold text-black dark:text-white mb-2">
+                      About Me
+                    </h4>
+                    <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
+                      {profileData.aboutMe}
+                    </p>
                   </div>
                 )}
               </div>
@@ -216,14 +284,34 @@ const ViewProfile = ({ onEdit, isDarkMode }) => {
             {/* Partner Preferences */}
             <InfoCard title="Partner Preferences" icon={Users}>
               <div className="space-y-2">
-                <InfoRow 
-                  label="Age Range" 
-                  value={profileData.partnerAgeMin && profileData.partnerAgeMax ? 
-                    `${profileData.partnerAgeMin} - ${profileData.partnerAgeMax} years` : ''} 
+                <InfoRow
+                  label="Age Range"
+                  value={
+                    profileData.partnerAgeMin && profileData.partnerAgeMax
+                      ? `${profileData.partnerAgeMin} - ${profileData.partnerAgeMax} years`
+                      : ""
+                  }
                 />
-                <InfoRow label="Education" value={profileData.partnerEducation} />
-                <InfoRow label="Occupation" value={profileData.partnerOccupation} />
-                <InfoRow label="Location" value={profileData.partnerLocation} />
+                <InfoRow label="Gender" value={profileData.partnerGender} />
+                <InfoRow
+                  label="Education"
+                  value={profileData.partnerEducation}
+                />
+                <InfoRow
+                  label="Occupation"
+                  value={profileData.partnerOccupation}
+                />
+                <InfoRow
+                  label="Annual Income"
+                  value={profileData.partnerIncome}
+                />
+                <InfoRow label="Country" value={profileData.partnerCountry} />
+                <InfoRow label="State" value={profileData.partnerLocation} />
+                <InfoRow label="Religion" value={profileData.partnerReligion} />
+                <InfoRow
+                  label="Marital Status"
+                  value={profileData.partnerMaritalStatus}
+                />
               </div>
             </InfoCard>
           </div>

@@ -10,6 +10,9 @@ import {
   uploadPhoto,
   uploadDocuments,
   searchUsers,
+  updateIsNewUser,
+  updatePrivacySettings,
+  deleteAccount,
 } from "../controllers/userController.js";
 import { uploadFile } from "../config/cloudinary.js";
 import express from "express";
@@ -26,6 +29,7 @@ userRouter.get("/profile-completion/:id", getProfileCompletion);
 userRouter.get("/search", authenticate, searchUsers);
 userRouter.get("/:id", getUserById);
 userRouter.get("/", getAllUsers);
+userRouter.put("/update-is-new-user", authenticate, requireUser, updateIsNewUser);
 userRouter.put("/:id", authenticate, requireUser, updateUser);
 userRouter.post("/skip", authenticate, requireUser, skipRecommendation);
 userRouter.post("/like", authenticate, requireUser, likeRecommendation);
@@ -43,5 +47,8 @@ userRouter.post(
   uploadFile.array("docs", 5),
   uploadDocuments
 );
+
+userRouter.put("/privacy-settings", authenticate, requireUser, updatePrivacySettings);
+userRouter.delete("/delete-account", authenticate, requireUser, deleteAccount);
 
 export default userRouter;

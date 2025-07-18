@@ -8,13 +8,11 @@ import LatestNotifications from "./LatestNotifications";
 function MainContent() {
   return (
     <main className="flex-1 h-full min-h-0 flex flex-col gap-3 w-full max-w-7xl mx-auto bg-white dark:bg-gray-900 rounded-xl shadow-md dark:shadow-lg">
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 lg:gap-8 w-full">
-        <div>
-          <RecentVisitors />
-        </div>
-        <div>
-          <LatestNotifications />
-        </div>
+      <div className="w-full mb-4">
+        <LatestNotifications />
+      </div>
+      <div className="w-full ">
+        <RecentVisitors />
       </div>
 
       <DailyRecommendations />

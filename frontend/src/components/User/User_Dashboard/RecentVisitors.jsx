@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { getVisitors } from "../../../services/visitorService";
 import { useAuth } from "../../../contexts/Chat/AuthContext";
-import { Star } from "lucide-react";
+import { Star, Eye, Lock, User, ChevronLeft, ChevronRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 function RecentVisitors() {
@@ -9,6 +9,9 @@ function RecentVisitors() {
   const [visitors, setVisitors] = useState([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+  const scrollRef = useRef(null);
+  const [showLeftArrow, setShowLeftArrow] = useState(false);
+  const [showRightArrow, setShowRightArrow] = useState(false);
 
   useEffect(() => {
     if (!user) return;
@@ -22,110 +25,220 @@ function RecentVisitors() {
       .finally(() => setLoading(false));
   }, [user]);
 
+  useEffect(() => {
+    const scrollElement = scrollRef.current;
+    if (scrollElement) {
+      const handleScroll = () => {
+        setShowLeftArrow(scrollElement.scrollLeft > 0);
+        setShowRightArrow(scrollElement.scrollLeft + scrollElement.clientWidth < scrollElement.scrollWidth);
+      };
+
+      handleScroll(); // Initial check
+      scrollElement.addEventListener('scroll', handleScroll);
+      window.addEventListener('resize', handleScroll); // Re-check on resize
+
+      return () => {
+        scrollElement.removeEventListener('scroll', handleScroll);
+        window.removeEventListener('resize', handleScroll);
+      };
+    }
+  }, [visitors, loading]); // Re-run when visitors data or loading state changes
+
+  const scroll = (direction) => {
+    const scrollAmount = 200; // Adjust as needed
+    if (scrollRef.current) {
+      if (direction === 'left') {
+        scrollRef.current.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
+      } else {
+        scrollRef.current.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+      }
+    }
+  };
+
+  const isPremium =
+    user && (user.subscription?.isActive || user.trial?.isActive);
+
   return (
-    <section className="bg-white dark:bg-gray-900 rounded-2xl p-4 sm:p-6 lg:p-8 shadow-lg dark:shadow-xl hover:shadow-xl w-full transition-all duration-300 border border-gray-100 dark:border-gray-800">
-      <h2 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6 text-gray-800 dark:text-white flex items-center gap-3">
-        <span className="text-xl sm:text-2xl">👀</span>
-        Recent Visitors
-        {!(user && (user.subscription?.isActive || user.trial?.isActive)) && (
-          <span className="ml-2 bg-yellow-500 text-white text-xs px-2 py-1 rounded-full font-bold">
-            PRO
+    <section className="bg-white dark:bg-gray-900 rounded-2xl p-4  shadow-lg dark:shadow-xl hover:shadow-xl w-full transition-all duration-300 border border-gray-100 dark:border-gray-800">
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-2xl font-bold text-gray-800 dark:text-white flex items-center gap-3">
+          <Eye className="w-6 h-6 text-purple-600 dark:text-purple-400" />
+          Recent Visitors
+          {!isPremium && (
+            <span className="ml-2 bg-yellow-500 text-white text-xs px-2 py-1 rounded-full font-bold">
+              PRO
+            </span>
+          )}
+        </h2>
+        {visitors.length > 0 && (
+          <span className="text-sm text-gray-500 dark:text-gray-400">
+            {visitors.length} {visitors.length === 1 ? "visit" : "visits"}
           </span>
         )}
-      </h2>
-      {user && (user.subscription?.isActive || user.trial?.isActive) ? (
-        loading ? (
-          <div className="text-center text-gray-400 dark:text-gray-500">
-            Loading...
+      </div>
+
+      {loading ? (
+        <div className="flex justify-center items-center h-20">
+          <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-purple-500"></div>
+        </div>
+      ) : visitors.length === 0 ? (
+        <div className="text-center py-6">
+          <div className="mx-auto w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mb-4">
+            <User className="w-8 h-8 text-gray-400" />
           </div>
-        ) : visitors.length === 0 ? (
-          <div className="text-center text-gray-400 dark:text-gray-500">
-            No recent visitors
-          </div>
-        ) : (
-          <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-8 gap-3 sm:gap-4 lg:gap-6 justify-items-center">
+          <h3 className="text-lg font-medium text-gray-700 dark:text-gray-300 mb-1">
+            No visitors yet
+          </h3>
+          <p className="text-gray-500 dark:text-gray-400 max-w-md mx-auto">
+            Your profile hasn't been viewed by anyone recently.
+          </p>
+        </div>
+      ) : isPremium ? (
+        <div className="relative">
+          {showLeftArrow && (
+            <button
+              onClick={() => scroll('left')}
+              className="absolute left-0 top-1/2 -translate-y-1/2 bg-white dark:bg-gray-800 p-2 rounded-full shadow-md z-10 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300"
+            >
+              <ChevronLeft className="w-6 h-6 text-gray-600 dark:text-gray-300" />
+            </button>
+          )}
+          <div className="relative">
+          {showLeftArrow && (
+            <button
+              onClick={() => scroll('left')}
+              className="absolute left-0 top-1/2 -translate-y-1/2 bg-white dark:bg-gray-800 p-2 rounded-full shadow-md z-10 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300"
+            >
+              <ChevronLeft className="w-6 h-6 text-gray-600 dark:text-gray-300" />
+            </button>
+          )}
+          <div ref={scrollRef} className="flex overflow-x-auto space-x-4 pb-2 scrollbar-hide">
             {visitors.map((v) => (
               <div
                 key={v._id}
                 onClick={() => navigate(`/profile/${v.visitorUserId?._id}`)}
-                className="w-16 h-16 sm:w-20 sm:h-20 lg:w-24 lg:h-24 bg-gradient-to-br from-purple-100 to-pink-100 dark:from-purple-900 dark:to-pink-900 rounded-2xl overflow-hidden cursor-pointer transition-all duration-300 hover:scale-110 hover:shadow-lg border-2 border-transparent hover:border-purple-200 dark:hover:border-purple-600 flex items-center justify-center"
-                title={
-                  v.visitorUserId?.firstName + " " + v.visitorUserId?.lastName
-                }
+                className="flex-shrink-0 w-36 group relative bg-white dark:bg-gray-800 rounded-xl p-3 shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer border border-gray-100 dark:border-gray-700 hover:border-purple-200 dark:hover:border-purple-600"
               >
-                {v.visitorUserId?.photos ? (
-                  <img
-                    src={v.visitorUserId.photos[0]}
-                    alt={v.visitorUserId.firstName}
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <span className="text-2xl font-bold text-purple-700 dark:text-purple-300">
-                    {v.visitorUserId?.firstName?.[0]}
-                    {v.visitorUserId?.lastName?.[0]}
-                  </span>
-                )}
+                <div className="relative w-full aspect-square rounded-lg overflow-hidden mb-2 bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/30 dark:to-pink-900/30">
+                  {v.visitorUserId?.photos?.[0] ? (
+                    <img
+                      src={v.visitorUserId.photos[0]}
+                      alt={v.visitorUserId.firstName}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-purple-600 dark:text-purple-300">
+                      <span className="text-3xl font-bold">
+                        {v.visitorUserId?.firstName?.[0]}
+                      </span>
+                    </div>
+                  )}
+                </div>
+                <div className="text-center">
+                  <h3 className="font-medium text-gray-800 dark:text-gray-100 truncate">
+                    {v.visitorUserId?.firstName}
+                  </h3>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                    {v.visitorUserId?.age || "--"} •{" "}
+                    {v.visitorUserId?.city || "--"}
+                  </p>
+                </div>
               </div>
             ))}
           </div>
-        )
+          {showRightArrow && (
+            <button
+              onClick={() => scroll('right')}
+              className="absolute right-0 top-1/2 -translate-y-1/2 bg-white dark:bg-gray-800 p-2 rounded-full shadow-md z-10 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300"
+            >
+              <ChevronRight className="w-6 h-6 text-gray-600 dark:text-gray-300" />
+            </button>
+          )}
+        </div>
+          {showRightArrow && (
+            <button
+              onClick={() => scroll('right')}
+              className="absolute right-0 top-1/2 -translate-y-1/2 bg-white dark:bg-gray-800 p-2 rounded-full shadow-md z-10 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300"
+            >
+              <ChevronRight className="w-6 h-6 text-gray-600 dark:text-gray-300" />
+            </button>
+          )}
+        </div>
       ) : (
         <>
-          <div className="relative min-h-[180px]">
-            {loading ? (
-              <div className="text-center text-gray-400 dark:text-gray-500">
-                Loading...
-              </div>
-            ) : visitors.length === 0 ? (
-              <div className="text-center text-gray-400 dark:text-gray-500">
-                No recent visitors
-              </div>
-            ) : (
-              <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-8 gap-3 sm:gap-4 lg:gap-6 justify-items-center">
-                {visitors.map((v) => (
-                  <div
-                    key={v._id}
-                    onClick={() => navigate(`/profile/${v.visitorUserId?._id}`)}
-                    className="relative w-16 h-16 sm:w-20 sm:h-20 lg:w-24 lg:h-24 bg-gradient-to-br from-purple-100 to-pink-100 dark:from-purple-900 dark:to-pink-900 rounded-2xl overflow-hidden cursor-pointer flex flex-col items-center justify-center p-1"
-                  >
-                    <div className="absolute inset-0 flex flex-col items-center justify-center w-full h-full">
-                      {v.visitorUserId?.photos ? (
+          <div className="relative">
+            {showLeftArrow && (
+              <button
+                onClick={() => scroll('left')}
+                className="absolute left-0 top-1/2 -translate-y-1/2 bg-white dark:bg-gray-800 p-2 rounded-full shadow-md z-10 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300"
+              >
+                <ChevronLeft className="w-6 h-6 text-gray-600 dark:text-gray-300" />
+              </button>
+            )}
+            <div ref={scrollRef} className="flex overflow-x-auto space-x-4 pb-2 scrollbar-hide opacity-60">
+              {visitors.map((v) => (
+                <div key={v._id} className="flex-shrink-0 w-36 relative">
+                  <div className="bg-white dark:bg-gray-800 rounded-xl p-3 shadow-sm border border-gray-100 dark:border-gray-700">
+                    <div className="relative w-full aspect-square rounded-lg overflow-hidden mb-2 bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/30 dark:to-pink-900/30">
+                      {v.visitorUserId?.photos?.[0] ? (
                         <img
                           src={v.visitorUserId.photos[0]}
                           alt={v.visitorUserId.firstName}
                           className="w-full h-full object-cover blur-md"
                         />
                       ) : (
-                        <span className="text-2xl font-bold text-purple-700 dark:text-purple-300 blur-md">
-                          {v.visitorUserId?.firstName?.[0]}
-                          {v.visitorUserId?.lastName?.[0]}
-                        </span>
+                        <div className="w-full h-full flex items-center justify-center text-purple-600 dark:text-purple-300 blur-md">
+                          <span className="text-3xl font-bold">
+                            {v.visitorUserId?.firstName?.[0]}
+                            {v.visitorUserId?.lastName?.[0]}
+                          </span>
+                        </div>
                       )}
                     </div>
-                    <p className="absolute bottom-0 left-0 right-0 text-center text-xs font-semibold text-gray-800 dark:text-gray-200 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm py-1 px-0.5">
-                      <span className="blur-sm">
+                    <div className="text-center">
+                      <h3 className="font-medium text-gray-800 dark:text-gray-100 truncate blur-sm">
                         {v.visitorUserId?.firstName}{" "}
                         {v.visitorUserId?.lastName?.[0]}.
-                      </span>
-                    </p>
+                      </h3>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 truncate blur-sm">
+                        {v.visitorUserId?.age || "--"} •{" "}
+                        {v.visitorUserId?.city || "--"}
+                      </p>
+                    </div>
                   </div>
-                ))}
-              </div>
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <Lock className="w-8 h-8 text-yellow-500" />
+                  </div>
+                </div>
+              ))}
+            </div>
+            {showRightArrow && (
+              <button
+                onClick={() => scroll('right')}
+                className="absolute right-0 top-1/2 -translate-y-1/2 bg-white dark:bg-gray-800 p-2 rounded-full shadow-md z-10 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300"
+              >
+                <ChevronRight className="w-6 h-6 text-gray-600 dark:text-gray-300" />
+              </button>
             )}
+            <div className="absolute inset-0 bg-gradient-to-t from-white dark:from-gray-900 via-white/70 dark:via-gray-900/70 to-transparent pointer-events-none h-full"></div>
           </div>
-          <div className="flex flex-col items-center justify-center bg-white dark:bg-gray-900 p-4 rounded-2xl mt-4">
-            <Star className="w-12 h-12 mx-auto text-yellow-400 mb-4 fill-current" />
-            <h3 className="text-lg font-medium text-gray-700 dark:text-gray-200 mb-2">
-              Unlock Profile Visitors
+
+          <div className="mt-4 bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-xl p-4 text-center">
+            <div className="mx-auto w-16 h-16 bg-white dark:bg-gray-800 rounded-full flex items-center justify-center mb-4 shadow-md">
+              <Star className="w-8 h-8 text-yellow-500 fill-current" />
+            </div>
+            <h3 className="text-xl font-bold text-gray-800 dark:text-white mb-2">
+              Unlock Your Profile Visitors
             </h3>
-            <p className="text-gray-500 dark:text-gray-400 max-w-md mx-auto mb-4">
-              Upgrade to a premium plan to see who has viewed your profile.
+            <p className="text-gray-600 dark:text-gray-300 max-w-md mx-auto mb-6">
+              Upgrade to Premium to see who's interested in you and view
+              detailed profiles.
             </p>
             <button
               onClick={() => navigate("/plans")}
-              className="px-6 py-3 rounded-full font-medium bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:shadow-lg transition-all"
+              className="px-4 py-2 rounded-full font-medium bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:shadow-lg transition-all hover:scale-105"
             >
-              View Plans
+              Upgrade Now
             </button>
           </div>
         </>

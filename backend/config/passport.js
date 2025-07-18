@@ -19,6 +19,10 @@ passport.use(
           user = await User.findOne({ email: profile.emails[0].value });
         }
         if (!user) {
+          const trialStartDate = new Date();
+          const trialEndDate = new Date();
+          trialEndDate.setDate(trialStartDate.getDate() + 3); // 3 days free trial
+
           user = await User.create({
             firstName: profile.name.givenName || "",
             lastName: profile.name.familyName || "",
@@ -27,6 +31,11 @@ passport.use(
             socialMediaLogin: true,
             isVerified: true,
             password: null,
+            trial: {
+              startDate: trialStartDate,
+              endDate: trialEndDate,
+              isActive: true,
+            },
           });
         } else if (!user.googleId) {
           // Link Google account to existing user

@@ -1,6 +1,6 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { getAllUsers } from "../services/userService";
+import { getUserById } from "../services/userService";
 import { sendRequest, getUserRequests } from "../services/requestService";
 import { addVisitor } from "../services/visitorService";
 import { useRequest } from "../hooks/useRequest";
@@ -41,19 +41,21 @@ export default function UserProfilePage({ isDarkMode }) {
     const fetchProfileAndRequests = async () => {
       setLoading(true);
       try {
-        const allUsersData = await getAllUsers();
-        const users = Array.isArray(allUsersData)
-          ? allUsersData
-          : allUsersData.users || [];
-        const currentProfile = users.find((u) => u._id === userId) || null;
+        const currentProfile = await getUserById(userId);
         setProfile(currentProfile);
 
         if (user && user._id && currentProfile) {
           // Add visitor entry
           if (user._id !== currentProfile._id) {
-            console.log("Calling addVisitor with:", { visitedUserId: currentProfile._id, visitorUserId: user._id });
+            console.log("Calling addVisitor with:", {
+              visitedUserId: currentProfile._id,
+              visitorUserId: user._id,
+            });
             try {
-              await addVisitor({ visitedUserId: currentProfile._id, visitorUserId: user._id });
+              await addVisitor({
+                visitedUserId: currentProfile._id,
+                visitorUserId: user._id,
+              });
               console.log("addVisitor call successful.");
             } catch (visitorError) {
               console.error("Error adding visitor:", visitorError);
@@ -227,8 +229,8 @@ export default function UserProfilePage({ isDarkMode }) {
       className={`min-h-screen ${
         isDarkMode
           ? "bg-gray-900 text-white"
-          : "bg-gradient-to-br from-gray-50 to-gray-100"
-      } py-8 px-4 sm:px-6 lg:px-8`}
+          : "bg-gradient-to-br from-gray-400 to-gray-900"
+      } py-8 px-4 sm:px-6 lg:px-8 dark:bg-gray-900`}
     >
       <Toaster position="top-center" reverseOrder={false} />
       {/* Floating decorative elements */}

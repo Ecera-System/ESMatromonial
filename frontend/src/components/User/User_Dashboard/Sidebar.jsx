@@ -2,28 +2,52 @@ import { useTheme } from "../../../contexts/ThemeContext";
 import React from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../../../contexts/Chat/AuthContext";
-import userProfile from "../../../assets/userprofile/profile.png";
+import userProfile from "../../../../public/assets/userprofile/profile.png";
+import {
+  Home,
+  CreditCard,
+  Newspaper,
+  MessageSquare,
+  User,
+  Settings,
+  LogOut,
+  Sun,
+  Moon,
+} from "lucide-react";
+
 import axios from "axios";
 
 function Sidebar({ onClose }) {
-  const { user, logout } = useAuth();
+  const { user, logout, loading: authLoading } = useAuth();
   const { isDarkMode, toggleTheme } = useTheme();
   const location = useLocation();
   const navigate = useNavigate();
 
   const [profile, setProfile] = React.useState(null);
-  const [loading, setLoading] = React.useState(true);
+  const [profileLoading, setProfileLoading] = React.useState(true);
   const [error, setError] = React.useState(null);
   const [matches, setMatches] = React.useState(0);
   const [interests, setInterests] = React.useState(0);
 
   React.useEffect(() => {
     const fetchProfile = async () => {
-      if (!user || !user._id) return;
-      setLoading(true);
+      if (!user || !user._id) {
+        setProfileLoading(false); // Ensure loading state is false if no user
+        return;
+      }
+      setProfileLoading(true);
       setError(null);
       try {
-        const response = await axios.get(`/api/v1/users/${user._id}`);
+        const token = localStorage.getItem("token");
+        const config = {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        };
+        const response = await axios.get(
+          `${import.meta.env.VITE_API_URL}/api/v1/auth/me`,
+          config
+        );
         setProfile(response.data);
         // Optionally fetch matches and interests if you have endpoints for them
         // For now, use dummy values or extract from response if available
@@ -32,7 +56,7 @@ function Sidebar({ onClose }) {
       } catch (err) {
         setError("Failed to load profile");
       } finally {
-        setLoading(false);
+        setProfileLoading(false);
       }
     };
     fetchProfile();
@@ -49,40 +73,40 @@ function Sidebar({ onClose }) {
 
   const menuItems = [
     {
-      icon: "🏠",
+      icon: <Home size={20} />,
       text: "Dashboard",
       to: "/dashboard",
       active: location.pathname === "/dashboard",
     },
     {
-      icon: "💳",
+      icon: <CreditCard size={20} />,
       text: "Subscription Plans",
       to: "/plans",
       active: location.pathname === "/plans",
     },
     {
-      icon: "📰",
+      icon: <Newspaper size={20} />,
       text: "Feed Page",
       to: "/feed",
       active: location.pathname === "/feed",
     },
     {
-      icon: "💬",
+      icon: <MessageSquare size={20} />,
       text: "Chat Page",
       to: "/chat",
       active: location.pathname === "/chat",
     },
     {
-      icon: "✏️",
+      icon: <User size={20} />,
       text: "Profile Page",
       to: "/profile",
       active: location.pathname.includes("/profile"),
     },
     {
-      icon: "✅",
-      text: "Verification",
-      to: "/verification",
-      active: location.pathname === "/verification",
+      icon: <Settings size={20} />,
+      text: "Setting",
+      to: "/setting",
+      active: location.pathname === "/setting",
     },
   ];
 
@@ -115,7 +139,7 @@ function Sidebar({ onClose }) {
       <div className="text-center mb-8 lg:mb-10">
         <div className="w-20 h-20 sm:w-24 sm:h-24 mx-auto mb-4 relative">
           <img
-            src={profile?.photos?.[0] || user?.avatar || userProfile}
+            src={profile?.user?.photos?.[0] || user?.avatar || userProfile}
             alt="User"
             className="w-full h-full object-cover rounded-full border-4 border-blue-100"
           />
@@ -125,36 +149,46 @@ function Sidebar({ onClose }) {
           {user ? `${user.firstName} ${user.lastName}` : "User Name"}
         </h2>
         <p className="text-xs sm:text-sm text-blue-600 mb-4 lg:mb-6 font-semibold bg-blue-50 px-2 sm:px-3 py-1 rounded-full inline-block">
-          {profile?.subscription?.isActive && profile?.subscription?.planName
-            ? profile.subscription.planName
+          {profile?.user?.subscription?.isActive &&
+          profile?.user?.subscription?.planName
+            ? profile.user.subscription.planName
             : "Free Member"}
         </p>
 
-        <div className="grid grid-cols-3 gap-2 sm:gap-4 mb-6">
-          {loading ? (
-            <div className="col-span-3 text-center text-gray-400">
-              Loading stats...
-            </div>
-          ) : (
-            [
-              { number: profile?.profileViews ?? 0, label: "Profile Views" },
-              { number: matches, label: "Matches" },
-              { number: interests, label: "Interests" },
-            ].map((stat, i) => (
-              <div
-                key={i}
-                className="flex flex-col items-center gap-1 p-2 sm:p-3 bg-gray-50 rounded-xl"
-              >
-                <span className="text-sm sm:text-lg font-bold text-gray-800">
-                  {stat.number}
-                </span>
-                <span className="text-xs text-gray-600 text-center leading-tight">
-                  {stat.label}
-                </span>
+        {authLoading || profileLoading ? (
+          <div className="col-span-3 text-center text-gray-400">
+            Loading profile...
+          </div>
+        ) : (
+          <div className="grid grid-cols-3 gap-2 sm:gap-4 mb-6">
+            {profileLoading ? (
+              <div className="col-span-3 text-center text-gray-400">
+                Loading stats...
               </div>
-            ))
-          )}
-        </div>
+            ) : (
+              [
+                {
+                  number: profile?.user?.profileViews ?? 0,
+                  label: "Profile Views",
+                },
+                { number: matches, label: "Matches" },
+                { number: interests, label: "Interests" },
+              ].map((stat, i) => (
+                <div
+                  key={i}
+                  className="flex flex-col items-center gap-1 p-2 sm:p-3 bg-gray-50 rounded-xl"
+                >
+                  <span className="text-sm sm:text-lg font-bold text-gray-800">
+                    {stat.number}
+                  </span>
+                  <span className="text-xs text-gray-600 text-center leading-tight">
+                    {stat.label}
+                  </span>
+                </div>
+              ))
+            )}
+          </div>
+        )}
       </div>
 
       {/* Navigation Menu */}
@@ -166,14 +200,14 @@ function Sidebar({ onClose }) {
             className={`flex items-center gap-3 sm:gap-4 px-3 sm:px-4 py-3 sm:py-4 rounded-xl transition-all text-sm font-medium group ${
               item.active
                 ? "bg-blue-600 text-white shadow-lg"
-                : "text-gray-600 hover:bg-gray-50 hover:text-gray-800"
+                : "text-gray-600 hover:scale-110"
             }`}
             onClick={onClose}
           >
-            <span className="text-base sm:text-lg w-5 sm:w-6 text-center group-hover:scale-110 transition-transform">
+            <span className="text-base dark:text-white sm:text-lg w-5 sm:w-6 text-center group-hover:scale-110 transition-transform">
               {item.icon}
             </span>
-            <span className="truncate">{item.text}</span>
+            <span className="truncate dark:text-white">{item.text}</span>
           </Link>
         ))}
       </nav>
@@ -185,7 +219,7 @@ function Sidebar({ onClose }) {
           className="w-full flex items-center gap-3 sm:gap-4 px-3 sm:px-4 py-3 sm:py-4 rounded-xl text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all group"
         >
           <span className="text-base sm:text-lg w-5 sm:w-6 text-center group-hover:scale-110 transition-transform">
-            {isDarkMode ? "☀️" : "🌙"}
+            {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
           </span>
           <span className="truncate">
             {isDarkMode ? "Light Mode" : "Dark Mode"}
@@ -196,7 +230,7 @@ function Sidebar({ onClose }) {
           className="w-full flex items-center gap-3 sm:gap-4 px-3 sm:px-4 py-3 sm:py-4 rounded-xl text-sm font-medium text-red-600 hover:bg-red-50 hover:text-red-700 transition-all group"
         >
           <span className="text-base sm:text-lg w-5 sm:w-6 text-center group-hover:scale-110 transition-transform">
-            🚪
+            <LogOut size={20} />
           </span>
           <span className="truncate">Logout</span>
         </button>

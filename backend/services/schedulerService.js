@@ -128,9 +128,15 @@ export const getTodayRecommendation = async (userId) => {
   try {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
+
+    // Fetch the current user to get their skippedUsers list
+    const currentUser = await User.findById(userId).select('skippedUsers');
+    const skippedUsers = currentUser ? currentUser.skippedUsers : [];
     
     const recommendation = await DailyRecommendation.findOne({
       userId: userId,
+      recommendedUserId: { $nin: skippedUsers }, // Exclude skipped users
+      isSkipped: false, // Exclude recommendations that have been skipped
       date: {
         $gte: today,
         $lt: new Date(today.getTime() + 24 * 60 * 60 * 1000)

@@ -9,6 +9,8 @@ import {
   GraduationCap,
   MapPin,
   Star,
+  User,
+  Heart,
 } from "lucide-react";
 import BackButton from "../../BackButton";
 import { motion, AnimatePresence } from "framer-motion";
@@ -185,6 +187,9 @@ function ProfileCard({
 // Main Feed Component
 export default function MatrimonyFeed() {
   const [activeFilter, setActiveFilter] = useState("all");
+  const [genderFilter, setGenderFilter] = useState("any");
+  const [hobbiesFilter, setHobbiesFilter] = useState("");
+  const [interestsFilter, setInterestsFilter] = useState("");
   const { user } = useAuth();
   const navigate = useNavigate();
   const [inviteMap, setInviteMap] = useState({});
@@ -239,20 +244,43 @@ export default function MatrimonyFeed() {
     fetchProfilesAndRequests();
   }, [user]);
 
-  const filteredProfiles = profiles.filter((profile) => {
-    if (!user) return true;
-    return (
-      profile._id !== user._id &&
-      (activeFilter === "all" ||
-        (activeFilter === "verified" && profile.verified) ||
-        (activeFilter === "nearby" && profile.category === "nearby"))
-    );
-  });
+  const filteredProfiles = profiles
+    .filter((profile) => {
+      if (!user) return true;
+
+      const matchesGender =
+        genderFilter === "any" || profile.gender === genderFilter;
+      const matchesHobbies =
+        hobbiesFilter === "" ||
+        (profile.hobbies &&
+          profile.hobbies.toLowerCase().includes(hobbiesFilter.toLowerCase()));
+      const matchesInterests =
+        interestsFilter === "" ||
+        (profile.interests &&
+          profile.interests
+            .toLowerCase()
+            .includes(interestsFilter.toLowerCase()));
+
+      return (
+        profile._id !== user._id &&
+        matchesGender &&
+        matchesHobbies &&
+        matchesInterests &&
+        (activeFilter === "all" ||
+          (activeFilter === "verified" && profile.isVerified))
+      );
+    })
+    .sort((a, b) => {
+      // Prioritize verified users
+      if (a.isVerified && !b.isVerified) return -1;
+      if (!a.isVerified && b.isVerified) return 1;
+      // Then sort by creation date (newest first) or another relevant field
+      return new Date(b.createdAt) - new Date(a.createdAt);
+    });
 
   const filters = [
     { key: "all", label: "All Profiles" },
     { key: "verified", label: "Verified" },
-    { key: "nearby", label: "Nearby" },
   ];
 
   const handleViewProfile = (profile) => {
@@ -323,6 +351,98 @@ export default function MatrimonyFeed() {
               </motion.button>
             ))}
           </div>
+
+          {/* Filter Card */}
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-6 mb-8 md:mb-12 border border-gray-200 dark:border-gray-700">
+            <h3 className="text-xl font-bold text-gray-800 dark:text-white mb-4">
+              Filter Profiles
+            </h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+              {/* Gender Filter */}
+              <div className="flex flex-col">
+                <label
+                  htmlFor="genderFilter"
+                  className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 flex items-center gap-1"
+                >
+                  <User className="w-4 h-4" /> Gender
+                </label>
+                <select
+                  id="genderFilter"
+                  value={genderFilter}
+                  onChange={(e) => setGenderFilter(e.target.value)}
+                  className="w-full px-4 py-2 rounded-lg font-semibold transition-all duration-300 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-500 border border-gray-300 dark:border-gray-600"
+                >
+                  <option value="any">Any</option>
+                  <option value="Male">Male</option>
+                  <option value="Female">Female</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+
+              {/* Hobbies Filter */}
+              <div className="flex flex-col">
+                <label
+                  htmlFor="hobbiesFilter"
+                  className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 flex items-center gap-1"
+                >
+                  <Heart className="w-4 h-4" /> Hobbies
+                </label>
+                <input
+                  id="hobbiesFilter"
+                  type="text"
+                  placeholder="e.g., reading, sports"
+                  value={hobbiesFilter}
+                  onChange={(e) => setHobbiesFilter(e.target.value)}
+                  className="w-full px-4 py-2 rounded-lg font-semibold transition-all duration-300 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-500 border border-gray-300 dark:border-gray-600"
+                />
+              </div>
+
+              {/* Interests Filter */}
+              <div className="flex flex-col">
+                <label
+                  htmlFor="interestsFilter"
+                  className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 flex items-center gap-1"
+                >
+                  <Star className="w-4 h-4" /> Interests
+                </label>
+                <input
+                  id="interestsFilter"
+                  type="text"
+                  placeholder="e.g., technology, art"
+                  value={interestsFilter}
+                  onChange={(e) => setInterestsFilter(e.target.value)}
+                  className="w-full px-4 py-2 rounded-lg font-semibold transition-all duration-300 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-500 border border-gray-300 dark:border-gray-600"
+                />
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex justify-end gap-4 mt-6">
+              <motion.button
+                onClick={() => {
+                  setGenderFilter("any");
+                  setHobbiesFilter("");
+                  setInterestsFilter("");
+                  setActiveFilter("all");
+                }}
+                className="px-6 py-2 rounded-full font-semibold text-sm transition-all duration-300 bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-200 shadow-md hover:bg-gray-300 dark:hover:bg-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                whileHover={{ y: -2, scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                Clear Filters
+              </motion.button>
+              <motion.button
+                onClick={() => {
+                  /* Apply filter logic here if needed, currently filters on state change */
+                }}
+                className="px-6 py-2 rounded-full font-semibold text-sm transition-all duration-300 bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-md hover:from-purple-600 hover:to-pink-600 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                whileHover={{ y: -2, scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                Apply Filters
+              </motion.button>
+            </div>
+          </div>
         </motion.div>
         {/* Profiles Grid */}
         {loading ? (
@@ -351,20 +471,6 @@ export default function MatrimonyFeed() {
           </motion.div>
         )}
         {/* Load More Button */}
-        <div className="text-center mt-8 md:mt-12">
-          <motion.button
-            className="bg-gradient-to-r from-pink-500 to-purple-600 text-white px-6 md:px-8 py-3 md:py-4 rounded-full font-semibold text-base md:text-lg"
-            whileHover={{
-              scale: 1.05,
-              y: -3,
-              boxShadow: "0px 15px 25px rgba(236, 72, 153, 0.3)",
-            }}
-            whileTap={{ scale: 0.95 }}
-            transition={{ type: "spring", stiffness: 400, damping: 15 }}
-          >
-            Load More Profiles
-          </motion.button>
-        </div>
       </main>
     </div>
   );

@@ -23,15 +23,14 @@ export const registerUser = async ({
   }
   const existing = await User.findOne({ email });
   if (existing) throw new Error("Email already registered");
-  const hash = await bcrypt.hash(password, 10);
   
   // Generate email verification token
   const emailVerificationToken = crypto.randomBytes(32).toString("hex");
   const emailVerificationTokenHash = crypto.createHash("sha256").update(emailVerificationToken).digest("hex");
-  
+
   const user = new User({
     email,
-    password: hash,
+    password,
     firstName,
     lastName,
     phone,

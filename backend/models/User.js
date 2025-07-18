@@ -1,6 +1,7 @@
 // User schema
 
 import mongoose from "mongoose";
+import bcrypt from "bcrypt";
 
 const userSchema = new mongoose.Schema(
   {
@@ -73,12 +74,13 @@ const userSchema = new mongoose.Schema(
     photos: [{ type: String }],
 
     // Auth & System
-    password: { type: String, required: false }, // allow null for social login
+    password: { type: String, required: false, default: "" }, // always a string, even for social login
     passwordResetToken: { type: String }, // for password reset
     passwordResetExpires: { type: Date }, // password reset token expiry
     emailVerificationToken: { type: String }, // for email verification
     emailVerificationExpires: { type: Date }, // email verification token expiry
     isEmailVerified: { type: Boolean, default: false }, // email verification status
+    isNewUser: { type: Boolean, default: true }, // New field to track new users
     isVerified: { type: Boolean, default: false }, // overall verification status
     verificationCompleted: { type: Boolean, default: false }, // verification suite completed
     verificationDocuments: [{ type: String }],
@@ -109,11 +111,44 @@ const userSchema = new mongoose.Schema(
     skippedUsers: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
     online: { type: Boolean, default: false },
     profileViews: { type: Number, default: 0 },
+
+    // Privacy Settings
+    privacy: {
+      profileVisibility: { type: String, enum: ["public", "premium-only", "private"], default: "public" },
+      contactVisibility: { type: String, enum: ["premium-only", "verified-only", "all"], default: "premium-only" },
+      dataUsage: { type: Boolean, default: true },
+      marketingCommunications: { type: Boolean, default: false },
+    },
+
+    // Notification Settings
+    notificationSettings: {
+      email: {
+        newMatches: { type: Boolean, default: true },
+        messages: { type: Boolean, default: true },
+        profileViews: { type: Boolean, default: true },
+        connectionRequests: { type: Boolean, default: true },
+      },
+      push: {
+        instantMessages: { type: Boolean, default: false },
+        matches: { type: Boolean, default: false },
+        reminders: { type: Boolean, default: false },
+      },
+    },
   },
   {
     timestamps: true, // Automatically manage createdAt and updatedAt fields
   }
 );
+
+userSchema.pre("save", async function (next) {
+  // Defensive: Only hash if password is present and not empty
+  if (!this.isModified("password") || !this.password || this.password === "") {
+    return next();
+  }
+  const salt = await bcrypt.genSalt(10);
+  this.password = await bcrypt.hash(this.password, salt);
+  next();
+});
 
 const User = mongoose.model("User", userSchema);
 

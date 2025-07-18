@@ -16,8 +16,7 @@ import Landing from "./components/User/Landing-Page/Landing";
 import UserLayout from "./components/User/UserLayout";
 import DashboardLayout from "./components/User/User_Dashboard/DashboardLayout";
 import MainContent from "./components/User/User_Dashboard/MainContent";
-import CreateProfile from "./components/User/User_Profile/CreateProfile";
-import ViewProfile from "./components/User/User_Profile/ViewProfile";
+import SettingsPage from "./pages/SettingsPage";
 import Feed from "./components/User/User-Feed/Feed";
 import Plans from "./components/User/User-Plan/Plans";
 import UserVerificationDashboard from "./components/User/verification_suite";
@@ -61,6 +60,8 @@ function App() {
                 />
                 <Route path="feed" element={<Feed />} />
                 <Route path="plans" element={<Plans />} />
+                <Route path="setting" element={<SettingsPage />} />
+
                 <Route
                   path="chat"
                   element={
