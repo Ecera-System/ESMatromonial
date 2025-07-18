@@ -983,6 +983,7 @@ const CreateProfile = ({ onProfileCreated = () => {} }) => {
                     <option value="Male">Male</option>
                     <option value="Female">Female</option>
                     <option value="Other">Other</option>
+                    <option value="Any Gender">Any Gender</option>
                   </select>
                 </div>
 

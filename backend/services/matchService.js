@@ -1,20 +1,46 @@
 import User from "../models/User.js";
 import logger from "../utils/logger.js";
 
+// Define a maximum possible score for percentage calculation
+const MAX_SCORE = 150; // This will be refined based on the sum of all max weights
+
 export const getDailyRecommendations = async (userId, limit = 7) => {
+  logger.info(`[MatchService] Fetching daily recommendations for user: ${userId}`);
   const user = await User.findById(userId);
   if (!user) throw new Error("User not found");
 
   // 1. Build base query
   const query = buildBaseQuery(user);
+  logger.info(`[MatchService] Base query built for user ${userId}: ${JSON.stringify(query)}`);
 
   // 2. Find candidates
   let candidates = await findCandidates(query, user);
+  logger.info(`[MatchService] Found ${candidates.length} candidates after initial filtering for user ${userId}.`);
 
   // 3. Score and sort candidates
   candidates = scoreAndSortCandidates(candidates, user);
+  logger.info(`[MatchService] Scored and sorted ${candidates.length} candidates for user ${userId}.`);
 
   return candidates.slice(0, limit);
+};
+
+export const getMatchedUsers = async (userId) => {
+  logger.info(`[MatchService] Fetching matched users for user: ${userId}`);
+  const user = await User.findById(userId);
+  if (!user) throw new Error("User not found");
+
+  logger.info(`[MatchService] User ${userId} preferences: Gender=${user.partnerGender}, Age=${user.partnerAgeMin}-${user.partnerAgeMax}, Religion=${user.partnerReligion}, Caste=${user.partnerCaste}`);
+
+  const query = buildBaseQuery(user);
+  logger.info(`[MatchService] Base query built for user ${userId}: ${JSON.stringify(query)}`);
+
+  let candidates = await findCandidates(query, user);
+  logger.info(`[MatchService] Found ${candidates.length} candidates after initial filtering for user ${userId}.`);
+
+  candidates = scoreAndSortCandidates(candidates, user);
+  logger.info(`[MatchService] Scored and sorted ${candidates.length} candidates for user ${userId}.`);
+
+  return candidates;
 };
 
 // Query Builder
@@ -71,7 +97,7 @@ const buildBaseQuery = (user) => {
 
 // Candidate Finder with Fallback
 const findCandidates = async (query, user) => {
-  let candidates = await User.find(query);
+  let candidates = await User.find(query).lean();
 
   // Helper to create a base query for fallbacks, always excluding self and skipped users
   const getBaseFallbackQuery = () => {
@@ -131,200 +157,7 @@ const findCandidates = async (query, user) => {
   }
 
   return candidates;
-
-  return candidates;
 };
 
 // Scoring Engine
-const scoreAndSortCandidates = (candidates, user) => {
-  candidates.forEach((candidate) => {
-    let score = 0;
-
-    // Core matching (higher weights)
-    if (
-      user.partnerReligion &&
-      user.partnerReligion !== "Any Religion" &&
-      candidate.religion === user.partnerReligion
-    )
-      score += 3;
-    if (
-      user.partnerCaste &&
-      user.partnerCaste.toLowerCase() !== "any" &&
-      candidate.caste === user.partnerCaste
-    )
-      score += 3;
-
-    // Location matching
-    if (
-      user.partnerCountry &&
-      user.partnerCountry !== "Any Country" &&
-      candidate.country === user.partnerCountry
-    )
-      score += 2;
-    if (
-      user.partnerLocation &&
-      user.partnerLocation !== "Any State" &&
-      candidate.state === user.partnerLocation
-    )
-      score += 2;
-
-    // Education/occupation/income matching
-    if (
-      user.partnerEducation &&
-      user.partnerEducation !== "Any Education" &&
-      candidate.education === user.partnerEducation
-    )
-      score += 2;
-    if (
-      user.partnerOccupation &&
-      user.partnerOccupation !== "Any Occupation" &&
-      candidate.occupation === user.partnerOccupation
-    )
-      score += 2;
-    if (
-      user.partnerIncome &&
-      user.partnerIncome !== "Any Income Range" &&
-      candidate.annualIncome === user.partnerIncome
-    )
-      score += 2;
-
-    // Sophisticated Age Scoring
-    if (user.partnerAgeMin && user.partnerAgeMax && candidate.dateOfBirth) {
-      const userMinAge = parseInt(user.partnerAgeMin);
-      const userMaxAge = parseInt(user.partnerAgeMax);
-      const candidateAge =
-        new Date().getFullYear() -
-        new Date(candidate.dateOfBirth).getFullYear();
-
-      if (candidateAge >= userMinAge && candidateAge <= userMaxAge) {
-        score += 2; // Full points for being within preferred range
-      } else if (
-        candidateAge >= userMinAge - 5 &&
-        candidateAge <= userMaxAge + 5
-      ) {
-        score += 1; // Partial points for being slightly outside
-      }
-    }
-
-    // Sophisticated Height Scoring (assuming height is in a comparable format like cm or inches)
-    // This part needs adjustment based on how height is stored (e.g., "5'10"" vs. "178cm")
-    // For now, a simple check, but can be expanded.
-    if (user.partnerHeightMin && user.partnerHeightMax && candidate.height) {
-      // Assuming height is stored as "X'Y"" and can be parsed
-      const parseHeight = (heightStr) => {
-        const parts = heightStr.match(/(\d+)\'(\d+)\"/);
-        if (parts) {
-          const feet = parseInt(parts[1]);
-          const inches = parseInt(parts[2]);
-          return feet * 12 + inches; // Convert to total inches
-        }
-        return 0;
-      };
-
-      const userMinHeightInches = parseHeight(user.partnerHeightMin);
-      const userMaxHeightInches = parseHeight(user.partnerHeightMax);
-      const candidateHeightInches = parseHeight(candidate.height);
-
-      if (
-        candidateHeightInches >= userMinHeightInches &&
-        candidateHeightInches <= userMaxHeightInches
-      ) {
-        score += 2; // Full points
-      } else if (
-        candidateHeightInches >= userMinHeightInches - 3 &&
-        candidateHeightInches <= userMaxHeightInches + 3
-      ) {
-        score += 1; // Partial points (within 3 inches)
-      }
-    }
-
-    // Mutual Matching (candidate's preferences align with user's profile)
-    // This is a simplified example; a more robust implementation would involve checking all relevant partner preferences
-    if (
-      candidate.partnerReligion &&
-      candidate.partnerReligion !== "Any Religion" &&
-      user.religion === candidate.partnerReligion
-    )
-      score += 1;
-    if (
-      candidate.partnerCaste &&
-      candidate.partnerCaste.toLowerCase() !== "any" &&
-      user.caste === candidate.partnerCaste
-    )
-      score += 1;
-    if (
-      candidate.partnerCountry &&
-      candidate.partnerCountry !== "Any Country" &&
-      user.country === candidate.partnerCountry
-    )
-      score += 1;
-    if (
-      candidate.partnerLocation &&
-      candidate.partnerLocation !== "Any State" &&
-      user.state === candidate.partnerLocation
-    )
-      score += 1;
-    if (
-      candidate.partnerEducation &&
-      candidate.partnerEducation !== "Any Education" &&
-      user.education === candidate.partnerEducation
-    )
-      score += 1;
-    if (
-      candidate.partnerOccupation &&
-      candidate.partnerOccupation !== "Any Occupation" &&
-      user.occupation === candidate.partnerOccupation
-    )
-      score += 1;
-    if (
-      candidate.partnerMaritalStatus &&
-      candidate.partnerMaritalStatus !== "Any Status" &&
-      user.maritalStatus === candidate.partnerMaritalStatus
-    )
-      score += 1;
-
-    // Interests and Hobbies
-    const userHobbies = user.hobbies
-      ? user.hobbies.split(",").map((s) => s.trim().toLowerCase())
-      : [];
-    const userInterests = user.interests
-      ? user.interests.split(",").map((s) => s.trim().toLowerCase())
-      : [];
-    const candidateHobbies = candidate.hobbies
-      ? candidate.hobbies.split(",").map((s) => s.trim().toLowerCase())
-      : [];
-    const candidateInterests = candidate.interests
-      ? candidate.interests.split(",").map((s) => s.trim().toLowerCase())
-      : [];
-
-    const sharedHobbies = userHobbies.filter((hobby) =>
-      candidateHobbies.includes(hobby)
-    );
-    const sharedInterests = userInterests.filter((interest) =>
-      candidateInterests.includes(interest)
-    );
-
-    score += sharedHobbies.length * 0.5; // Award points for each shared hobby
-    score += sharedInterests.length * 0.5; // Award points for each shared interest
-
-    // Profile completeness
-    if (candidate.photos?.length > 0) score += 1;
-    if (candidate.aboutMe) score += 1;
-
-    // Recent activity bonus
-    if (candidate.lastActive) {
-      const daysSinceActive =
-        (Date.now() - new Date(candidate.lastActive)) / (1000 * 60 * 60 * 24);
-      if (daysSinceActive < 7) score += 2;
-      else if (daysSinceActive < 30) score += 1;
-    }
-
-    candidate.matchScore = score;
-  });
-
-  return candidates.sort(
-    (a, b) =>
-      b.matchScore - a.matchScore ||
-      new Date(b.lastActive || 0) - new Date(a.lastActive || 0)
-  );
-};
+const scoreAndSortCandidates = (candidates, user) => {logger.info(`[MatchService] Starting scoring process for ${candidates.length} candidates for user: ${user._id}`);candidates.forEach((candidate) => {let score = 0;logger.info(`[MatchService] --- Scoring candidate: ${candidate._id} ---`);if (user.partnerReligion && user.partnerReligion !== "Any Religion" && candidate.religion === user.partnerReligion) {score += 10;logger.info(`[MatchService] Candidate ${candidate._id}: Matched religion. Score: ${score}`);}if (user.partnerCaste && user.partnerCaste.toLowerCase() !== "any" && candidate.caste === user.partnerCaste) {score += 10;logger.info(`[MatchService] Candidate ${candidate._id}: Matched caste. Score: ${score}`);}if (user.partnerAgeMin && user.partnerAgeMax && candidate.dateOfBirth) {const userMinAge = parseInt(user.partnerAgeMin);const userMaxAge = parseInt(user.partnerAgeMax);const candidateAge = new Date().getFullYear() - new Date(candidate.dateOfBirth).getFullYear();if (candidateAge >= userMinAge && candidateAge <= userMaxAge) {score += 10;logger.info(`[MatchService] Candidate ${candidate._id}: Age within preferred range. Score: ${score}`);} else if (candidateAge >= userMinAge - 5 && candidateAge <= userMaxAge + 5) {score += 5;logger.info(`[MatchService] Candidate ${candidate._id}: Age slightly outside preferred range. Score: ${score}`);}}if (user.partnerHeightMin && user.partnerHeightMax && candidate.height) {const parseHeight = (heightStr) => {const parts = heightStr.match(/(\d+)\'(\d+)\"/);if (parts) {const feet = parseInt(parts[1]);const inches = parseInt(parts[2]);return feet * 12 + inches;}return 0;};const userMinHeightInches = parseHeight(user.partnerHeightMin);const userMaxHeightInches = parseHeight(user.partnerHeightMax);const candidateHeightInches = parseHeight(candidate.height);if (candidateHeightInches >= userMinHeightInches && candidateHeightInches <= userMaxHeightInches) {score += 7;logger.info(`[MatchService] Candidate ${candidate._id}: Height within preferred range. Score: ${score}`);} else if (candidateHeightInches >= userMinHeightInches - 3 && candidateHeightInches <= userMaxHeightInches + 3) {score += 3;logger.info(`[MatchService] Candidate ${candidate._id}: Height slightly outside preferred range. Score: ${score}`);}}if (user.partnerEducation && user.partnerEducation !== "Any Education" && candidate.education === user.partnerEducation) {score += 7;logger.info(`[MatchService] Candidate ${candidate._id}: Matched education. Score: ${score}`);}if (user.partnerOccupation && user.partnerOccupation !== "Any Occupation" && candidate.occupation === user.partnerOccupation) {score += 7;logger.info(`[MatchService] Candidate ${candidate._id}: Matched occupation. Score: ${score}`);}if (user.partnerIncome && user.partnerIncome !== "Any Income Range" && candidate.annualIncome === user.partnerIncome) {score += 7;logger.info(`[MatchService] Candidate ${candidate._id}: Matched income. Score: ${score}`);}if (user.partnerCountry && user.partnerCountry !== "Any Country" && candidate.country === user.partnerCountry) {score += 7;logger.info(`[MatchService] Candidate ${candidate._id}: Matched country. Score: ${score}`);}if (user.partnerLocation && user.partnerLocation !== "Any State" && candidate.state === user.partnerLocation) {score += 7;logger.info(`[MatchService] Candidate ${candidate._id}: Matched state. Score: ${score}`);}if (user.partnerMaritalStatus && user.partnerMaritalStatus !== "Any Status" && candidate.maritalStatus === user.partnerMaritalStatus) {score += 3;logger.info(`[MatchService] Candidate ${candidate._id}: Matched marital status. Score: ${score}`);}if (user.partnerBodyType && candidate.bodyType === user.partnerBodyType) {score += 3;logger.info(`[MatchService] Candidate ${candidate._id}: Matched body type. Score: ${score}`);}if (user.partnerComplexion && candidate.complexion === user.partnerComplexion) {score += 3;logger.info(`[MatchService] Candidate ${candidate._id}: Matched complexion. Score: ${score}`);}if (user.partnerPhysicalStatus && candidate.physicalStatus === user.partnerPhysicalStatus) {score += 3;logger.info(`[MatchService] Candidate ${candidate._id}: Matched physical status. Score: ${score}`);}if (user.partnerFamilyType && candidate.familyType === user.partnerFamilyType) {score += 3;logger.info(`[MatchService] Candidate ${candidate._id}: Matched family type. Score: ${score}`);}if (user.partnerFamilyStatus && candidate.familyStatus === user.partnerFamilyStatus) {score += 3;logger.info(`[MatchService] Candidate ${candidate._id}: Matched family status. Score: ${score}`);}if (user.partnerFamilyValues && candidate.familyValues === user.partnerFamilyValues) {score += 3;logger.info(`[MatchService] Candidate ${candidate._id}: Matched family values. Score: ${score}`);}if (user.partnerFatherOccupation && candidate.fatherOccupation === user.partnerFatherOccupation) {score += 3;logger.info(`[MatchService] Candidate ${candidate._id}: Matched father's occupation. Score: ${score}`);}if (user.partnerMotherOccupation && candidate.motherOccupation === user.partnerMotherOccupation) {score += 3;logger.info(`[MatchService] Candidate ${candidate._id}: Matched mother's occupation. Score: ${score}`);}if (user.partnerSiblings && candidate.siblings === user.partnerSiblings) {score += 3;logger.info(`[MatchService] Candidate ${candidate._id}: Matched siblings. Score: ${score}`);}if (user.partnerDiet && candidate.diet === user.partnerDiet) {score += 3;logger.info(`[MatchService] Candidate ${candidate._id}: Matched diet. Score: ${score}`);}if (user.partnerSmoking && candidate.smoking === user.partnerSmoking) {score += 3;logger.info(`[MatchService] Candidate ${candidate._id}: Matched smoking preference. Score: ${score}`);}if (user.partnerDrinking && candidate.drinking === user.partnerDrinking) {score += 3;logger.info(`[MatchService] Candidate ${candidate._id}: Matched drinking preference. Score: ${score}`);}const userHobbies = user.hobbies ? user.hobbies.split(",").map((s) => s.trim().toLowerCase()) : [];const userInterests = user.interests ? user.interests.split(",").map((s) => s.trim().toLowerCase()) : [];const candidateHobbies = candidate.hobbies ? candidate.hobbies.split(",").map((s) => s.trim().toLowerCase()) : [];const candidateInterests = candidate.interests ? candidate.interests.split(",").map((s) => s.trim().toLowerCase()) : [];const sharedHobbies = userHobbies.filter((hobby) => candidateHobbies.includes(hobby));const sharedInterests = userInterests.filter((interest) => candidateInterests.includes(interest));const hobbyPoints = Math.min(sharedHobbies.length, 5) * 1;const interestPoints = Math.min(sharedInterests.length, 5) * 1;score += hobbyPoints;score += interestPoints;if (hobbyPoints > 0) logger.info(`[MatchService] Candidate ${candidate._id}: Shared hobbies. Points: ${hobbyPoints}. Score: ${score}`);if (interestPoints > 0) logger.info(`[MatchService] Candidate ${candidate._id}: Shared interests. Points: ${interestPoints}. Score: ${score}`);if (candidate.photos?.length > 0) {score += 3;logger.info(`[MatchService] Candidate ${candidate._id}: Has photos. Score: ${score}`);}if (candidate.aboutMe) {score += 3;logger.info(`[MatchService] Candidate ${candidate._id}: Has 'about me'. Score: ${score}`);}if (candidate.lastActive) {const daysSinceActive = (Date.now() - new Date(candidate.lastActive)) / (1000 * 60 * 60 * 24);if (daysSinceActive < 7) {score += 3;logger.info(`[MatchService] Candidate ${candidate._id}: Recently active (<7 days). Score: ${score}`);} else if (daysSinceActive < 30) {score += 1;logger.info(`[MatchService] Candidate ${candidate._id}: Recently active (<30 days). Score: ${score}`);}}if (candidate.partnerReligion && candidate.partnerReligion !== "Any Religion" && user.religion === candidate.partnerReligion) {score += 5;logger.info(`[MatchService] Candidate ${candidate._id}: Mutual religion preference. Score: ${score}`);}if (candidate.partnerCaste && candidate.partnerCaste.toLowerCase() !== "any" && user.caste === candidate.partnerCaste) {score += 5;logger.info(`[MatchService] Candidate ${candidate._id}: Mutual caste preference. Score: ${score}`);}if (candidate.partnerCountry && candidate.partnerCountry !== "Any Country" && user.country === candidate.partnerCountry) {score += 5;logger.info(`[MatchService] Candidate ${candidate._id}: Mutual country preference. Score: ${score}`);}if (candidate.partnerLocation && candidate.partnerLocation !== "Any State" && user.state === candidate.partnerLocation) {score += 5;logger.info(`[MatchService] Candidate ${candidate._id}: Mutual state preference. Score: ${score}`);}if (candidate.partnerEducation && candidate.partnerEducation !== "Any Education" && user.education === candidate.partnerEducation) {score += 5;logger.info(`[MatchService] Candidate ${candidate._id}: Mutual education preference. Score: ${score}`);}if (candidate.partnerOccupation && candidate.partnerOccupation !== "Any Occupation" && user.occupation === candidate.partnerOccupation) {score += 5;logger.info(`[MatchService] Candidate ${candidate._id}: Mutual occupation preference. Score: ${score}`);}if (candidate.partnerMaritalStatus && candidate.partnerMaritalStatus !== "Any Status" && user.maritalStatus === candidate.partnerMaritalStatus) {score += 5;logger.info(`[MatchService] Candidate ${candidate._id}: Mutual marital status preference. Score: ${score}`);}candidate.matchScore = score;candidate.matchPercentage = Math.min(100, Math.round((score / MAX_SCORE) * 100));logger.info(`[MatchService] Final score for candidate ${candidate._id}: ${candidate.matchScore}, Percentage: ${candidate.matchPercentage}%`);});return candidates.map(candidate => ({...candidate.toObject(),_id: candidate._id.toString(),matchScore: candidate.matchScore,matchPercentage: candidate.matchPercentage,})).sort((a, b) =>b.matchPercentage - a.matchPercentage ||new Date(b.lastActive || 0) - new Date(a.lastActive || 0));};

@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../../contexts/Chat/AuthContext";
-import { getAllUsers } from "../../../services/userService";
+import { getMatchedUsers } from "../../../services/feedService"; // New import
 import { getUserRequests } from "../../../services/requestService";
 import {
   MessageCircle,
@@ -24,6 +24,7 @@ function ProfileCard({
   onSendInvite,
   inviteStatus,
   onMessage,
+  matchPercentage, // Add matchPercentage prop
 }) {
   const handleMessage = (e) => {
     e.stopPropagation();
@@ -49,6 +50,7 @@ function ProfileCard({
       transition: { duration: 0.2 },
     },
   };
+  console.log("matchPercentage", matchPercentage);
 
   return (
     <motion.div
@@ -85,6 +87,16 @@ function ProfileCard({
           >
             <Star className="w-3 h-3 fill-current" />
             Verified
+          </motion.div>
+        )}
+        {matchPercentage !== undefined && matchPercentage !== null && (
+          <motion.div
+            className="absolute top-4 left-4 bg-purple-600 text-white px-3 py-1 rounded-full text-sm font-semibold flex items-center gap-1 border border-red-500" // Added red border for visibility
+            initial={{ scale: 0, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ delay: 0.5, type: "spring", stiffness: 200 }}
+          >
+            {matchPercentage}% Match
           </motion.div>
         )}
       </div>
@@ -201,10 +213,7 @@ export default function MatrimonyFeed() {
     const fetchProfilesAndRequests = async () => {
       setLoading(true);
       try {
-        const allUsersData = await getAllUsers();
-        const fetchedProfiles = Array.isArray(allUsersData)
-          ? allUsersData
-          : allUsersData.users || [];
+        const fetchedProfiles = await getMatchedUsers();
         setProfiles(fetchedProfiles);
 
         if (user && user._id) {
@@ -248,8 +257,6 @@ export default function MatrimonyFeed() {
     .filter((profile) => {
       if (!user) return true;
 
-      const matchesGender =
-        genderFilter === "any" || profile.gender === genderFilter;
       const matchesHobbies =
         hobbiesFilter === "" ||
         (profile.hobbies &&
@@ -262,8 +269,8 @@ export default function MatrimonyFeed() {
             .includes(interestsFilter.toLowerCase()));
 
       return (
+        profile._id && // Ensure _id exists for key and filtering
         profile._id !== user._id &&
-        matchesGender &&
         matchesHobbies &&
         matchesInterests &&
         (activeFilter === "all" ||
@@ -359,7 +366,7 @@ export default function MatrimonyFeed() {
             </h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
               {/* Gender Filter */}
-              <div className="flex flex-col">
+              {/* <div className="flex flex-col">
                 <label
                   htmlFor="genderFilter"
                   className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 flex items-center gap-1"
@@ -377,7 +384,7 @@ export default function MatrimonyFeed() {
                   <option value="Female">Female</option>
                   <option value="Other">Other</option>
                 </select>
-              </div>
+              </div> */}
 
               {/* Hobbies Filter */}
               <div className="flex flex-col">
@@ -459,12 +466,13 @@ export default function MatrimonyFeed() {
             <AnimatePresence>
               {filteredProfiles.map((profile) => (
                 <ProfileCard
-                  key={profile._id}
+                  key={profile._id ? String(profile._id) : `fallback-${Math.random()}`}
                   profile={profile}
                   onViewProfile={handleViewProfile}
                   onSendInvite={handleSendInvite}
                   inviteStatus={inviteMap[profile._id] || "idle"}
                   onMessage={handleMessage}
+                  matchPercentage={profile.matchPercentage}
                 />
               ))}
             </AnimatePresence>

@@ -57,6 +57,11 @@ const userSchema = new mongoose.Schema(
     aboutMe: { type: String },
 
     // Partner Preferences
+    partnerGender: {
+      type: String,
+      enum: ["Male", "Female", "Other", "Any Gender", ""],
+      default: "",
+    },
     partnerAgeMin: { type: String },
     partnerAgeMax: { type: String },
     partnerHeightMin: { type: String },
@@ -114,8 +119,16 @@ const userSchema = new mongoose.Schema(
 
     // Privacy Settings
     privacy: {
-      profileVisibility: { type: String, enum: ["public", "premium-only", "private"], default: "public" },
-      contactVisibility: { type: String, enum: ["premium-only", "verified-only", "all"], default: "premium-only" },
+      profileVisibility: {
+        type: String,
+        enum: ["public", "premium-only", "private"],
+        default: "public",
+      },
+      contactVisibility: {
+        type: String,
+        enum: ["premium-only", "verified-only", "all"],
+        default: "premium-only",
+      },
       dataUsage: { type: Boolean, default: true },
       marketingCommunications: { type: Boolean, default: false },
     },

@@ -25,6 +25,7 @@ import visitorRoutes from "./routes/visitorRoutes.js";
 import requestRoutes from "./routes/requestRoutes.js";
 import subscriptionRoutes from "./routes/subscriptionRoutes.js";
 import verificationRoutes from "./routes/verificationRoutes.js";
+import feedRoutes from "./routes/feedRoutes.js";
 import { checkSubscriptionAndTrial } from "./middleware/subscriptionCheck.js";
 import { authenticate } from "./middleware/auth.js";
 const __filename = fileURLToPath(import.meta.url);
@@ -96,6 +97,7 @@ app.use("/api/v1/visiter", authenticate, visitorRoutes);
 app.use("/api/v1/requests", authenticate, requestRoutes);
 app.use("/api/v1/subscription", authenticate, subscriptionRoutes);
 app.use("/api/v1/verification", authenticate, verificationRoutes);
+app.use("/api/v1/feed", authenticate, feedRoutes);
 
 // 404 handler
 app.use((req, res) => {
