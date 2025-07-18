@@ -1,167 +1,171 @@
-import React, { useState } from "react";
-import narendraImg from "../assets/user-1.png";
-import tanmayImg from "../assets/user-2.png";
-import amitImg from "../assets/user-3.png";
-import sakshiImg from "../assets/user-4.png";
-
-const users = [
-  {
-    id: 1,
-    username: "Narendra Khamkar",
-    email: "narendra@gmail.com",
-    lastActive: "9-4-2025",
-    status: "Inactive",
-    photo: narendraImg,
-  },
-  {
-    id: 2,
-    username: "Tanmay Nagawade",
-    email: "tanmay@gmail.com",
-    lastActive: "18-6-2025",
-    status: "Inactive",
-    photo: tanmayImg,
-  },
-  {
-    id: 3,
-    username: "Amit M",
-    email: "amit@gmail.com",
-    lastActive: "22-6-2025",
-    status: "Inactive",
-    photo: amitImg,
-  },
-  {
-    id: 4,
-    username: "Sakshi K",
-    email: "sakshi@gmail.com",
-    lastActive: "5-7-2025",
-    status: "Inactive",
-    photo: sakshiImg,
-  },
-];
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export default function InactiveUser() {
-  const [selectedDays, setSelectedDays] = useState("1");
+  const [users, setUsers] = useState([]);
   const [actions, setActions] = useState({});
+  const [days, setDays] = useState("10");
 
-  const today = new Date();
-  const cutoffDate = new Date();
-  cutoffDate.setDate(today.getDate() - Number(selectedDays));
+  useEffect(() => {
+    axios
+      .get("/api/users/inactive", { params: { days } })
+      .then((res) => setUsers(res.data))
+      .catch((err) => console.error("Error fetching users:", err));
+  }, [days]);
 
-  const filteredAndSortedUsers = [...users]
-    .filter((user) => {
-      const [day, month, year] = user.lastActive.split("-").map(Number);
-      const lastActiveDate = new Date(year, month - 1, day);
-      return lastActiveDate < cutoffDate; // Users inactive for more than selected days
-    })
-    .sort((a, b) => {
-      const [aDay, aMonth, aYear] = a.lastActive.split("-").map(Number);
-      const [bDay, bMonth, bYear] = b.lastActive.split("-").map(Number);
-      const dateA = new Date(aYear, aMonth - 1, aDay);
-      const dateB = new Date(bYear, bMonth - 1, bDay);
-      return dateA - dateB;
-    });
-
-  const handleActionChange = (userId, value) => {
-    setActions((prev) => ({ ...prev, [userId]: value }));
+  const handleSelectChange = (id, value) => {
+    setActions((prev) => ({ ...prev, [id]: value }));
+    if (value === "follow-up") {
+      toast.info(`Follow-up recorded.`); //.info use for showing info messages
+    }
+    if (value === "cleanup") {
+      toast.info(`Cleanup selected. Click 🗑️ to delete ${users.find(u => u._id === id)?.firstName}'s Data.`);
+    }
   };
 
-  const handleSendEmail = (user) => {
-    alert(`📧 Reminder email sent to ${user.email} to encourage account reactivation.`);
-    
+  const sendFollowUpEmail = (id) => {
+    axios
+      .post(`/api/users/send-email/${id}`)
+      .then(() => {
+        toast.success("🖂 Follow-up email sent successfully!");
+      })
+      .catch((err) => {
+        console.error("Error sending follow-up:", err);
+        toast.error("Failed to send email.");
+      });
+  };
+
+  const markForCleanup = (id) => {
+    axios
+      .post(`/api/users/action/${id}`, { action: "cleanup" })
+      .then(() => {
+        toast.success("User deleted successfully");
+        setUsers((prev) => prev.filter((u) => u._id !== id)); // remove user from UI
+      })
+      .catch((err) => {
+        console.error("Error deleting user:", err);
+        toast.error("Failed to delete user.");
+      });
   };
 
   return (
-    <div className="max-w-4xl mt-5 mx-auto bg-sky-50 p-6 rounded-xl shadow-md">
-      <h1 className="text-3xl font-bold text-gray-900 mb-4 text-center">
+    <div className="p-8 max-w-6xl mx-auto bg-blue-50 min-h-screen rounded-3xl shadow-lg">
+      <h1 className="text-3xl font-bold text-center mb-6 text-gray-800">
         Inactive User Management
       </h1>
 
-      <div className="mb-6 text-center">
-        <label className="text-black-700 font-bold mr-2">
+      <div className="flex flex-col md:flex-row gap-4 justify-center mb-6 items-center">
+        <label className="font-medium text-gray-700">
           Show users inactive for more than:
         </label>
         <select
-          className="px-3 py-2 rounded-md border text-sm hover:bg-gray-100"
-          value={selectedDays}
-          onChange={(e) => setSelectedDays(e.target.value)}
+          onChange={(e) => setDays(e.target.value)}
+          value={days}
+          className="px-4 py-2 border rounded-md text-sm bg-white shadow-sm"
         >
-          <option className="text-gray-700 font-bold" value="1">Select</option>
-          <option value="7">7 days</option>
+          <option value="10">10 days</option>
           <option value="15">15 days</option>
           <option value="30">30 days</option>
         </select>
       </div>
 
-      <div className="overflow-x-auto rounded-xl bg-gray-50 shadow">
-        <table className="w-full text-sm text-left min-w-[700px]">
-          <thead className="bg-sky-100 text-center">
+      <div className="overflow-x-auto rounded-xl bg-green-50 shadow">
+        <table className="w-full text-sm min-w-[900px] text-center">
+          <thead className="bg-blue-100">
             <tr>
-              <th className="p-3 font-bold">Username</th>
-              <th className="p-3 font-bold">Email</th>
-              <th className="p-3 font-bold">Last Active</th>
-              <th className="p-3 font-bold">Status</th>
-              <th className="p-3 font-bold">Action</th>
-              <th className="p-3 font-bold">Notify</th>
+              <th className="p-4">Name</th>
+              <th className="p-4">Email</th>
+              <th className="p-4">Last Active</th>
+              <th className="p-4">Status</th>
+              <th className="p-4">Action</th>
+              <th className="p-4">Notify</th>
             </tr>
           </thead>
           <tbody>
-            {filteredAndSortedUsers.map((user) => (
-              <tr key={user.id} className="text-center">
-                <td className="p-3 flex items-center gap-3">
-                  <img
-                    src={user.photo}
-                    alt={user.username}
-                    className="w-10 h-10 rounded-full object-cover"
-                  />
-                  <span className="text-black-700 font-bold">
-                    {user.username}
-                  </span>
-                </td>
-                <td className="p-3 text-black-700 ">{user.email}</td>
-                <td className="p-3 text-black-700 ">{user.lastActive}</td>
-                <td className="p-3">
-                  <span
-                    className={`px-2 py-1 rounded-md text-xs font-semibold whitespace-nowrap transition duration-200 cursor-pointer ${
-                      user.status === "Active"
-                        ? "bg-green-100 text-green-700 hover:bg-green-200 hover:text-green-800"
-                        : "bg-red-100 text-red-600 hover:bg-red-200 hover:text-red-700"
-                    }`}
-                  >
-                    {user.status}
-                  </span>
-                </td>
-                <td className="p-3">
-                  <select
-                    className="px-2 py-1 border rounded-md text-sm"
-                    value={actions[user.id] || ""}
-                    onChange={(e) => handleActionChange(user.id, e.target.value)}
-                  >
-                    <option value="">Select</option>
-                    <option value="follow-up">Follow-up</option>
-                    <option value="cleanup">Cleanup</option>
-                  </select>
-                </td>
-                <td className="p-3">
-                  <button
-                    onClick={() => handleSendEmail(user)}
-                    className="text-orange-600 hover:text-orange-800 text-xl"
-                    title="Send Reminder Email"
-                  >
-                    📧
-                  </button>
-                </td>
-              </tr>
-            ))}
-            {filteredAndSortedUsers.length === 0 && (
+            {users.length ? (
+              users.map((u) => {
+                const inactive =
+                  new Date(u.lastActive) <
+                  new Date(Date.now() - days * 24 * 60 * 60 * 1000);
+
+                return (
+                  <tr key={u._id} className="border-b hover:bg-gray-50">
+                    <td className="p-4 font-medium text-gray-800">
+                      {u.firstName} {u.lastName}
+                    </td>
+                    <td className="p-4 text-gray-700">{u.email}</td>
+                    <td className="p-4 font-semibold text-gray-800">
+                      {new Date(u.lastActive).toLocaleDateString("en-GB")}
+                    </td>
+                    <td className="p-4">
+                      <span
+                        className={`px-3 py-1 text-xs font-bold rounded-full ${
+                          inactive
+                            ? "bg-red-100 text-red-600"
+                            : "bg-green-100 text-green-700"
+                        }`}
+                      >
+                        {inactive ? "Inactive" : "Active"}
+                      </span>
+                    </td>
+                    <td className="p-4">
+                      <select
+                        className="px-3 py-1 border rounded-md text-sm"
+                        value={actions[u._id] || ""}
+                        onChange={(e) =>
+                          handleSelectChange(u._id, e.target.value)
+                        }
+                      >
+                        <option value="">Select</option>
+                        <option value="follow-up">Follow-up</option>
+                        <option value="cleanup">Cleanup</option>
+                      </select>
+                    </td>
+                    <td className="p-4">
+                      {actions[u._id] === "follow-up" && (
+                        <button
+                          onClick={() => sendFollowUpEmail(u._id)}
+                          title="Send Follow-up Email"
+                          className="text-blue-600 hover:text-blue-800 text-xl"
+                        >
+                          🖂
+                        </button>
+                      )}
+                      {actions[u._id] === "cleanup" && (
+                        <button
+                          onClick={() => {
+                            if (
+                              window.confirm(
+                                "Are you sure you want to delete this user?"
+                              )
+                            ) {
+                              markForCleanup(u._id);
+                            }
+                          }}
+                          title="Delete User"
+                          className="text-red-500 hover:text-red-700 text-xl"
+                        >
+                          🗑️
+                        </button>
+                      )}
+                    </td>
+                  </tr>
+                );
+              })
+            ) : (
               <tr>
-                <td colSpan="6" className="p-4 text-center text-gray-500">
-                  No inactive users found for the selected period.
+                <td colSpan="6" className="p-6 text-center text-gray-500">
+                  No users found.
                 </td>
               </tr>
             )}
           </tbody>
         </table>
       </div>
+
+      <ToastContainer />
     </div>
   );
 }
