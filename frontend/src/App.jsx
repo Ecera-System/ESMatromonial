@@ -26,6 +26,18 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import NotificationsPage from "./pages/NotificationsPage";
 import "./App.css";
 import UserProfilePage from "./pages/UserProfilePage";
+import AdminSignUp from './components/Admin/Auth/AdminSignUp';
+import AdminSignIn from './components/Admin/Auth/AdminSignIn';
+import AdminDashboard from './components/Admin/Dashboard/AdminDashboard';
+import AdminFeedbackPage from './pages/AdminFeedbackPage';
+import InactiveUser from './components/Admin/InactiveUser/InactiveUser';
+import CouponDashboard from './components/Admin/CouponManagement/CouponDashboard';
+import CreateCoupon from './components/Admin/CouponManagement/CreateCoupon';
+import CouponManager from './components/Admin/CouponManagement/CouponManager';
+import UsersPage from './components/Admin/UserManagemnet/UsersPage';
+import ReportsPage from './components/Admin/Reports/ReportsPage';
+import AdminSettingsPage from './components/Admin/Settings/AdminSettingsPage';
+import AdminProtectedRoute from './components/Admin/AdminProtectedRoute';
 
 function App() {
   return (
@@ -38,7 +50,56 @@ function App() {
               <Route path="/" element={<Landing />} />
               <Route path="/login" element={<Login />} />
               <Route path="/signup" element={<Signup />} />
-
+                
+                {/* Admin Routes - Separate from user layout with AdminProtectedRoute */}
+            <Route path="/admin/signup" element={<AdminSignUp />} />
+            <Route path="/admin/signin" element={<AdminSignIn />} />
+            <Route path="/admin/dashboard" element={
+              <AdminProtectedRoute>
+                <AdminDashboard />
+              </AdminProtectedRoute>
+            } />
+            <Route path="/admin/users" element={
+              <AdminProtectedRoute>
+                <UsersPage users={[]} onUpdateUserStatus={() => {}} />
+              </AdminProtectedRoute>
+            } />
+            <Route path="/admin/reports" element={
+              <AdminProtectedRoute>
+                <ReportsPage reports={[]} onUpdateStatus={() => {}} />
+              </AdminProtectedRoute>
+            } />
+            <Route path="/admin/settings" element={
+              <AdminProtectedRoute>
+                <AdminSettingsPage />
+              </AdminProtectedRoute>
+            } />
+            <Route path="/admin/feedback" element={
+              <AdminProtectedRoute>
+                <AdminFeedbackPage />
+              </AdminProtectedRoute>
+            } />
+            <Route path="/admin/inactive-users" element={
+              <AdminProtectedRoute>
+                <InactiveUser />
+              </AdminProtectedRoute>
+            } />
+            <Route path="/admin/coupons" element={
+              <AdminProtectedRoute>
+                <CouponDashboard />
+              </AdminProtectedRoute>
+            } />
+            <Route path="/admin/coupons/create" element={
+              <AdminProtectedRoute>
+                <CreateCoupon />
+              </AdminProtectedRoute>
+            } />
+            <Route path="/admin/coupons/edit/:id" element={
+              <AdminProtectedRoute>
+                <CouponManager />
+              </AdminProtectedRoute>
+            } />
+            
               {/* User Layout Routes - All protected routes with Header and Sidebar */}
               <Route
                 path="/"
