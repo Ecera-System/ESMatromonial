@@ -1,8 +1,6 @@
 import React, { useState } from 'react';
 import { 
-  Users, 
-  UserCheck, 
-  MessageSquare, 
+  
   BarChart3, 
   Settings, 
   Crown,
