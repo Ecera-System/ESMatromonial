@@ -12,7 +12,7 @@ import "./config/passport.js";
 import googleRouter from "./routes/googleAuth.js";
 import cors from "cors";
 import logger from "./utils/logger.js";
-import { initializeScheduler } from "./services/schedulerService.js";
+import { startSchedulers } from "./services/schedulerService.js";
 import path from "path";
 import { fileURLToPath } from "url";
 import http from "http";
@@ -28,8 +28,8 @@ import verificationRoutes from "./routes/verificationRoutes.js";
 import feedRoutes from "./routes/feedRoutes.js";
 import { checkSubscriptionAndTrial } from "./middleware/subscriptionCheck.js";
 import { authenticate } from "./middleware/auth.js";
-import couponRoutes from './routes/couponRoutes.js';
-import analyticsRoutes from './routes/analyticsRoutes.js';
+import couponRoutes from "./routes/couponRoutes.js";
+import analyticsRoutes from "./routes/analyticsRoutes.js";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -61,7 +61,7 @@ const startServer = async () => {
   server.listen(PORT, () => {
     logger.info(`Server is running on http://localhost:${PORT}`);
     // Initialize the daily recommendation scheduler
-    initializeScheduler();
+    startSchedulers();
   });
 };
 
@@ -89,8 +89,8 @@ app.use("/api/v1/auth", userAuthRouter);
 app.use("/api/v1/users", authenticate, userRouter);
 app.use("/api/v1/auth/admin", adminAuthRouter);
 app.use("/api/v1/admin", authenticate, adminRouter);
-app.use('/api/v1/admin/coupons', couponRoutes);
-app.use('/api/v1/admin/analytics', analyticsRoutes);
+app.use("/api/v1/admin/coupons", couponRoutes);
+app.use("/api/v1/admin/analytics", analyticsRoutes);
 app.use("/api/v1/auth", googleRouter);
 app.use("/api/v1/calls", authenticate, callRouter);
 app.use("/api/v1/chat", authenticate, chatRoutes);

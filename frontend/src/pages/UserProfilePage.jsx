@@ -141,7 +141,7 @@ export default function UserProfilePage({ isDarkMode }) {
           The profile you're looking for doesn't exist or may have been removed
         </p>
         <button
-          onClick={() => navigate("/")}
+          onClick={() => navigate("/dashboard")}
           className="px-6 py-3 rounded-full font-medium bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:shadow-lg transition-all"
         >
           Discover Other Profiles

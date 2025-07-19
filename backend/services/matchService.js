@@ -2,7 +2,7 @@ import User from "../models/User.js";
 import logger from "../utils/logger.js";
 
 // Define a maximum possible score for percentage calculation
-const MAX_SCORE = 150; // This will be refined based on the sum of all max weights
+const MAX_SCORE = 127; // This will be refined based on the sum of all max weights
 
 export const getDailyRecommendations = async (userId, limit = 7) => {
   logger.info(`[MatchService] Fetching daily recommendations for user: ${userId}`);
@@ -14,14 +14,14 @@ export const getDailyRecommendations = async (userId, limit = 7) => {
   logger.info(`[MatchService] Base query built for user ${userId}: ${JSON.stringify(query)}`);
 
   // 2. Find candidates
-  let candidates = await findCandidates(query, user);
-  logger.info(`[MatchService] Found ${candidates.length} candidates after initial filtering for user ${userId}.`);
+  const { candidates, fallbackTriggered } = await findCandidates(query, user);
+  logger.info(`[MatchService] Found ${candidates.length} candidates after initial filtering for user ${userId}. Fallback triggered: ${fallbackTriggered}`);
 
   // 3. Score and sort candidates
-  candidates = scoreAndSortCandidates(candidates, user);
-  logger.info(`[MatchService] Scored and sorted ${candidates.length} candidates for user ${userId}.`);
+  const scoredCandidates = scoreAndSortCandidates(candidates, user);
+  logger.info(`[MatchService] Scored and sorted ${scoredCandidates.length} candidates for user ${userId}.`);
 
-  return candidates.slice(0, limit);
+  return { profiles: scoredCandidates.slice(0, limit), fallbackTriggered };
 };
 
 export const getMatchedUsers = async (userId) => {
@@ -34,13 +34,13 @@ export const getMatchedUsers = async (userId) => {
   const query = buildBaseQuery(user);
   logger.info(`[MatchService] Base query built for user ${userId}: ${JSON.stringify(query)}`);
 
-  let candidates = await findCandidates(query, user);
-  logger.info(`[MatchService] Found ${candidates.length} candidates after initial filtering for user ${userId}.`);
+  const { candidates, fallbackTriggered } = await findCandidates(query, user);
+  logger.info(`[MatchService] Found ${candidates.length} candidates after initial filtering for user ${userId}. Fallback triggered: ${fallbackTriggered}`);
 
-  candidates = scoreAndSortCandidates(candidates, user);
-  logger.info(`[MatchService] Scored and sorted ${candidates.length} candidates for user ${userId}.`);
+  const scoredCandidates = scoreAndSortCandidates(candidates, user);
+  logger.info(`[MatchService] Scored and sorted ${scoredCandidates.length} candidates for user ${userId}.`);
 
-  return candidates;
+  return { profiles: scoredCandidates, fallbackTriggered };
 };
 
 // Query Builder
@@ -97,7 +97,8 @@ const buildBaseQuery = (user) => {
 
 // Candidate Finder with Fallback
 const findCandidates = async (query, user) => {
-  let candidates = await User.find(query).lean();
+  let candidates = await User.find(query);
+  let fallbackTriggered = false;
 
   // Helper to create a base query for fallbacks, always excluding self and skipped users
   const getBaseFallbackQuery = () => {
@@ -144,19 +145,28 @@ const findCandidates = async (query, user) => {
     candidates = await User.find(minimalQuery);
   }
 
-  // Fourth fallback: If still no candidates, consider all active, verified users (excluding self)
-  // This will re-introduce previously skipped users if no new ones are available.
+  // Fourth fallback: If still no candidates, try finding any active, verified user not yet skipped
   if (candidates.length === 0) {
-    logger.info("Still no matches, re-introducing previously skipped users as a last resort.");
+    logger.info("Still no matches, trying to find any active, verified user not yet skipped.");
+    const minimalQueryNotSkipped = getBaseFallbackQuery(); // This already excludes skipped users
+    minimalQueryNotSkipped.gender = query.gender; // Re-add gender filter
+    candidates = await User.find(minimalQueryNotSkipped);
+    fallbackTriggered = true;
+  }
+
+  // Fifth (absolute last) fallback: If still no candidates, re-introduce previously skipped users
+  if (candidates.length === 0) {
+    logger.info("Still no matches, re-introducing previously skipped users as an absolute last resort.");
     candidates = await User.find({
       _id: { $ne: user._id },
       accountStatus: "active",
       isVerified: true,
-      gender: query.gender, // Maintain gender filter
+      gender: query.gender, // Ensure gender filter is always applied
     });
+    fallbackTriggered = true;
   }
 
-  return candidates;
+  return { candidates, fallbackTriggered };
 };
 
 // Scoring Engine

@@ -2,7 +2,6 @@ import express from "express";
 import { getMatchedUsers } from "../services/matchService.js";
 import { authenticate } from "../middleware/auth.js";
 
-
 const router = express.Router();
 
 // @route   GET /api/feed/matched-users
@@ -12,7 +11,6 @@ router.get("/matched-users", authenticate, async (req, res) => {
   try {
     const userId = req.user.id; // Assuming user ID is available from protect middleware
     const matchedUsers = await getMatchedUsers(userId);
-    console.log(matchedUsers);
 
     res.json(matchedUsers);
   } catch (error) {

@@ -50,7 +50,6 @@ function ProfileCard({
       transition: { duration: 0.2 },
     },
   };
-  console.log("matchPercentage", matchPercentage);
 
   return (
     <motion.div
@@ -213,23 +212,26 @@ export default function MatrimonyFeed() {
     const fetchProfilesAndRequests = async () => {
       setLoading(true);
       try {
-        const fetchedProfiles = await getMatchedUsers();
+        const { profiles: fetchedProfiles } = await getMatchedUsers();
+        // console.log(fetchedProfiles);
+
         setProfiles(fetchedProfiles);
 
         if (user && user._id) {
           const userRequests = await getUserRequests();
           const newInviteMap = {};
           fetchedProfiles.forEach((profile) => {
+            if (!profile) return; // Add null check for profile
             if (profile._id === user._id) return;
             const sentRequest = userRequests.sent.find(
-              (req) => req.receiver._id === profile._id
+              (req) => req.receiver && req.receiver._id === profile._id
             );
             if (sentRequest) {
               newInviteMap[profile._id] = sentRequest.status;
               return;
             }
             const receivedRequest = userRequests.received.find(
-              (req) => req.sender._id === profile._id
+              (req) => req.sender && req.sender._id === profile._id
             );
             if (receivedRequest) {
               newInviteMap[profile._id] =
@@ -253,7 +255,7 @@ export default function MatrimonyFeed() {
     fetchProfilesAndRequests();
   }, [user]);
 
-  const filteredProfiles = profiles
+  const filteredProfiles = (profiles || [])
     .filter((profile) => {
       if (!user) return true;
 
@@ -278,10 +280,14 @@ export default function MatrimonyFeed() {
       );
     })
     .sort((a, b) => {
-      // Prioritize verified users
+      // Primary sort: by matchPercentage (descending)
+      if (b.matchPercentage !== a.matchPercentage) {
+        return b.matchPercentage - a.matchPercentage;
+      }
+      // Secondary sort: Prioritize verified users
       if (a.isVerified && !b.isVerified) return -1;
       if (!a.isVerified && b.isVerified) return 1;
-      // Then sort by creation date (newest first) or another relevant field
+      // Tertiary sort: by creation date (newest first)
       return new Date(b.createdAt) - new Date(a.createdAt);
     });
 
@@ -466,7 +472,11 @@ export default function MatrimonyFeed() {
             <AnimatePresence>
               {filteredProfiles.map((profile) => (
                 <ProfileCard
-                  key={profile._id ? String(profile._id) : `fallback-${Math.random()}`}
+                  key={
+                    profile._id
+                      ? String(profile._id)
+                      : `fallback-${Math.random()}`
+                  }
                   profile={profile}
                   onViewProfile={handleViewProfile}
                   onSendInvite={handleSendInvite}

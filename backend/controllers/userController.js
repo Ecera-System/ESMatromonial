@@ -5,8 +5,9 @@ import {
   deleteUserService,
 } from "../services/userService.js";
 import { getDailyRecommendations } from "../services/matchService.js";
-import { getTodayRecommendation } from "../services/schedulerService.js";
+
 import User from "../models/User.js";
+import DailyRecommendation from "../models/DailyRecommendation.js";
 import logger from "../utils/logger.js";
 import { createNotification } from "../services/notificationService.js";
 import mongoose from "mongoose";
@@ -308,7 +309,8 @@ export const getDailyRecommendation = async (req, res) => {
     logger.info(`Fetching daily recommendation for user: ${userId}`);
 
     // First try to get today's pre-generated recommendation
-    let todayRecommendation = await getTodayRecommendation(userId);
+    const DailyRecommendation = (await import("../models/DailyRecommendation.js")).default;
+    let todayRecommendation = await DailyRecommendation.findOne({ userId: userId, isViewed: false, isSkipped: false, isLiked: false });
 
     if (todayRecommendation) {
       // Populate the recommendedUserId to get user details including avatar
@@ -331,7 +333,7 @@ export const getDailyRecommendation = async (req, res) => {
     );
 
     // Fallback to on-demand generation
-    const recommendations = await getDailyRecommendations(userId, 1);
+    const { profiles: recommendations } = await getDailyRecommendations(userId);
 
     if (!recommendations.length) {
       logger.warn(`No recommendations found for user: ${userId}`);
@@ -347,25 +349,50 @@ export const getDailyRecommendation = async (req, res) => {
       });
     }
 
+    // Fetch the current user's skipped users to filter out
+    const currentUser = await User.findById(userId).select('skippedUsers').lean();
+    const skippedUserIds = new Set(currentUser.skippedUsers.map(id => id.toString()));
+
+    let nextRecommendation = null;
+    for (const rec of recommendations) {
+      if (!skippedUserIds.has(rec._id.toString())) {
+        nextRecommendation = rec;
+        break;
+      }
+    }
+
+    if (!nextRecommendation) {
+      logger.warn(`All generated recommendations were skipped for user: ${userId}`);
+      return res.status(404).json({
+        message:
+          "No new recommendations found based on your current preferences. All available recommendations have been skipped.",
+        suggestions: [
+          "Try adjusting your partner preferences to broaden your search.",
+          "Complete your profile to unlock more potential matches.",
+          "Consider resetting your skipped users list to see them again (if you wish).",
+          "Check back later, new users are joining all the time!",
+        ],
+      });
+    }
+
     // Return the on-demand recommendation
     logger.info(
       `Successfully generated on-demand recommendation for user ${userId}`
     );
 
     // Manually select public fields for the on-demand recommendation
-    const recommendedUser = recommendations[0];
     const filteredRecommendedUser = {};
     publicUserFields.split(" ").forEach((field) => {
-      if (recommendedUser[field] !== undefined) {
-        filteredRecommendedUser[field] = recommendedUser[field];
+      if (nextRecommendation[field] !== undefined) {
+        filteredRecommendedUser[field] = nextRecommendation[field];
       }
     });
-    filteredRecommendedUser._id = recommendedUser._id; // Ensure _id is always included
+    filteredRecommendedUser._id = nextRecommendation._id; // Ensure _id is always included
 
     const onDemandRecommendation = {
       recommendedUserId: filteredRecommendedUser,
-      matchScore: recommendedUser.matchScore,
-      matchPercentage: calculateMatchPercentage(recommendedUser.matchScore),
+      matchScore: nextRecommendation.matchScore,
+      matchPercentage: calculateMatchPercentage(nextRecommendation.matchScore),
       isOnDemand: true,
     };
     return res.json({
@@ -454,7 +481,7 @@ export const likeRecommendation = async (req, res) => {
 
 // Helper function
 const calculateMatchPercentage = (score) => {
-  const maxPossibleScore = 10; // Adjust based on your scoring system
+  const maxPossibleScore = 127; // Adjust based on your scoring system
   return Math.min(100, Math.round((score / maxPossibleScore) * 100));
 };
 

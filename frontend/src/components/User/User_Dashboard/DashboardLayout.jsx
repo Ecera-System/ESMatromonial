@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { Check } from "lucide-react";
 import { useAuth } from "../../../contexts/Chat/AuthContext";
 import axios from "axios";
+import notificationService from "../../../services/notificationService";
 
 const DashboardLayout = () => {
   const [showTrialPopup, setShowTrialPopup] = useState(false);
@@ -23,6 +24,12 @@ const DashboardLayout = () => {
 
         if (isNewUserFlag && diffDays > 0) {
           setShowTrialPopup(true);
+          notificationService.showNotification({
+            title: "Complete Your Profile!",
+            body: "To get the best matches and experience, please update your profile now.",
+            icon: "/path/to/your/icon.png", // You might want to add a relevant icon here
+            onClick: () => navigate("/profile"),
+          });
         }
       } else {
         setTrialDaysRemaining(0);
@@ -82,8 +89,8 @@ const DashboardLayout = () => {
                 </span>{" "}
                 of free premium features!
               </p>
-              <p className="text-md text-gray-600 dark:text-gray-300 mb-6">
-                Complete your profile to get the best matches and experience.
+              <p className="text-md text-gray-600 dark:text-gray-300 mb-6 font-semibold">
+                To unlock the full potential of your trial and receive the best matches, it's crucial to complete your profile now!
               </p>
               <button
                 onClick={() => {

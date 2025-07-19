@@ -212,7 +212,11 @@ function DailyRecommendations() {
         ) : error ? (
           <div className="flex flex-col items-center justify-center h-40 text-center text-red-500">
             <div className="text-2xl mb-2">😕</div>
-            <div>{error}</div>
+            {error === "Partner gender not specified" ? (
+              <div>Please specify your partner's gender in your profile settings to receive daily recommendations.</div>
+            ) : (
+              <div>{error}</div>
+            )}
             <button
               className="mt-4 px-4 py-2 bg-blue-500 text-white rounded-full"
               onClick={fetchRecommendation}

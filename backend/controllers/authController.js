@@ -39,10 +39,10 @@ export const register = async (req, res) => {
     // Create a welcome notification
     await createNotification({
       user: userData._id,
-      type: 'welcome',
-      title: 'Welcome to ESMatrimonial!',
+      type: "welcome",
+      title: "Welcome to ESMatrimonial!",
       message: `Hi ${userData.firstName}, welcome to our platform! We're excited to have you here.`,
-      link: '/profile',
+      link: "/profile",
     });
 
     // Send welcome email
@@ -258,13 +258,15 @@ export const resetPassword = async (req, res) => {
     await user.save();
 
     // Create a password change notification
-    logger.info(`Creating password change notification for user: ${user.email}`);
+    logger.info(
+      `Creating password change notification for user: ${user.email}`
+    );
     await createNotification({
       user: user._id,
-      type: 'password_change',
-      title: 'Password Changed',
-      message: 'Your password has been successfully changed.',
-      link: '/settings', // Or a relevant link
+      type: "password_change",
+      title: "Password Changed",
+      message: "Your password has been successfully changed.",
+      link: "/settings", // Or a relevant link
     });
 
     logger.info(`Password reset successful for user: ${user.email}`);
@@ -423,7 +425,10 @@ export const changePassword = async (req, res) => {
       return res.status(404).json({ error: "User not found" });
     }
 
-    const isPasswordValid = await bcrypt.compare(currentPassword, user.password);
+    const isPasswordValid = await bcrypt.compare(
+      currentPassword,
+      user.password
+    );
     if (!isPasswordValid) {
       return res.status(401).json({ error: "Invalid current password" });
     }
@@ -433,10 +438,10 @@ export const changePassword = async (req, res) => {
 
     await createNotification({
       user: user._id,
-      type: 'password_change',
-      title: 'Password Changed',
-      message: 'Your password has been successfully changed from settings.',
-      link: '/settings',
+      type: "password_change",
+      title: "Password Changed",
+      message: "Your password has been successfully changed from settings.",
+      link: "/settings",
     });
 
     logger.info(`Password changed for user: ${user.email}`);

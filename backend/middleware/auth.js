@@ -2,8 +2,8 @@ import jwt from "jsonwebtoken";
 import User from "../models/User.js";
 import Admin from "../models/Admin.js";
 
-const JWT_SECRET = process.env.JWT_SECRET || "yoursecret";
-const ADMIN_JWT_SECRET = process.env.JWT_SECRET || "adminsecret";
+const JWT_SECRET = process.env.JWT_SECRET;
+const ADMIN_JWT_SECRET = process.env.JWT_SECRET;
 
 // Middleware to authenticate any user (user or admin)
 export const authenticate = async (req, res, next) => {

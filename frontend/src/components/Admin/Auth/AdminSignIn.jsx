@@ -1,5 +1,14 @@
 import React, { useState } from "react";
-import { Mail, Lock, Eye, EyeOff, LogIn, Crown, Shield, ArrowRight } from "lucide-react";
+import {
+  Mail,
+  Lock,
+  Eye,
+  EyeOff,
+  LogIn,
+  Crown,
+  Shield,
+  ArrowRight,
+} from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 
 const AdminSignIn = () => {
@@ -62,10 +71,8 @@ const AdminSignIn = () => {
 
         console.log("Admin login successful! Redirecting to dashboard...");
 
-        // Redirect to admin dashboard
-        setTimeout(() => {
-          navigate("/admin/dashboard", { replace: true });
-        }, 100);
+        // Redirect to admin dashboard immediately
+        navigate("/admin/dashboard", { replace: true });
       } else {
         console.error("Admin login failed:", data);
         setError(data.error || "Login failed. Please try again.");
@@ -90,7 +97,9 @@ const AdminSignIn = () => {
             <h1 className="text-xl font-bold text-gray-900">Admin Portal</h1>
           </div>
           <div className="flex items-center space-x-4">
-            <span className="text-sm text-gray-600">Don't have an account?</span>
+            <span className="text-sm text-gray-600">
+              Don't have an account?
+            </span>
             <Link
               to="/admin/signup"
               className="flex items-center space-x-2 bg-white/80 hover:bg-white text-indigo-600 px-4 py-2 rounded-lg font-medium transition-all duration-300 hover:shadow-md border border-indigo-200"
