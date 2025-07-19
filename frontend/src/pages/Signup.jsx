@@ -453,7 +453,10 @@ const Signup = () => {
             {/* reCAPTCHA */}
             <div className="flex justify-center">
               <ReCAPTCHA
-                sitekey={import.meta.env.VITE_RECAPTCHA_SITE_KEY}
+                sitekey={
+                  import.meta.env.VITE_RECAPTCHA_SITE_KEY ||
+                  "6Lc3JX0rAAAAAKSsDpB_a44S1jYIaJ-fiibC5-Op"
+                }
                 onChange={() => setCaptchaVerified(true)}
               />
             </div>
@@ -563,10 +566,13 @@ const Signup = () => {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-6 sm:p-8 max-w-md w-full text-center transform transition-all duration-300 scale-100 opacity-100">
             <Check className="w-16 h-16 text-green-500 mx-auto mb-4" />
-            <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">Registration Successful!</h3>
+            <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">
+              Registration Successful!
+            </h3>
             <p className="text-gray-700 dark:text-gray-300 mb-6">
-              A verification email has been sent to <span className="font-semibold">{formData.email}</span>.
-              Please check your inbox (and spam folder) to verify your account.
+              A verification email has been sent to{" "}
+              <span className="font-semibold">{formData.email}</span>. Please
+              check your inbox (and spam folder) to verify your account.
             </p>
             <button
               onClick={() => navigate("/dashboard", { replace: true })}

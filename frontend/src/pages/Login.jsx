@@ -301,7 +301,10 @@ const Login = () => {
             {/* reCAPTCHA */}
             <div className="flex justify-center">
               <ReCAPTCHA
-                sitekey={import.meta.env.VITE_RECAPTCHA_SITE_KEY}
+                sitekey={
+                  import.meta.env.VITE_RECAPTCHA_SITE_KEY ||
+                  "6Lc3JX0rAAAAAKSsDpB_a44S1jYIaJ-fiibC5-Op"
+                }
                 onChange={() => setCaptchaVerified(true)}
               />
             </div>
