@@ -155,11 +155,17 @@ function Header({ onMenuClick }) {
             to="/dashboard"
             className="flex items-center gap-2 sm:gap-3 text-lg lg:text-xl font-bold"
           >
-            <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-2 rounded-xl shadow-lg">
+            {/* <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-2 rounded-xl shadow-lg">
               <span className="text-white text-xl lg:text-2xl">❤️</span>
-            </div>
+            </div> */}
+            <img
+              src="../../../../../public/assets/image.png"
+              alt=""
+              srcset=""
+              className="h-[50px] rounded-[50px]"
+            />
             <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent hidden sm:block font-extrabold tracking-tight">
-              HeartConnect
+              MetroMatch
             </span>
           </Link>
 
